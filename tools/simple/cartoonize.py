@@ -5,16 +5,20 @@ Usage :
     python tools/cartoonize.py --data "<dossier Factorio>/data" [--mods base] [--limit 20]
 
 Pour chaque PNG de <data>/<mod>/graphics, écrit la version cartoon dans
-graphics/<mod>/... (à la racine du mod) et régénère converted_paths.lua.
+graphics/generated/<mod>/... (à la racine du mod) puis régénère manifest.lua.
 Le canal alpha est conservé tel quel.
 """
 import argparse
+import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+
+from build_manifest import build_manifest  # noqa: E402
 
 
 def cartoonize(img_bgra, colors=12, edge_strength=1):
@@ -84,17 +88,13 @@ def main():
                 img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             if img.shape[2] == 3:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-            dst = ROOT / "graphics" / mod / rel
+            dst = ROOT / "graphics" / "generated" / mod / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(dst), cartoonize(img, colors=args.colors))
             converted.append(f"__{mod}__/graphics/{rel}")
             print("OK", converted[-1])
 
-    lines = ["-- Fichier généré par tools/cartoonize.py (ne pas éditer à la main).",
-             "return {"]
-    lines += [f'  ["{p}"] = true,' for p in converted]
-    lines.append("}")
-    (ROOT / "converted_paths.lua").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    build_manifest()
     print(f"{len(converted)} fichiers convertis.")
 
 

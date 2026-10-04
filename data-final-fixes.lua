@@ -1,19 +1,20 @@
 -- Remplace les chemins de textures du jeu par leur version cartoon.
--- La liste des fichiers convertis est générée par tools/cartoonize.py
--- dans converted_paths.lua (table { ["__base__/graphics/..."] = true }).
+-- manifest.lua (généré par tools/build_manifest.py) associe chaque texture
+-- remplacée à sa source : "generated" (filtre) ou "overrides" (refaite).
+-- Exemple : ["__base__/graphics/x.png"] = "overrides"
 
 local MOD = "__factorio-cartoon-mod__"
-local converted = require("converted_paths")
+local manifest = require("manifest")
 
 local visited = {}
 
 local function remap(path)
-  if type(path) ~= "string" then return path end
-  if converted[path] then
-    -- "__base__/graphics/x.png" -> "__factorio-cartoon-mod__/graphics/base/x.png"
+  local source = manifest[path]
+  if source then
+    -- "__base__/graphics/x.png" -> "__factorio-cartoon-mod__/graphics/<source>/base/x.png"
     local mod, rest = path:match("^__(.-)__/graphics/(.+)$")
     if mod and rest then
-      return MOD .. "/graphics/" .. mod .. "/" .. rest
+      return MOD .. "/graphics/" .. source .. "/" .. mod .. "/" .. rest
     end
   end
   return path
