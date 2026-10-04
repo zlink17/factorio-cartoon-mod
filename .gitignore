@@ -1,0 +1,6 @@
+# Textures générées (à reproduire avec tools/cartoonize.py) : sprites Factorio sous licence
+graphics/
+__pycache__/
+*.pyc
+.venv/
+*.zip
