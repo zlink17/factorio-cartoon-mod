@@ -83,9 +83,22 @@ def sampler(wf):
     return found[0]
 
 
-def linked_node(wf, ref):
-    """ref = ['id', sortie] -> identifiant du nœud relié, sinon None."""
-    return str(ref[0]) if isinstance(ref, list) and ref else None
+def prompt_node(wf, ref, role):
+    """Remonte depuis l'entrée positive/négative du sampler jusqu'au nœud qui porte le texte.
+
+    Traverse les nœuds intermédiaires (ControlNet, etc.) en suivant l'entrée du même nom."""
+    for _ in range(10):
+        if not (isinstance(ref, list) and ref):
+            return None
+        nid = str(ref[0])
+        node = wf.get(nid)
+        if node is None:
+            return None
+        ins = node.get("inputs", {})
+        if "text" in ins and not isinstance(ins["text"], list):
+            return nid
+        ref = ins.get(role) or ins.get("conditioning")
+    return None
 
 
 def patch(wf, image_name, seed, prompt=None, negative=None, image_node=None,
@@ -102,15 +115,15 @@ def patch(wf, image_name, seed, prompt=None, negative=None, image_node=None,
     sid, snode = sampler(wf)
     key = "noise_seed" if "noise_seed" in snode["inputs"] else "seed"
     snode["inputs"][key] = seed
-    # prompts : on suit les liens positive/negative du sampler
+    # prompts : on suit les liens positive/negative du sampler (à travers les nœuds ControlNet)
     if prompt is not None:
-        pid = positive_node or linked_node(wf, snode["inputs"].get("positive"))
-        if pid is None or "text" not in wf[str(pid)]["inputs"]:
+        pid = positive_node or prompt_node(wf, snode["inputs"].get("positive"), "positive")
+        if pid is None:
             sys.exit("Impossible de trouver le nœud du prompt positif (précise --positive-node).")
         wf[str(pid)]["inputs"]["text"] = prompt
     if negative is not None:
-        nid = negative_node or linked_node(wf, snode["inputs"].get("negative"))
-        if nid is None or "text" not in wf[str(nid)]["inputs"]:
+        nid = negative_node or prompt_node(wf, snode["inputs"].get("negative"), "negative")
+        if nid is None:
             sys.exit("Impossible de trouver le nœud du prompt négatif (précise --negative-node).")
         wf[str(nid)]["inputs"]["text"] = negative
     return wf

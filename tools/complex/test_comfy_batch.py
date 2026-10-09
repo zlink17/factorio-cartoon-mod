@@ -103,6 +103,12 @@ def main():
             assert "API Format" in str(e)
         else:
             raise AssertionError("workflow interface accepté")
+    # workflow réel avec ControlNet : les prompts sont retrouvés à travers ControlNetApplyAdvanced
+    real = comfy_batch.load_workflow(os.path.join(os.path.dirname(os.path.abspath(__file__)), "workflows", "sd15_canny_api.json"))
+    q = comfy_batch.patch(real, "x.png", 123, prompt="P", negative="N")
+    assert q["2"]["inputs"]["image"] == "x.png" and q["10"]["inputs"]["seed"] == 123
+    assert q["5"]["inputs"]["text"] == "P" and q["6"]["inputs"]["text"] == "N"
+    assert real["5"]["inputs"]["text"] != "P"
     print("TOUS LES TESTS PASSENT")
 
 

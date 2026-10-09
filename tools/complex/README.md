@@ -45,7 +45,14 @@ sur chaque image d'un dossier. Il n'a **aucune dépendance** (bibliothèque stan
    `--seeds 4` produit 4 variantes par image. `--dry-run` affiche le workflow modifié sans l'envoyer.
 4. **Mettre au format** les résultats retenus avec `postprocess.py` (détourage, taille exacte).
 
-Le script retrouve seul le nœud d'image, la graine et les prompts (en suivant les liens du `KSampler`).
+**Workflow de départ fourni** : `workflows/sd15_canny_api.json` (Stable Diffusion 1.5 + ControlNet canny, en img2img).
+Il attend `v1-5-pruned-emaonly-fp16.safetensors` dans `models/checkpoints` et `control_v11p_sd15_canny.pth` dans
+`models/controlnet`. Dans ComfyUI, le glisser-déposer sur le canevas l'ouvre pour l'essayer. Réglage principal :
+le `denoise` du KSampler (1,0 = génération presque libre guidée par les contours ; 0,6 à 0,8 = on garde mieux
+les couleurs et la forme de l'image de départ). **Jamais lancé contre un vrai ComfyUI** : les noms de nœuds sont
+ceux que je connais, un nœud peut demander un ajustement.
+
+Le script retrouve seul le nœud d'image, la graine et les prompts (en suivant les liens du `KSampler`, y compris à travers un nœud ControlNet).
 Si ton workflow est atypique, précise `--image-node`, `--positive-node` ou `--negative-node`.
 
 `test_comfy_batch.py` vérifie la logique contre un faux serveur. **Il n'a jamais tourné contre un vrai
