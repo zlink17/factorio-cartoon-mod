@@ -25,9 +25,10 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer ou
 
 ## 3. Contours
 
-- Noir chaud (RGB linéaire 0.05, 0.03, 0.03), jamais noir pur. **[VALIDÉ]**
-- Épaisseur : 2,2 px pour un rendu de 256 px, proportionnelle à la taille du rendu. **[VALIDÉ]**
-- Contour sur la silhouette, les arêtes et les bords internes, pas sur les détails minuscules. **[VALIDÉ]**
+- Noir chaud (brun très foncé), jamais noir pur. **[VALIDÉ]**
+- Épaisseur : 1,6 px pour un rendu de 256 px, proportionnelle à la taille du rendu (soit environ 1,6 px sur un sprite d'assembleur à la taille du jeu). **[CALÉ]** (une version à 2,2 px recouvrait les parois et les petits détails)
+- Seules les arêtes vives sont contournées (angle d'écart > 70°) : pas de trait sur les biseaux ni sur les arrondis. **[CALÉ]**
+- Contour sur la silhouette, les bords et les arêtes vives, pas sur les détails minuscules. **[VALIDÉ]**
 
 ## 4. Ombrage à trois tons
 
@@ -43,25 +44,27 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 
 ## 5. Palette
 
-Couleurs vives et saturées, peu de teintes par objet (3 maximum + contour). Valeurs exactes dans `style.py` (`PALETTE`). **[VALIDÉ]**
+**Couleurs de l'assembleur 1 original, conservées** : dominante gris-vert (parois), cuivre rouillé (plaques, tuyaux), fer sombre et laiton. Le style cartoon vient des aplats et des contours, pas d'un changement de teintes. 3 teintes maximum par objet. Valeurs dans `style.py` (`PALETTE_HEX`). **[VALIDÉ]**
 
-| Nom | Usage |
-|---|---|
-| orange, yellow | machines, convoyeurs, éléments de signalisation |
-| blue | socles, structures |
-| grey, dark | métal, fours, intérieurs |
-| brown | bois, coffres, poteaux |
-| red | zones chaudes, alertes |
-| white | engrenages, détails clairs |
-| ore_iron | minerai de fer |
+| Nom | Hex | Usage |
+|---|---|---|
+| grey | #7d8573 | tôle gris-vert des parois |
+| blue | #5b6e6a | acier verdi (panneaux, structures froides) |
+| dark | #3a3126 | fer sombre, moteurs, intérieurs, socles |
+| brown | #7a5238 | cuivre rouillé (plaque du dessus, tuyaux) |
+| orange | #c07a45 | cuivre clair, pièces chaudes |
+| yellow | #c9a24a | laiton (engrenages, finitions) |
+| white | #d9d0bc | métal clair, reflets |
+| red | #a8462f | rouge brique, braises |
+| ore_iron | #5f7f9a | minerai de fer |
 
-À définir : cuivre, charbon, pierre, uranium, fluides. **[PROVISOIRE]**
+À définir : cuivre (minerai), charbon, pierre, uranium, fluides. **[PROVISOIRE]**
 
 ## 6. Format technique
 
 - PNG RGBA, **fond transparent**. **[VALIDÉ]**
 - Même dimensions en pixels et même alignement que le sprite original, pour remplacer le fichier sans toucher au reste du mod. **[VALIDÉ]**
-- Rendu Blender : moteur Cycles CPU, 4 échantillons, transformation de vue « Standard », matériaux en émission (aplats, sans éclairage). **[VALIDÉ]**
+- Rendu Blender : moteur Cycles CPU, 4 échantillons, sur-échantillonnage 2x puis réduction (bords nets), transformation de vue « Standard », matériaux en émission (aplats, sans éclairage). **[VALIDÉ]**
 - Les sprites refaits vont dans `graphics/overrides/<mod>/...` avec le même chemin que l'original. **[VALIDÉ]**
 
 ## 7. Règles par type d'objet

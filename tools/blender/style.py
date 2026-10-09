@@ -12,27 +12,39 @@ YAW_DEG = 0               # jamais de rotation : alignement sur la grille
 
 # --- Contours -----------------------------------------------------------
 OUTLINE_COLOR = (0.05, 0.03, 0.03)
-OUTLINE_PX_AT_256 = 2.2   # épaisseur pour un rendu de 256 px ; à mettre à l'échelle
+OUTLINE_PX_AT_256 = 1.6   # épaisseur pour un rendu de 256 px ; à mettre à l'échelle
+OUTLINE_CREASE_DEG = 110  # seules les arêtes vives (> 70° d'écart) sont contournées
 
 # --- Ombrage à trois tons (multiplicateurs de la couleur de base) ----------
 SHADE_SIDE = 0.68         # côtés
 SHADE_FRONT = 0.88        # face avant  (0.68 + 0.20)
 SHADE_TOP = 1.10          # dessus      (0.68 + 0.42)
 
-# --- Palette -------------------------------------------------------------
-PALETTE = {
-    "orange": (0.95, 0.50, 0.10),
-    "yellow": (1.00, 0.78, 0.20),
-    "blue":   (0.20, 0.40, 0.85),
-    "white":  (0.95, 0.95, 0.95),
-    "grey":   (0.55, 0.62, 0.70),
-    "dark":   (0.30, 0.32, 0.38),
-    "brown":  (0.70, 0.40, 0.15),
-    "red":    (0.95, 0.20, 0.15),
-    "ore_iron": (0.35, 0.55, 0.90),
+# --- Palette (teintes mesurées sur l'assembleur 1 original) -----------------------
+def _lin(hex_):
+    """#rrggbb (sRGB) -> RGB linéaire pour Blender."""
+    out = []
+    for k in (1, 3, 5):
+        v = int(hex_[k:k + 2], 16) / 255.0
+        out.append(v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4)
+    return tuple(round(x, 4) for x in out)
+
+
+PALETTE_HEX = {
+    "grey":   "#7d8573",   # tôle gris-vert des parois
+    "blue":   "#5b6e6a",   # acier verdi (socles, structures froides)
+    "dark":   "#3a3126",   # fer sombre, moteurs, intérieurs
+    "brown":  "#7a5238",   # cuivre rouillé (plaque du dessus, tuyaux)
+    "orange": "#c07a45",   # cuivre clair, pièces chaudes
+    "yellow": "#c9a24a",   # laiton (engrenages, finitions)
+    "white":  "#d9d0bc",   # métal clair, reflets
+    "red":    "#a8462f",   # rouge brique, braises
+    "ore_iron": "#5f7f9a",
 }
+PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 
 # --- Rendu ----------------------------------------------------------------
 RENDER_SAMPLES = 4
+SUPERSAMPLE = 2           # rendu à 2x puis réduction (bords nets, sans crénelage)
 VIEW_TRANSFORM = "Standard"
 FILM_TRANSPARENT = True

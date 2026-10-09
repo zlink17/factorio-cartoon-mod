@@ -46,11 +46,11 @@ def mat(name, rgb):
     return m
 
 
-def box(loc, scale, m, bevel=0.0, rot_z=0.0, rot_x=0.0):
+def box(loc, scale, m, bevel=0.0, rot_z=0.0, rot_x=0.0, rot_y=0.0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
     o = bpy.context.object
     o.scale = scale
-    o.rotation_euler = (math.radians(rot_x), 0, math.radians(rot_z))
+    o.rotation_euler = (math.radians(rot_x), math.radians(rot_y), math.radians(rot_z))
     if bevel:
         bpy.ops.object.modifier_add(type="BEVEL")
         o.modifiers["Bevel"].width = bevel
@@ -95,16 +95,43 @@ def frustum(z0, h, w0, d0, w1, d1, m, cy=0.0, bevel=0.0):
     return o
 
 
+def tri_plate(center, w, h, depth, tilt_deg, m):
+    """Triangle en relief (sommet vers le haut) posé sur une paroi avant inclinée de `tilt_deg`."""
+    import bmesh
+    t = math.radians(tilt_deg)
+    up = (0.0, math.sin(t), math.cos(t))        # le long de la paroi, vers le haut
+    nrm = (0.0, -math.cos(t), math.sin(t))      # normale sortante
+    cx, cy, cz = center
+
+    def pt(a, b, c):
+        return (cx + a, cy + b * up[1] + c * nrm[1], cz + b * up[2] + c * nrm[2])
+
+    base = [(0, h / 2), (-w / 2, -h / 2), (w / 2, -h / 2)]
+    bm = bmesh.new()
+    back = [bm.verts.new(pt(a, b, 0)) for a, b in base]
+    front = [bm.verts.new(pt(a, b, depth)) for a, b in base]
+    bm.faces.new(back[::-1]); bm.faces.new(front)
+    for k in range(3):
+        bm.faces.new((back[k], back[(k + 1) % 3], front[(k + 1) % 3], front[k]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    mesh = bpy.data.meshes.new("tri")
+    bm.to_mesh(mesh); bm.free()
+    o = bpy.data.objects.new("tri", mesh)
+    bpy.context.scene.collection.objects.link(o)
+    mesh.materials.append(m)
+    return o
+
+
 def gear(center, r, depth, teeth, angle_deg, m, hub_m=None):
     """Engrenage horizontal d'un seul maillage (contours propres). `angle_deg` sert à l'animation."""
     import bmesh
     cx, cy, cz = center
-    tip = r * 1.28
+    tip = r * 1.22
     pts = []
     step = 2 * math.pi / teeth
     for i in range(teeth):
         a0 = math.radians(angle_deg) + i * step
-        for frac, rad in ((0.0, r), (0.14, tip), (0.36, tip), (0.5, r)):
+        for frac, rad in ((0.0, r), (0.09, tip), (0.41, tip), (0.5, r)):
             a = a0 + frac * step
             pts.append((cx + rad * math.cos(a), cy + rad * math.sin(a)))
     bm = bmesh.new()
@@ -127,8 +154,16 @@ def gear(center, r, depth, teeth, angle_deg, m, hub_m=None):
     return o
 
 
-def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0.0):
-    """Rend la scène courante avec la projection du guide de style."""
+def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0.0, supersample=None):
+    """Rend la scène courante avec la projection du guide de style.
+
+    Le rendu est fait à `supersample` fois la taille puis réduit (alpha prémultiplié)."""
+    ss = supersample or getattr(S, "SUPERSAMPLE", 1)
+    final_path = path
+    size_final = size
+    size = size * ss
+    if ss > 1:
+        path = path + ".big.png"
     p = math.radians(pitch_deg)
     # étire le sol en Y pour que, une fois raccourci par la caméra, il reste carré
     root = bpy.data.objects.new("root", None)
@@ -159,9 +194,20 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
     sc.render.line_thickness = S.OUTLINE_PX_AT_256 * size / 256
     vl = sc.view_layers[0]
     vl.use_freestyle = True
+    vl.freestyle_settings.crease_angle = math.radians(S.OUTLINE_CREASE_DEG)
     ls = vl.freestyle_settings.linesets.new("outline")
     ls.select_silhouette = ls.select_border = ls.select_crease = True
     ls.linestyle.color = S.OUTLINE_COLOR
     sc.render.filepath = path
     bpy.ops.render.render(write_still=True)
-    return path
+    if ss > 1:
+        import cv2, numpy as np
+        im = cv2.imread(path, cv2.IMREAD_UNCHANGED).astype(np.float32)
+        a = im[:, :, 3:4] / 255.0
+        pre = np.dstack([im[:, :, :3] * a, im[:, :, 3:4]])
+        small = cv2.resize(pre, (size_final, size_final), interpolation=cv2.INTER_AREA)
+        al = np.clip(small[:, :, 3:4] / 255.0, 1e-6, 1)
+        out = np.dstack([np.clip(small[:, :, :3] / al, 0, 255), small[:, :, 3:4]])
+        cv2.imwrite(final_path, np.clip(out, 0, 255).astype(np.uint8))
+        os.remove(path)
+    return final_path
