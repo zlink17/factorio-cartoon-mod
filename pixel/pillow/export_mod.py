@@ -11,7 +11,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-import belt
+import belt, inserter, ore
 from assembler import draw_assembler, shadow_of, N_FRAMES, W, H, SCALE
 
 OVR = ROOT / "pixel" / "mod" / "graphics" / "overrides" / "base"
@@ -58,5 +58,26 @@ for tier, name, frames in (("yellow", "transport-belt", 16), ("red", "fast-trans
     d.mkdir(parents=True, exist_ok=True)
     up(belt.sheet(tier, frames)).save(d / f"{name}.png")
     print(name, "ok")
+
+# inserters : tige, mains, plateforme par type ; ombres communes (celles du burner, réutilisées par les autres)
+for kind in inserter.RAMPS:
+    d = GAME / kind
+    d.mkdir(parents=True, exist_ok=True)
+    sp = inserter.sprites(kind)
+    for part in ("hand-base", "hand-open", "hand-closed", "platform"):
+        sp[part].save(d / f"{kind}-{part}.png")
+    if kind == "burner-inserter":
+        for part, img in sp["shadow"].items():
+            alpha = img.getchannel("A").point(lambda v: 90 if v else 0)
+            img.putalpha(alpha)
+            img.save(d / f"{kind}-{part}-shadow.png")
+    print(kind, "ok")
+
+# minerais : planche 8 x 8 (étapes x variantes), 128 px par cellule
+for kind in ore.RAMPS:
+    d = GAME / kind
+    d.mkdir(parents=True, exist_ok=True)
+    up(ore.sheet(kind)).save(d / f"{kind}.png")
+    print(kind, "ok")
 
 subprocess.run([sys.executable, str(ROOT / "tools" / "build_manifest.py"), "pixel"], check=True)
