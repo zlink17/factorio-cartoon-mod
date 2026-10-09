@@ -1,13 +1,14 @@
-# Guide de style cartoon
+# Guide de style cartoon (prompt IA)
 
-À garder identique pour tous les sprites afin de conserver la cohérence.
+**Le guide de référence est `STYLE.md` à la racine du repo.** Ce fichier n'en est que la version à donner à un modèle d'image : en cas de conflit, `STYLE.md` l'emporte.
 
 ## Règles visuelles
 
 - Contours noirs épais et réguliers
 - Aplats de couleurs vives, pas de dégradés complexes
 - Ombrage simple (une teinte plus foncée par zone)
-- Même point de vue et mêmes proportions que le sprite original
+- Même point de vue et mêmes proportions que le sprite original (vue de face alignée sur la grille, dessus visible, jamais de rotation à 45° ; convoyeurs vus du dessus)
+- Trois tons par couleur seulement : dessus clair, face avant moyenne, côtés plus sombres
 - Fond uni vert vif (#00FF00), sans ombre portée, pour faciliter le détourage
 
 ## Prompt type (à adapter)

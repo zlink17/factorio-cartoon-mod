@@ -12,6 +12,9 @@ import bpy
 import cv2
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import style as S
+
 OUT = sys.argv[1] if len(sys.argv) > 1 else "demo_out"
 SIZE = 256
 os.makedirs(OUT, exist_ok=True)
@@ -38,9 +41,9 @@ def mat(name, rgb):
     front = n.new("ShaderNodeMath"); front.operation = "GREATER_THAN"; front.inputs[1].default_value = 0.5
     nt.links.new(negy.outputs[0], front.inputs[0])
     # ombre = 0.68 + 0.42*top + 0.2*front
-    a = n.new("ShaderNodeMath"); a.operation = "MULTIPLY_ADD"; a.inputs[1].default_value = 0.42; a.inputs[2].default_value = 0.68
+    a = n.new("ShaderNodeMath"); a.operation = "MULTIPLY_ADD"; a.inputs[1].default_value = S.SHADE_TOP - S.SHADE_SIDE; a.inputs[2].default_value = S.SHADE_SIDE
     nt.links.new(top.outputs[0], a.inputs[0])
-    b = n.new("ShaderNodeMath"); b.operation = "MULTIPLY_ADD"; b.inputs[1].default_value = 0.2
+    b = n.new("ShaderNodeMath"); b.operation = "MULTIPLY_ADD"; b.inputs[1].default_value = S.SHADE_FRONT - S.SHADE_SIDE
     nt.links.new(front.outputs[0], b.inputs[0]); nt.links.new(a.outputs[0], b.inputs[2])
     mix = n.new("ShaderNodeMix"); mix.data_type = "RGBA"; mix.blend_type = "MULTIPLY"
     mix.inputs[0].default_value = 1.0
@@ -84,11 +87,11 @@ def blob(loc, r, m):
     return o
 
 
-ORANGE, YELLOW = (0.95, 0.5, 0.1), (1.0, 0.78, 0.2)
-BLUE, WHITE = (0.2, 0.4, 0.85), (0.95, 0.95, 0.95)
-GREY, DARK = (0.55, 0.62, 0.7), (0.3, 0.32, 0.38)
-BROWN, RED = (0.7, 0.4, 0.15), (0.95, 0.2, 0.15)
-ORE = (0.35, 0.55, 0.9)
+ORANGE, YELLOW = S.PALETTE["orange"], S.PALETTE["yellow"]
+BLUE, WHITE = S.PALETTE["blue"], S.PALETTE["white"]
+GREY, DARK = S.PALETTE["grey"], S.PALETTE["dark"]
+BROWN, RED = S.PALETTE["brown"], S.PALETTE["red"]
+ORE = S.PALETTE["ore_iron"]
 
 
 def assembler():
@@ -156,20 +159,20 @@ def render(builder, name, scale, pitch_deg, cy=0.0):
     sc.camera = cam
     sc.render.engine = "CYCLES"
     sc.cycles.device = "CPU"
-    sc.cycles.samples = 4
+    sc.cycles.samples = S.RENDER_SAMPLES
     sc.cycles.use_denoising = False
-    sc.render.film_transparent = True
+    sc.render.film_transparent = S.FILM_TRANSPARENT
     sc.render.resolution_x = sc.render.resolution_y = SIZE
     sc.render.image_settings.color_mode = "RGBA"
-    sc.view_settings.view_transform = "Standard"
+    sc.view_settings.view_transform = S.VIEW_TRANSFORM
     sc.render.use_freestyle = True
     sc.render.line_thickness_mode = "ABSOLUTE"
-    sc.render.line_thickness = 2.2
+    sc.render.line_thickness = S.OUTLINE_PX_AT_256 * SIZE / 256
     vl = sc.view_layers[0]
     vl.use_freestyle = True
     ls = vl.freestyle_settings.linesets.new("outline")
     ls.select_silhouette = ls.select_border = ls.select_crease = True
-    ls.linestyle.color = (0.05, 0.03, 0.03)
+    ls.linestyle.color = S.OUTLINE_COLOR
     path = os.path.join(OUT, f"{name}.png")
     sc.render.filepath = path
     bpy.ops.render.render(write_still=True)
@@ -177,9 +180,9 @@ def render(builder, name, scale, pitch_deg, cy=0.0):
 
 
 # (nom, fonction, taille de cadrage, inclinaison en degrés, décalage vertical caméra)
-ITEMS = [("assembleur", assembler, 4.4, 35, 0.9), ("four", furnace, 4.4, 35, 0.9),
-         ("coffre", chest, 3.4, 35, 0.5), ("convoyeur", belt, 3.6, 0, 0.0),
-         ("poteau", pole, 4.4, 35, 1.2), ("minerai", ore, 3.0, 35, 0.3)]
+ITEMS = [("assembleur", assembler, 4.4, S.PITCH_BUILDING_DEG, 0.9), ("four", furnace, 4.4, S.PITCH_BUILDING_DEG, 0.9),
+         ("coffre", chest, 3.4, S.PITCH_BUILDING_DEG, 0.5), ("convoyeur", belt, 3.6, S.PITCH_TOPDOWN_DEG, 0.0),
+         ("poteau", pole, 4.4, S.PITCH_BUILDING_DEG, 1.2), ("minerai", ore, 3.0, S.PITCH_BUILDING_DEG, 0.3)]
 paths = [render(b, n, s, pt, cy) for n, b, s, pt, cy in ITEMS]
 
 tiles = []

@@ -2,6 +2,8 @@
 
 Mod Factorio (2.0) qui remplace les textures du jeu par une version au style cartoon, avec deux approches qui cohabitent dans le même mod.
 
+> **Style** : toutes les règles visuelles (projection, contours, palette, ombrage) sont dans [STYLE.md](STYLE.md). À respecter pour tout sprite.
+
 ## Les deux approches
 
 | | Simple | Complexe |
