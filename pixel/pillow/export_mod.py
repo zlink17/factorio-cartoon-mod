@@ -1,7 +1,7 @@
 """Écrit les sprites des assembleurs 1 à 3 dans pixel/mod/graphics/overrides/base/ puis régénère le manifeste.
 
 Usage : python pixel/pillow/export_mod.py
-Pour chaque niveau : planche 8 x 4 images (x4, 224 x 272 par image), image d'ombre, icône (64 px + mips 32/16/8).
+Assembleurs, pour chaque niveau : planche 8 x 4 images (x4, 224 x 272 par image), image d'ombre, icône (64 px + mips 32/16/8).
 Le cadrage (taille, échelle, décalage) est appliqué côté Lua, dans pixel/mod/data-final-fixes.lua.
 """
 import os, subprocess, sys
@@ -11,6 +11,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
+import belt
 from assembler import draw_assembler, shadow_of, N_FRAMES, W, H, SCALE
 
 OVR = ROOT / "pixel" / "mod" / "graphics" / "overrides" / "base"
@@ -48,6 +49,14 @@ for tier in (1, 2, 3):
     up(shadows).save(ent / f"{name}-shadow.png")
     (OVR / "icons").mkdir(parents=True, exist_ok=True)
     icon_of(frames[0]).save(OVR / "icons" / f"{name}.png")
+    print(name, "ok")
+
+# convoyeurs : jaune (basique, 16 images), rouge (rapide) et bleu (express), 32 images
+GAME = OVR / "entity"
+for tier, name, frames in (("yellow", "transport-belt", 16), ("red", "fast-transport-belt", 32), ("blue", "express-transport-belt", 32)):
+    d = GAME / name
+    d.mkdir(parents=True, exist_ok=True)
+    up(belt.sheet(tier, frames)).save(d / f"{name}.png")
     print(name, "ok")
 
 subprocess.run([sys.executable, str(ROOT / "tools" / "build_manifest.py"), "pixel"], check=True)

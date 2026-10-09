@@ -8,7 +8,7 @@ Palette partagée dans `pillow/palette.py` : jamais de noir pur, ombres vers le 
 | Dossier | Rôle |
 |---|---|
 | `mod/` | Le mod Factorio (`info.json`, `data-final-fixes.lua`, `manifest.lua`, `graphics/overrides/`). Assembleurs 1 à 3 installés (planches, ombres, icônes), régénérés par `pillow/export_mod.py`. |
-| `pillow/` | Sprites dessinés en code. `assembler.py` : assembleur 3×3 à 16 px par case, agrandi ×4, avec animation. |
+| `pillow/` | Sprites dessinés en code. `assembler.py` : assembleur 3×3 à 16 px par case, agrandi ×4, avec animation. `belt.py` : convoyeurs basique, rapide et express (droites, virages, capuchons). `export_mod.py` écrit tout dans `mod/`. |
 
 ## Génération
 

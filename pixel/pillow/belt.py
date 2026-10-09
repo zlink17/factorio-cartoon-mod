@@ -1,0 +1,139 @@
+"""Convoyeurs en pixel art, vus directement du dessus (16 px par case, x4 à l'export).
+
+Planche de Factorio : une cellule de 128 px (32 px d'art) par image, la case au centre ; une rangée par pièce,
+une colonne par image d'animation. Rangées : 0-3 droites (E, O, N, S), 4-11 virages, 12-19 capuchons de début/fin.
+Une image avance d'un demi-pixel d'art, donc le décalage est (image // 2) : la boucle se referme sur un nombre
+entier de motifs (pas de 8 px).
+
+Usage : python pixel/pillow/belt.py <dossier_sortie>      (aperçu de la planche basique)
+"""
+import math, os, sys
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from palette import P, BELT
+
+CELL = 32           # px d'art par cellule ; la case occupe [8, 24[
+T = 16              # px d'art par case
+PITCH = 8           # pas des chevrons
+LIGHT = (-1 / math.sqrt(2), -1 / math.sqrt(2))   # direction vers la lumière (haut gauche)
+
+# (coin, vecteur coin -> milieu du bord d'entrée, vecteur coin -> milieu du bord de sortie)
+CURVES = [
+    ((16, 0), (0, 1), (-1, 0)),     # est -> nord
+    ((16, 0), (-1, 0), (0, 1)),     # nord -> est
+    ((0, 0), (0, 1), (1, 0)),       # ouest -> nord
+    ((0, 0), (1, 0), (0, 1)),       # nord -> ouest
+    ((16, 16), (-1, 0), (0, -1)),   # sud -> est
+    ((16, 16), (0, -1), (-1, 0)),   # est -> sud
+    ((0, 16), (1, 0), (0, -1)),     # sud -> ouest
+    ((0, 16), (0, -1), (1, 0)),     # ouest -> sud
+]
+STRAIGHT = [(1, 0), (-1, 0), (0, -1), (0, 1)]   # est, ouest, nord, sud
+
+
+def shade(depth, normal):
+    """Couleur d'un pixel de rail selon sa profondeur depuis le bord extérieur et son orientation."""
+    lit = normal[0] * LIGHT[0] + normal[1] * LIGHT[1] > 0.2
+    if depth < 1:
+        return P["steel_dark"]
+    if depth < 2:
+        return P["steel_light"] if lit else P["steel"]
+    return P["steel_mid"] if lit else P["steel"]
+
+
+def surface(s, lat, off, tier):
+    light, dark = BELT[tier]
+    ph = (s + abs(lat) - off) % PITCH
+    if ph < 2:
+        return light
+    if ph >= 7:
+        return dark
+    return P["steel_mid"] if ph < 5 else P["steel"]
+
+
+def straight_pixel(x, y, flow, off, tier):
+    px, py = x + 0.5, y + 0.5
+    if flow[0]:
+        s = px if flow[0] > 0 else T - px
+        lat, normal = py - 8, (0, 1 if py > 8 else -1)
+    else:
+        s = py if flow[1] > 0 else T - py
+        lat, normal = px - 8, (1 if px > 8 else -1, 0)
+    if abs(lat) >= 5:
+        return shade(8 - abs(lat), normal)
+    return surface(s, lat, off, tier)
+
+
+def curve_pixel(x, y, curve, off, tier):
+    (cx, cy), a, b = curve
+    px, py = x + 0.5 - cx, y + 0.5 - cy
+    r = math.hypot(px, py)
+    if r > T:
+        return None
+    ang = math.acos(max(-1.0, min(1.0, (px * a[0] + py * a[1]) / r)))
+    s = ang / (math.pi / 2) * T
+    if r >= 13:
+        return shade(T - r, (px / r, py / r))
+    if r < 3:
+        return shade(r, (-px / r, -py / r))
+    return surface(s, r - 8, off, tier)
+
+
+def piece(row, frame, tier):
+    off = frame // 2
+    img = Image.new("RGBA", (T, T), (0, 0, 0, 0))
+    for y in range(T):
+        for x in range(T):
+            if row < 4:
+                c = straight_pixel(x, y, STRAIGHT[row], off, tier)
+            elif row < 12:
+                c = curve_pixel(x, y, CURVES[row - 4], off, tier)
+            else:
+                c = None
+            if c:
+                img.putpixel((x, y), c)
+    if row >= 12:
+        side, variant = divmod(row - 12, 2)       # 0 haut, 1 droite, 2 bas, 3 gauche
+        cap = Image.new("RGBA", (T, T), (0, 0, 0, 0))
+        for y in range(4):
+            for x in range(T):
+                if y == 0:
+                    c = P["steel_dark"]
+                elif y == 1:
+                    c = P["steel_light"]
+                elif y == 2:
+                    c = P["steel_mid"]
+                else:
+                    c = P["steel"]
+                if y == 0 and x in (0, T - 1):
+                    continue
+                cap.putpixel((x, y), c)
+        if variant == 0:                          # chevron du début, pointe vers l'extérieur
+            light, dark = BELT[tier]
+            for x, y in ((7, 2), (8, 2), (6, 3), (9, 3)):
+                cap.putpixel((x, y), light)
+        # le capuchon est dessiné côté haut puis tourné : droite = 90° horaire, bas = 180°, gauche = 270°
+        img = cap.rotate(-90 * side, expand=False)
+    return img
+
+
+def sheet(tier, frames):
+    out = Image.new("RGBA", (CELL * frames, CELL * 20), (0, 0, 0, 0))
+    for row in range(20):
+        for f in range(frames):
+            out.alpha_composite(piece(row, f, tier), (CELL * f + 8, CELL * row + 8))
+    return out
+
+
+if __name__ == "__main__":
+    o = sys.argv[1] if len(sys.argv) > 1 else "out"
+    os.makedirs(o, exist_ok=True)
+    s = sheet("yellow", 16)
+    s.save(f"{o}/belt_sheet.png")
+    # aperçu : image 0 de chaque rangée, x6, sur fond de sol
+    prev = Image.new("RGBA", (5 * 20 * 6, 4 * 20 * 6), P["sand"])
+    for r in range(20):
+        cell = s.crop((0, CELL * r + 4, CELL, CELL * r + 28)).crop((4, 0, 28, 24))
+        prev.alpha_composite(cell.resize((24 * 6, 24 * 6), Image.NEAREST), ((r % 5) * 144 - 0, (r // 5) * 144))
+    prev.save(f"{o}/belt_preview.png")

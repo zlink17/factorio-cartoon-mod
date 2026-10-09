@@ -35,3 +35,10 @@ for _t, _d in TIERS.items():
         P[f"w{_t}_{_n}"] = hx(_d["wall"][_i])
     for _i, _n in enumerate(("out", "dark", "mid")):
         P[f"p{_t}_{_n}"] = hx(_d["panel"][_i])
+
+# Chevrons des convoyeurs : clair, ombre (jaune = basique, rouge = rapide, bleu = express, comme dans Factorio)
+BELT = {
+    "yellow": (hx("ffd24a"), hx("d9962c")),
+    "red": (hx("f0624f"), hx("b03a48")),
+    "blue": (hx("56d4f2"), hx("2f6bc4")),
+}
