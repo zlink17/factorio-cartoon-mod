@@ -42,7 +42,10 @@ for tier in (1, 2, 3):
     ent = OVR / "entity" / name
     ent.mkdir(parents=True, exist_ok=True)
     up(sheet).save(ent / f"{name}.png")
-    up(shadow_of(frames[0])).save(ent / f"{name}-shadow.png")
+    shadows = Image.new("RGBA", sheet.size, (0, 0, 0, 0))
+    for i, fr in enumerate(frames):
+        shadows.alpha_composite(shadow_of(fr), (W * (i % 8), H * (i // 8)))
+    up(shadows).save(ent / f"{name}-shadow.png")
     (OVR / "icons").mkdir(parents=True, exist_ok=True)
     icon_of(frames[0]).save(OVR / "icons" / f"{name}.png")
     print(name, "ok")

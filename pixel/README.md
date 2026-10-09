@@ -26,4 +26,4 @@ tools/install_mod.sh pixel
 ## État
 
 Essai d'assembleur uniquement, 3 niveaux aux couleurs de Factorio (gris-vert, bleu, olive). Pas encore calé sur le cadre de l'original (214 × 226 px, 32 images, 64 px par case)
-ni installé dans `mod/graphics/overrides/`. Le style (STYLE.md) du mod pixel reste à écrire.
+ni installé dans `mod/graphics/overrides/`. Style : voir [STYLE.md](STYLE.md).

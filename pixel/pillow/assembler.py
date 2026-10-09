@@ -103,7 +103,8 @@ def piston(d, x, phase, offset=0.0, slim=False):
     cyl(d, x, 29, 35, rs, "steel", "steel_light", "steel_dark", "steel_dark")
     d.rectangle((x - (not slim), hy + 4, x + (not slim), 29), fill=P["steel_dark"])
     d.point((x, hy + 6), P["white"])
-    cyl(d, x, hy, hy + 4, rh, "steel_mid", "white", "steel", "steel_dark")
+    cyl(d, x, hy, hy + 4, rh, "steel_mid", "steel_light", "steel", "steel_dark")
+    d.point((x - 1, hy), P["white"])
 
 
 def draw_assembler(phase=0.0, tier=2):
@@ -157,7 +158,9 @@ def draw_assembler(phase=0.0, tier=2):
     d.rectangle((12, 28, 12, 35), fill=P["steel_mid"])
     d.rectangle((13, 30, 16, 34), fill=pn("out"))
     d.rectangle((14, 31, 15, 33), fill=pn("mid"))
-    d.point((14, 31), P["cyan_light"])
+    blink = (phase * 2) % 1 < 0.5
+    d.rectangle((14, 31, 15, 33), fill=P["cyan"] if blink else pn("dark"))
+    d.point((14, 31), P["cyan_light"] if blink else pn("mid"))
     for x in (13, 16):
         cyl(d, x, 19, 25, 1, "orange", "tan", "red", "maroon")
 
