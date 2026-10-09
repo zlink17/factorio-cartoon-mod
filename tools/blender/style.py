@@ -5,7 +5,8 @@ Les couleurs sont en RGB linéaire (valeurs Blender).
 """
 
 # --- Projection ---------------------------------------------------------
-PITCH_BUILDING_DEG = 35   # PROVISOIRE : à caler sur les sprites originaux
+PITCH_BUILDING_DEG = 30   # calé sur l'assembleur 1 original (voir STYLE.md)
+GROUND_STRETCH = False    # False : le sol est raccourci par cos(pitch), comme dans les sprites originaux
 PITCH_TOPDOWN_DEG = 0     # convoyeurs, tuyaux au sol, rails : vue de dessus
 YAW_DEG = 0               # jamais de rotation : alignement sur la grille
 

@@ -12,13 +12,16 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer ou
 - On garde les formes, proportions et lisibilité de l'original : un joueur doit reconnaître chaque machine au premier coup d'œil. **[VALIDÉ]**
 - Pas de dégradés, de bruit ni de texture réaliste (rouille, rayures, poussière). **[VALIDÉ]**
 
-## 2. Projection (comme Factorio)
+## 2. Projection (calée sur l'assembleur 1 original)
 
-- **Bâtiments alignés sur la grille, aucune rotation** (jamais de vue à 45°). Vue de face, dessus visible. **[VALIDÉ]**
-- **Le sol n'est pas raccourci** : une case reste carrée à l'écran. La hauteur est décalée vers le haut de l'écran. **[VALIDÉ]**
+- **Bâtiments alignés sur la grille, aucune rotation** (jamais de vue à 45°). **[VALIDÉ]**
+- **Vue presque du dessus, inclinée de 30°** : le dessus occupe l'essentiel du sprite, la face avant est une bande en bas. Le sol est **raccourci** par cos(30°) (mesuré sur l'original : la bande avant fait environ 0,8 case de haut). **[CALÉ]** (`PITCH_BUILDING_DEG`, `GROUND_STRETCH = False`)
+- **Parois en tronc de pyramide** : les machines sont plus larges en bas qu'en haut (2,6 → 2,15 pour un assembleur), donc les côtés gauche et droit restent visibles. **[CALÉ]**
+- **Silhouette** : une machine 3x3 mesure environ 2,6 cases de large (pas 3), centrée dans son emprise. **[CALÉ]**
 - **Convoyeurs, tuyaux au sol, rails : vue directement du dessus**, jamais inclinés. **[VALIDÉ]**
-- Inclinaison des bâtiments : 35°. **[PROVISOIRE]** À caler en superposant un rendu sur le sprite original (assembleur 1).
 - Les ombres portées sont des sprites séparés, comme dans le jeu (pas d'ombre dans le sprite principal). **[PROVISOIRE]**
+
+> Correction : une première version de ce guide disait « sol non raccourci, 35° ». Les mesures sur le sprite original ont montré que c'était faux.
 
 ## 3. Contours
 
@@ -63,7 +66,8 @@ Couleurs vives et saturées, peu de teintes par objet (3 maximum + contour). Val
 
 ## 7. Règles par type d'objet
 
-- **Machines** : forme de base en boîte aux angles biseautés, un socle plus sombre ou plus froid, un détail reconnaissable (engrenage, cheminée, porte).
+- **Machines** : corps en tronc de pyramide sur un socle sombre, dessus ouvert avec un mécanisme visible (engrenages), grande plaque avant, un ou deux éléments qui dépassent (tuyau, cheminée) pour casser la symétrie. Fibre « punk » : tôle, tuyauterie apparente, bande de danger, mais toujours en aplats.
+- **Taille des détails** : à la taille du jeu, tout détail de moins de 6 px est avalé par les contours. Pas de petits rivets ni de petites jauges : peu de gros éléments.
 - **Convoyeurs** : bande sombre, chevrons clairs régulièrement espacés, bords colorés.
 - **Minerais** : tas bas et étalé, une teinte par ressource. **[PROVISOIRE]** (le premier test est trop « cristal »)
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
@@ -74,7 +78,7 @@ Même règles : mêmes contours, même palette, même projection. Voir `tools/co
 
 ## 9. Checklist avant de valider un sprite
 
-- [ ] Projection correcte (grille, pas de rotation, convoyeurs vus de dessus)
+- [ ] Projection correcte (grille, pas de rotation, 30°, parois en tronc de pyramide, convoyeurs vus de dessus)
 - [ ] Contours noir chaud, épaisseur proportionnelle
 - [ ] Trois tons d'ombrage uniquement
 - [ ] Couleurs prises dans la palette
