@@ -26,7 +26,7 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer ou
 ## 3. Contours
 
 - Noir chaud (brun très foncé), jamais noir pur. **[VALIDÉ]**
-- Épaisseur : 1,6 px pour un rendu de 256 px, proportionnelle à la taille du rendu (soit environ 1,6 px sur un sprite d'assembleur à la taille du jeu). **[CALÉ]** (une version à 2,2 px recouvrait les parois et les petits détails)
+- Épaisseur définie **en unités du monde** : 0,026 case (`OUTLINE_UNITS`), soit environ 1,7 px à 64 px par case, la taille des fichiers de Factorio. Le même contour s'applique donc à tout objet, quelle que soit la taille de rendu. **[CALÉ]** (0,038 était trop épais à cette échelle : les parois de 14 px de large étaient recouvertes)
 - Seules les arêtes vives sont contournées (angle d'écart > 70°) : pas de trait sur les biseaux ni sur les arrondis. **[CALÉ]**
 - Contour sur la silhouette, les bords et les arêtes vives, pas sur les détails minuscules. **[VALIDÉ]**
 
@@ -63,14 +63,15 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 ## 6. Format technique
 
 - PNG RGBA, **fond transparent**. **[VALIDÉ]**
-- Même dimensions en pixels et même alignement que le sprite original, pour remplacer le fichier sans toucher au reste du mod. **[VALIDÉ]**
+- **Même cadre et même emprise que le sprite original**, au pixel près, pour remplacer le fichier sans toucher au reste du mod. L'assembleur 1 est calé automatiquement : cadre 214 × 226 px, pixels opaques de (25, 2) à (188, 199), recouvrement de silhouette de 92 %. `assembler.py` règle lui-même l'échelle et le décalage de la caméra par mesure. **[VALIDÉ]**
+- Les fichiers de Factorio sont des planches : l'assembleur 1 contient 32 images d'animation (8 colonnes × 4 lignes de 214 × 226 px). **[CALÉ]**
 - Rendu Blender : moteur Cycles CPU, 4 échantillons, sur-échantillonnage 2x puis réduction (bords nets), transformation de vue « Standard », matériaux en émission (aplats, sans éclairage). **[VALIDÉ]**
 - Les sprites refaits vont dans `graphics/overrides/<mod>/...` avec le même chemin que l'original. **[VALIDÉ]**
 
 ## 7. Règles par type d'objet
 
 - **Machines** : corps en tronc de pyramide sur un socle sombre, dessus ouvert avec un mécanisme visible (engrenages), grande plaque avant, un ou deux éléments qui dépassent (tuyau, cheminée) pour casser la symétrie. Fibre « punk » : tôle, tuyauterie apparente, bande de danger, mais toujours en aplats.
-- **Taille des détails** : à la taille du jeu, tout détail de moins de 6 px est avalé par les contours. Pas de petits rivets ni de petites jauges : peu de gros éléments.
+- **Taille des détails** : à la taille du jeu, tout détail de moins de 6 px est avalé par les contours, et les bandes étroites (parois latérales : ~14 px) ne supportent ni nervures ni rivets. Peu de gros éléments, vérifiés **au format final** et pas seulement en grand.
 - **Convoyeurs** : bande sombre, chevrons clairs régulièrement espacés, bords colorés.
 - **Minerais** : tas bas et étalé, une teinte par ressource. **[PROVISOIRE]** (le premier test est trop « cristal »)
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**

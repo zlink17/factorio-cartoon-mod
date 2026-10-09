@@ -12,7 +12,7 @@ YAW_DEG = 0               # jamais de rotation : alignement sur la grille
 
 # --- Contours -----------------------------------------------------------
 OUTLINE_COLOR = (0.05, 0.03, 0.03)
-OUTLINE_PX_AT_256 = 1.6   # épaisseur pour un rendu de 256 px ; à mettre à l'échelle
+OUTLINE_UNITS = 0.026     # épaisseur en unités du monde (1 case = 1 unité) : ~1,7 px à 64 px/case
 OUTLINE_CREASE_DEG = 110  # seules les arêtes vives (> 70° d'écart) sont contournées
 
 # --- Ombrage à trois tons (multiplicateurs de la couleur de base) ----------

@@ -154,14 +154,14 @@ def gear(center, r, depth, teeth, angle_deg, m, hub_m=None):
     return o
 
 
-def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0.0, supersample=None):
+def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0.0, supersample=None, shift_y=0.0):
     """Rend la scène courante avec la projection du guide de style.
 
     Le rendu est fait à `supersample` fois la taille puis réduit (alpha prémultiplié)."""
     ss = supersample or getattr(S, "SUPERSAMPLE", 1)
     final_path = path
-    size_final = size
-    size = size * ss
+    size_final = size if isinstance(size, tuple) else (size, size)   # (largeur, hauteur)
+    size = (size_final[0] * ss, size_final[1] * ss)
     if ss > 1:
         path = path + ".big.png"
     p = math.radians(pitch_deg)
@@ -176,7 +176,8 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
     bpy.ops.object.camera_add(location=(0, -d * math.sin(p), d * math.cos(p) + cy))
     cam = bpy.context.object
     cam.data.type = "ORTHO"
-    cam.data.ortho_scale = scale
+    cam.data.ortho_scale = scale   # couvre la plus grande dimension du rendu
+    cam.data.shift_y = shift_y
     cam.data.clip_end = 100
     cam.rotation_euler = (p, 0, 0)
     sc = bpy.context.scene
@@ -186,12 +187,12 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
     sc.cycles.samples = S.RENDER_SAMPLES
     sc.cycles.use_denoising = False
     sc.render.film_transparent = S.FILM_TRANSPARENT
-    sc.render.resolution_x = sc.render.resolution_y = size
+    sc.render.resolution_x, sc.render.resolution_y = size
     sc.render.image_settings.color_mode = "RGBA"
     sc.view_settings.view_transform = S.VIEW_TRANSFORM
     sc.render.use_freestyle = True
     sc.render.line_thickness_mode = "ABSOLUTE"
-    sc.render.line_thickness = S.OUTLINE_PX_AT_256 * size / 256
+    sc.render.line_thickness = S.OUTLINE_UNITS * max(size) / scale
     vl = sc.view_layers[0]
     vl.use_freestyle = True
     vl.freestyle_settings.crease_angle = math.radians(S.OUTLINE_CREASE_DEG)
@@ -205,7 +206,7 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
         im = cv2.imread(path, cv2.IMREAD_UNCHANGED).astype(np.float32)
         a = im[:, :, 3:4] / 255.0
         pre = np.dstack([im[:, :, :3] * a, im[:, :, 3:4]])
-        small = cv2.resize(pre, (size_final, size_final), interpolation=cv2.INTER_AREA)
+        small = cv2.resize(pre, size_final, interpolation=cv2.INTER_AREA)
         al = np.clip(small[:, :, 3:4] / 255.0, 1e-6, 1)
         out = np.dstack([np.clip(small[:, :, :3] / al, 0, 255), small[:, :, 3:4]])
         cv2.imwrite(final_path, np.clip(out, 0, 255).astype(np.uint8))
