@@ -11,11 +11,13 @@ import math, os, sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import P, BELT
+from palette import P, BELT, hx
 
 CELL = 32           # px d'art par cellule ; la case occupe [8, 24[
 T = 16              # px d'art par case
 PITCH = 8           # pas des chevrons
+# Couleur du fond du tapis, par niveau : brun (basique), bordeaux (rapide), marine (express)
+BASE = {"yellow": hx("6b5638"), "red": hx("6e3446"), "blue": hx("33507a")}
 LIGHT = (-1 / math.sqrt(2), -1 / math.sqrt(2))   # direction vers la lumière (haut gauche)
 
 # (coin, vecteur coin -> milieu du bord d'entrée, vecteur coin -> milieu du bord de sortie)
@@ -51,7 +53,7 @@ def surface(s, lat, off, tier):
             return light
         if ph >= 7:
             return dark
-    return P["steel_mid"]
+    return BASE[tier]
 
 
 def straight_pixel(x, y, flow, off, tier):
