@@ -36,9 +36,9 @@ Chaque couleur de base est multipliée selon l'orientation de la face :
 
 | Face | Multiplicateur |
 |---|---|
-| Dessus | 1,10 |
-| Face avant | 0,88 |
-| Côtés | 0,68 |
+| Dessus | 1,12 |
+| Face avant | 0,85 |
+| Côtés | 0,62 |
 
 Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 

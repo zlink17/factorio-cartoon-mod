@@ -29,7 +29,7 @@ def build(gear_angle=0.0):
     box((0, 0, 0.06), (2.72, 2.72, 0.12), dark, 0.03)
 
     # --- corps : tronc de pyramide (2.6 -> 2.15), hauteur 0.95 ---------------------------------
-    z0, h, w0, w1 = 0.12, 0.95, 2.6, 2.15
+    z0, h, w0, w1 = 0.12, 1.15, 2.6, 2.15
     frustum(z0, h, w0, w0, w1, w1, steel, bevel=0.03)
     tilt = math.degrees(math.atan((w0 - w1) / 2 / h))
     ym = -(w0 + w1) / 4
@@ -39,13 +39,13 @@ def build(gear_angle=0.0):
 
     # quatre panneaux avant, chacun avec un triangle en relief
     for x in (-0.9, -0.3, 0.3, 0.9):
-        box((x, ym - 0.03, zm), (0.52, 0.05, 0.64), teal, 0.02, rot_x=-tilt)
-        tri_plate((x, ym - 0.06, zm - 0.02), 0.3, 0.3, 0.03, tilt, dark)
+        box((x, ym - 0.03, zm), (0.52, 0.05, 0.82), teal, 0.02, rot_x=-tilt)
+        tri_plate((x, ym - 0.06, zm - 0.04), 0.32, 0.36, 0.03, tilt, dark)
 
     # côtés nervurés
     for side, rot in ((-1, tilt), (1, -tilt)):
         for k in range(4):
-            box((side * (xm + 0.03), -0.84 + k * 0.56, zm), (0.05, 0.14, 0.6), dark, rot_y=rot)
+            box((side * (xm + 0.03), -0.84 + k * 0.56, zm), (0.05, 0.14, 0.8), dark, rot_y=rot)
 
     # --- dessus : plaque de cuivre rouillé, rebord, mécanisme -----------------------------------
     box((0, 0, zt + 0.03), (1.95, 1.95, 0.06), rust, 0.02)
@@ -58,14 +58,16 @@ def build(gear_angle=0.0):
     cyl((-0.78, 0.5, zt + 0.18), 0.09, 0.8, copper, rot=(90, 0, 0))
     cyl((-0.55, 0.5, zt + 0.18), 0.09, 0.8, copper, rot=(90, 0, 0))
 
-    # engrenages au centre (tournent avec gear_angle)
-    gear((0.22, -0.12, zt + 0.15), 0.5, 0.16, 9, gear_angle, steel, dark)
-    gear((0.78, -0.55, zt + 0.15), 0.28, 0.16, 6, -gear_angle * 9 / 6 + 20, light, dark)
-    gear((0.82, 0.3, zt + 0.15), 0.24, 0.16, 5, gear_angle * 9 / 5 + 25, steel, dark)
+    # engrenages au centre : posés pour que les dents se frôlent sans se traverser
+    #   (distance entre centres = rayon pointe 1 + rayon pointe 2 + 0.02, pointe = 1.22 x rayon)
+    g1 = (0.05, -0.15)
+    gear((g1[0], g1[1], zt + 0.15), 0.42, 0.16, 9, gear_angle, steel, dark)
+    gear((0.73, 0.17, zt + 0.15), 0.18, 0.16, 6, -gear_angle * 9 / 6 + 20, light, dark)
+    gear((0.60, -0.70, zt + 0.15), 0.2, 0.16, 5, gear_angle * 9 / 5 + 25, steel, dark)
 
-    # deux engrenages en laiton qui dépassent du bord arrière
-    gear((-0.2, 0.86, zt + 0.36), 0.4, 0.16, 8, -gear_angle + 10, brass, copper)
-    gear((0.4, 0.98, zt + 0.4), 0.3, 0.16, 6, gear_angle * 8 / 6 + 5, copper, dark)
+    # deux engrenages en laiton qui dépassent du bord arrière (se frôlent aussi)
+    gear((-0.35, 0.9, zt + 0.36), 0.36, 0.16, 8, -gear_angle + 10, brass, copper)
+    gear((0.43, 0.97, zt + 0.4), 0.26, 0.16, 6, gear_angle * 8 / 6 + 5, copper, dark)
 
 
 if __name__ == "__main__":
@@ -74,5 +76,5 @@ if __name__ == "__main__":
     os.makedirs(out, exist_ok=True)
     build(angle)
     path = render_scene(os.path.join(out, "assembleur.png"), size=512, scale=4.4,
-                        pitch_deg=S.PITCH_BUILDING_DEG, cy=0.55)
+                        pitch_deg=S.PITCH_BUILDING_DEG, cy=0.65)
     print("OK", path)

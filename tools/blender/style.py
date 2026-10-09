@@ -16,9 +16,9 @@ OUTLINE_PX_AT_256 = 1.6   # épaisseur pour un rendu de 256 px ; à mettre à l'
 OUTLINE_CREASE_DEG = 110  # seules les arêtes vives (> 70° d'écart) sont contournées
 
 # --- Ombrage à trois tons (multiplicateurs de la couleur de base) ----------
-SHADE_SIDE = 0.68         # côtés
-SHADE_FRONT = 0.88        # face avant  (0.68 + 0.20)
-SHADE_TOP = 1.10          # dessus      (0.68 + 0.42)
+SHADE_SIDE = 0.62         # côtés
+SHADE_FRONT = 0.85        # face avant  (0.62 + 0.23)
+SHADE_TOP = 1.12          # dessus      (0.62 + 0.50)
 
 # --- Palette (teintes mesurées sur l'assembleur 1 original) -----------------------
 def _lin(hex_):
