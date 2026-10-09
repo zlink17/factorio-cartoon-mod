@@ -1,14 +1,14 @@
 """Assembleur (3x3) : modèle de référence du style « punk mais cartoon ».
 
-Usage : python tools/blender/assembler.py <dossier_sortie> [angle_engrenages_deg]
+Usage : python tools/blender/assembler.py <dossier_sortie> [phase 0..1]
 
 Structure reprise de l'assembleur 1 de Factorio : socle sombre, corps en tronc de pyramide
-(quatre panneaux à triangle en relief devant, côtés nervurés), dessus en cuivre rouillé avec
+(quatre panneaux à triangle en relief devant), dessus en cuivre rouillé avec
 un moteur à gauche, des engrenages au centre et deux engrenages en laiton qui dépassent
 du bord arrière. Couleurs mesurées sur l'original (voir style.py).
 
-`build(gear_angle)` est paramétré pour l'animation : chaque image de l'animation
-est un rendu avec un angle d'engrenage différent.
+`build(phase)` est paramétré pour l'animation : chaque image est un rendu avec une phase
+différente (0 à 1). Voir animate.py pour la planche de 32 images.
 """
 import math, os, sys
 
@@ -19,7 +19,14 @@ from lib import reset, mat, box, cyl, blob, gear, frustum, tri_plate, render_sce
 P = S.PALETTE
 
 
-def build(gear_angle=0.0):
+# Animation : `phase` va de 0 (inclus) à 1 (exclu) sur une boucle complète. Chaque engrenage tourne
+# d'un nombre entier de dents sur la boucle, pour que la dernière image enchaîne sur la première.
+CENTER_PITCHES = 2      # le grand engrenage central avance de 2 dents par boucle
+BRASS_PITCHES = 2       # l'engrenage en laiton avance de 2 dents par boucle
+N_FRAMES = 32           # comme l'original (planche de 8 x 4 images)
+
+
+def build(phase=0.0):
     reset()
     steel, teal, dark = mat("steel", P["grey"]), mat("teal", P["blue"]), mat("dark", P["dark"])
     rust, copper, brass = mat("rust", P["brown"]), mat("copper", P["orange"]), mat("brass", P["yellow"])
@@ -55,14 +62,16 @@ def build(gear_angle=0.0):
 
     # engrenages au centre : posés pour que les dents se frôlent sans se traverser
     #   (distance entre centres = rayon pointe 1 + rayon pointe 2 + 0.02, pointe = 1.22 x rayon)
-    g1 = (0.05, -0.15)
-    gear((g1[0], g1[1], zt + 0.15), 0.42, 0.16, 9, gear_angle, steel, dark)
-    gear((0.73, 0.17, zt + 0.15), 0.18, 0.16, 6, -gear_angle * 9 / 6 + 20, light, dark)
-    gear((0.60, -0.70, zt + 0.15), 0.2, 0.16, 5, gear_angle * 9 / 5 + 25, steel, dark)
+    #   deux engrenages qui s'engrènent tournent en sens inverse, à des vitesses inverses de leurs dents
+    big = phase * CENTER_PITCHES * 360 / 9
+    gear((0.05, -0.15, zt + 0.15), 0.42, 0.16, 9, big, steel, dark)
+    gear((0.73, 0.17, zt + 0.15), 0.18, 0.16, 6, -big * 9 / 6 + 20, light, dark)
+    gear((0.60, -0.70, zt + 0.15), 0.2, 0.16, 5, -big * 9 / 5 + 25, steel, dark)
 
-    # deux engrenages en laiton qui dépassent du bord arrière (se frôlent aussi)
-    gear((-0.35, 0.9, zt + 0.46), 0.36, 0.16, 8, -gear_angle + 10, brass, copper)
-    gear((0.43, 0.97, zt + 0.5), 0.26, 0.16, 6, gear_angle * 8 / 6 + 5, copper, dark)
+    # deux engrenages en laiton qui dépassent du bord arrière (s'engrènent entre eux)
+    bras = phase * BRASS_PITCHES * 360 / 8
+    gear((-0.35, 0.9, zt + 0.46), 0.36, 0.16, 8, bras + 10, brass, copper)
+    gear((0.43, 0.97, zt + 0.5), 0.26, 0.16, 6, -bras * 8 / 6 + 5, copper, dark)
 
 
 # Cadre et position de la machine dans le sprite original (assembling-machine-1.png, image 0)
@@ -77,27 +86,38 @@ def measure(path):
     return xs.min(), ys.min(), xs.max(), ys.max()
 
 
-def render_fitted(out, angle=0.0, name="assembleur.png"):
-    """Rend l'assembleur au format exact du sprite original (même cadre, même emprise)."""
+def fit_camera(out, phase=0.0):
+    """Cherche l'échelle et le décalage de caméra qui donnent la même emprise que l'original."""
     tw = TARGET_BBOX[2] - TARGET_BBOX[0] + 1
     tcy = (TARGET_BBOX[1] + TARGET_BBOX[3]) / 2
     scale, shift = 3.9, 0.0
-    path = os.path.join(out, name)
+    path = os.path.join(out, "_fit.png")
     for _ in range(4):
-        build(angle)
+        build(phase)
         render_scene(path, size=FRAME, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_y=shift)
         x0, y0, x1, y1 = measure(path)
         w, cy = x1 - x0 + 1, (y0 + y1) / 2
         scale *= w / tw                                  # plus grand si le sprite est trop petit
         shift += (cy - tcy) / max(FRAME) * (-1)          # recentre verticalement
-    build(angle)
-    render_scene(path, size=FRAME, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_y=shift)
+    os.remove(path)
+    return scale, shift
+
+
+def render_phase(path, phase, scale, shift):
+    """Rend une image de l'animation avec une caméra déjà calée (identique pour toutes les images)."""
+    build(phase)
+    return render_scene(path, size=FRAME, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_y=shift)
+
+
+def render_fitted(out, phase=0.0, name="assembleur.png"):
+    scale, shift = fit_camera(out, phase)
+    path = render_phase(os.path.join(out, name), phase, scale, shift)
     return path, scale, shift
 
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "assembler_out"
-    angle = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0
+    phase = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0
     os.makedirs(out, exist_ok=True)
-    path, scale, shift = render_fitted(out, angle)
+    path, scale, shift = render_fitted(out, phase)
     print("OK", path, "scale", round(scale, 3), "shift_y", round(shift, 4), "bbox", measure(path))

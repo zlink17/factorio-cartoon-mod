@@ -33,6 +33,10 @@ python tools/simple/cartoonize.py --data "<dossier Factorio>/data" --mods base s
 
 # Approche complexe : voir tools/complex/README.md
 
+# Rendus Blender (pip install bpy) : sprite de référence et animation de l'assembleur
+python tools/blender/assembler.py sortie/
+python tools/blender/animate.py sortie/     # planche de 32 images + aperçu GIF
+
 # Régénérer le manifeste à la main si besoin
 python tools/build_manifest.py
 ```
@@ -41,10 +45,13 @@ Copier ou lier ce dossier dans `mods/` de Factorio (renommé `factorio-cartoon-m
 
 ## À faire
 
-- [ ] Récupérer les sprites de l'installation Factorio
+- [x] Récupérer les sprites de l'installation Factorio (assembleur 1 pour l'instant)
 - [ ] Tester le filtre simple et ajuster le rendu
 - [ ] Définir le style de référence pour l'approche complexe
-- [ ] Refaire les assets les plus visibles (assembleurs, convoyeurs, personnage)
+- [x] Assembleur 1 : planche d'animation de 32 images (`tools/blender/animate.py`), installée dans `graphics/overrides/`
+- [ ] Tester le mod dans Factorio (jamais lancé pour l'instant)
+- [ ] Ombre de l'assembleur 1 et icône
+- [ ] Refaire les autres assets les plus visibles (assembleurs 2 et 3, convoyeurs, fours, personnage)
 - [ ] Gérer les icônes et l'interface (GUI)
 
 Les sprites originaux de Factorio ne sont pas inclus dans le repo.
