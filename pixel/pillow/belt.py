@@ -43,13 +43,15 @@ def shade(depth, normal):
 
 
 def surface(s, lat, off, tier):
+    """Petits chevrons (7 px de haut, 2 px d'épaisseur) centrés sur l'axe du convoyeur, avec une ombre derrière."""
     light, dark = BELT[tier]
-    ph = (s + abs(lat) - off) % PITCH
-    if ph < 2:
-        return light
-    if ph >= 7:
-        return dark
-    return P["steel_mid"] if ph < 5 else P["steel"]
+    if abs(lat) <= 3.2:
+        ph = (s + abs(lat) - off) % PITCH
+        if ph < 2:
+            return light
+        if ph >= 7:
+            return dark
+    return P["steel_mid"]
 
 
 def straight_pixel(x, y, flow, off, tier):
@@ -72,7 +74,7 @@ def curve_pixel(x, y, curve, off, tier):
     if r > T:
         return None
     ang = math.acos(max(-1.0, min(1.0, (px * a[0] + py * a[1]) / r)))
-    s = ang / (math.pi / 2) * T
+    s = ang / (math.pi / 2) * T            # 16 px de bout en bout : le motif se raccorde aux cases voisines
     if r >= 13:
         return shade(T - r, (px / r, py / r))
     if r < 3:

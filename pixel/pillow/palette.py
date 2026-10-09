@@ -36,9 +36,10 @@ for _t, _d in TIERS.items():
     for _i, _n in enumerate(("out", "dark", "mid")):
         P[f"p{_t}_{_n}"] = hx(_d["panel"][_i])
 
-# Chevrons des convoyeurs : clair, ombre (jaune = basique, rouge = rapide, bleu = express, comme dans Factorio)
+# Chevrons des convoyeurs : clair, ombre (jaune = basique, rouge = rapide, bleu = express, comme dans Factorio).
+# Tons volontairement sourds pour rester dans la gamme des machines.
 BELT = {
-    "yellow": (hx("ffd24a"), hx("d9962c")),
-    "red": (hx("f0624f"), hx("b03a48")),
-    "blue": (hx("56d4f2"), hx("2f6bc4")),
+    "yellow": (hx("e8b85a"), hx("a8743a")),
+    "red": (hx("dc6a5e"), hx("8e3a48")),
+    "blue": (hx("6cb4dc"), hx("3f6fa8")),
 }
