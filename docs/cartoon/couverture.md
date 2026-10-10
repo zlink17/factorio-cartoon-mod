@@ -8,18 +8,18 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 135 | 4143 | 3 % |
+| `base` | 138 | 4143 | 3 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **153** | **8246** | **2 %** |
+| **Total** | **156** | **8246** | **2 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 96 | 5483 |
+| sprite | 99 | 5483 |
 | icone | 44 | 1525 |
 | ombre | 13 | 822 |
 | lumiere | 0 | 135 |
@@ -278,7 +278,7 @@ Faites : `assembling-machine`, `big-electric-pole`, `bulk-inserter`, `burner-ins
 
 ### technology : 0 / 131
 
-### terrain : 19 / 143
+### terrain : 22 / 143
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -289,7 +289,7 @@ Faites : `assembling-machine`, `big-electric-pole`, `bulk-inserter`, `burner-ins
 | hazard-concrete-left | 0 | 2 | 0 |
 | hazard-concrete-right | 0 | 2 | 0 |
 | lab-tiles | 0 | 3 | 0 |
-| masks | 0 | 5 | 0 |
+| ◐ masks | 3 | 5 | 0 |
 | out-of-map-transition | 0 | 19 | 0 |
 | stone-path | 0 | 8 | 0 |
 | ◐ terrain | 19 | 22 | 0 |

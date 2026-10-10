@@ -94,6 +94,13 @@ pour l'ordre de chargement).
 - **Un sprite du mod peut ne plus correspondre à son générateur** (code retouché sans relancer le rendu) : c'était le
   cas de la planche de l'assembleur 1 (teinte des panneaux avant). `tools/build.py cartoon tous --verifier` relance
   tout de zéro et signale ces écarts ; les rendus Cycles sont reproductibles à ±3 près par canal.
+- **Sans dialogue Steam** : lancé hors de Steam, Factorio se fait relancer par Steam, qui demande de confirmer les
+  arguments. Il faut un `steam_appid.txt` (427520) **dans le dossier courant** du processus (donc lancer depuis
+  `bin/x64`) et les variables `SteamAppId`/`SteamGameId` (passées à Windows par `WSLENV`) : `tools/factorio.py`.
+- **Surface de test sous Space Age** : `game.create_surface` sans réglages mélange toutes les planètes (on obtient
+  Gleba) ; copier `game.surfaces.nauvis.map_gen_settings`.
+- **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
+  avant de lancer le jeu.
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
   « mirrored » (`.wslconfig`). `bpy` demande Python 3.11 (environnement `.venv` créé avec `uv`).
 

@@ -59,7 +59,7 @@ def run(*args, mods=(), timeout=600):
 def no_steam_relaunch():
     """Lancé hors de Steam, le jeu se fait relancer par Steam, qui demande de confirmer les arguments (dialogue
     « Lancer le jeu avec des arguments personnalisés »). Un steam_appid.txt à côté de l'exécutable l'évite : le jeu
-    démarre directement (Steam doit être ouvert). Sans effet sur un lancement normal depuis Steam ; une vérification
+    démarre directement (Steam doit être ouvert), à condition de le lancer depuis son dossier. Sans effet sur un lancement normal depuis Steam ; une vérification
     des fichiers du jeu par Steam peut le supprimer, on le recrée donc à chaque lancement."""
     appid = EXE.parent / "steam_appid.txt"
     if not appid.exists():
@@ -71,7 +71,11 @@ def start(*args, mods=()):
     no_steam_relaunch()
     prepare(mods)
     cmd = [str(EXE), "--config", winpath(WORK / "config.ini"), "--mod-directory", winpath(WORK / "mods"), *args]
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd="/tmp")
+    # Steam cherche steam_appid.txt dans le dossier courant (d'où cwd), et considère comme lancé par lui un processus
+    # qui a SteamAppId / SteamGameId dans son environnement (transmis à Windows par WSLENV)
+    env = dict(os.environ, SteamAppId="427520", SteamGameId="427520",
+               WSLENV=":".join(filter(None, [os.environ.get("WSLENV"), "SteamAppId", "SteamGameId"])))
+    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=EXE.parent, env=env)
 
 
 def running():

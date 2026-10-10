@@ -16,5 +16,5 @@ LOTS = {
     "repartiteurs": [("blender/splitter.py", ["tous"])],
     "pylones": [("blender/pole.py", ["tous"])],          # et câbles (jeu core)
     "minerais": [("blender/ore.py", ["tous"])],
-    "sols": [("terrain/ground.py", ["toutes"])],
+    "sols": [("terrain/ground.py", ["toutes"]), ("terrain/masks.py", [])],   # planches et masques de transition
 }

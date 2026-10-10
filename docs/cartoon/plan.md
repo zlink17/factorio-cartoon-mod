@@ -99,8 +99,12 @@ Avec le banc d'essai (vues rapprochées « detail-* » à la résolution du jeu,
 - [x] Assembleurs 1 à 3 : animés en marche, ombres en place
 - [x] Minerais : **corrigé**, les gisements formaient des bandes horizontales (tas trop plats et trop petits aux étapes
       moyennes, voir `FIELD_*` dans `ore.py`) ; ils sont maintenant continus comme l'original
-- [ ] Répartiteurs : la tête cartoon (barre fine) pèse beaucoup moins que l'original (bloc épais) ; **à trancher**
-- [ ] Sols : transitions encore en fondu doux (masques d'origine) ; **à trancher** : garder ou refaire des masques nets
+- [x] Répartiteurs : la tête (barre fine) se perdait sur les convoyeurs ; **décidé** : bloc gris plus épais, chevrons
+      à la couleur du niveau
+- [x] Sols : **décidé** : masques de transition nets (`terrain/masks.py` : flou léger, seuil, anticrénelage ; partagés
+      avec des sols de Space Age)
+- [ ] **Constat** : les décorations d'origine (touffes d'herbe réalistes) jurent fortement sur les sols en aplats
+      (capture `monde-02`) ; le lot 2.8 « Décorations » est à avancer juste après les objets (2.1)
 - [ ] Revue de cohérence générale par Bastien : comparaisons dans `.cache/vitrine/comparaison/`
 
 ---

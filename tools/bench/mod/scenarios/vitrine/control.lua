@@ -312,9 +312,19 @@ local function items()
 end
 
 -- Monde généré : une portion de carte avec sa nature, ses minerais, son eau (graine fixe).
+-- Réglages de génération de Nauvis (avec Space Age, une surface créée sans réglages mélange toutes les planètes),
+-- graine fixe, sans ennemis.
+local function nauvis_settings(seed)
+  local settings = game.surfaces.nauvis.map_gen_settings
+  settings.seed = seed
+  settings.peaceful_mode = true
+  settings.autoplace_controls = settings.autoplace_controls or {}
+  settings.autoplace_controls["enemy-base"] = { frequency = 0, size = 0, richness = 0 }
+  return settings
+end
+
 local function world()
-  local s = game.create_surface("monde", { seed = 1234, peaceful_mode = true,
-    autoplace_controls = { ["enemy-base"] = { frequency = 0, size = 0, richness = 0 } } })
+  local s = game.create_surface("monde", nauvis_settings(1234))
   s.always_day = true
   s.request_to_generate_chunks({ 0, 0 }, 4)
   s.force_generate_chunk_requests()
@@ -467,8 +477,7 @@ local function detail_grounds()
 end
 
 local function build()
-  surface = game.create_surface("vitrine", { seed = 1, peaceful_mode = true,
-    autoplace_controls = { ["enemy-base"] = { frequency = 0, size = 0, richness = 0 } } })
+  surface = game.create_surface("vitrine", nauvis_settings(1))
   surface.always_day = true
   game.map_settings.enemy_expansion.enabled = false
   game.forces.enemy.set_cease_fire("player", true)
