@@ -61,6 +61,10 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 | navy | #3d5a78 | panneaux avant de l'assembleur 2 |
 | olive | #97a03f | corps de l'assembleur 3 |
 | olive_dark | #6c7430 | panneaux avant de l'assembleur 3 |
+| green | #6f9a3c | bras en vrac |
+| tan | #dcb878 | petit poteau électrique (clair pour ressortir sur le sol) |
+| coral | #e5835a | poteau électrique moyen |
+| steel_light | #c3ced2 | grand pylône électrique |
 
 À définir : cuivre (minerai), charbon, pierre, uranium, fluides. **[PROVISOIRE]**
 

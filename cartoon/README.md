@@ -26,8 +26,18 @@ Remplace les textures par une version cartoon : aplats de couleur, gros contours
 # convoyeurs : planches (20 rangées) et icônes ; "tous" ou un nom, puis un nombre d'images max pour tester
 .venv/bin/python cartoon/blender/belt.py sortie/ tous
 
-# bras robotisés : plateformes, mains, ombres, icônes (burner, inserter, long-handed, fast)
+# bras robotisés : plateformes, mains, ombres, icônes (burner, de base, longue portée, rapide, en vrac)
 .venv/bin/python cartoon/blender/inserter.py sortie/ tous
+
+# souterrains et répartiteurs (trois niveaux chacun)
+.venv/bin/python cartoon/blender/underground.py sortie/ tous
+.venv/bin/python cartoon/blender/splitter.py sortie/ tous
+
+# pylônes électriques (4 modèles) et câbles ; le convoyeur turbo (Space Age) est dans belt.py, underground.py et splitter.py
+.venv/bin/python cartoon/blender/pole.py sortie/ tous
+
+# contrôle : chaque sprite du mod doit avoir la taille de l'original, sinon Factorio ne démarre pas
+.venv/bin/python tools/check_sizes.py cartoon
 ```
 
 Ensuite, copier les fichiers produits dans `mod/graphics/overrides/base/...` (entité, ombre, `icons/`), puis
@@ -38,7 +48,10 @@ Ensuite, copier les fichiers produits dans `mod/graphics/overrides/base/...` (en
 - [x] Assembleurs 1, 2 et 3 : planches animées de 32 images, ombres et icônes (à vérifier en jeu)
 - [ ] Tuyaux des assembleurs 2 et 3 (`-pipe-N/E/S/W.png`, encore ceux d'origine)
 - [x] Convoyeurs jaune, rouge et bleu : droits, courbes, bouts de ligne, icônes (à vérifier en jeu)
-- [x] Bras robotisés : à charbon, de base, à longue portée, rapide (à vérifier en jeu)
-- [ ] Bras en vrac (`bulk-inserter`, pince différente), souterrains, répartiteurs
+- [x] Bras robotisés : à charbon, de base, à longue portée, rapide, en vrac (à vérifier en jeu)
+- [x] Souterrains et répartiteurs, trois niveaux (à vérifier en jeu : capot, ordre des directions, pièces « patch » des souterrains vides)
+- [x] Convoyeur turbo (Space Age) : convoyeur, souterrain, répartiteur (le patch « gelé » d'Aquilo reste d'origine)
+- [x] Pylônes (poteau, poteau moyen, pylône, sous-station) et câbles ; les points d'attache des câbles tombent sur ceux de l'original
+- [ ] Chargeurs (loaders), lecteur de convoyeur, paratonnerre
 - [ ] Fours, personnage, minerais
 - [ ] Icônes et interface (GUI)

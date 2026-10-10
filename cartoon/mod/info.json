@@ -4,6 +4,10 @@
   "title": "Factorio Cartoon",
   "author": "zlink17",
   "factorio_version": "2.0",
-  "dependencies": ["base >= 2.0.0", "! factorio-pixel-mod"],
+  "dependencies": [
+    "base >= 2.0.0",
+    "! factorio-pixel-mod",
+    "? space-age"
+  ],
   "description": "Remplace les textures du jeu par une version au style cartoon."
 }

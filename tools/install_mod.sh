@@ -14,6 +14,6 @@ DEST="$MODS/${NAME}_$VERSION"
 python3 "$ROOT/tools/build_manifest.py" "$MOD"
 rm -rf "$DEST"
 mkdir -p "$DEST"
-cp "$SRC"/info.json "$SRC"/data-final-fixes.lua "$SRC"/manifest.lua "$DEST"/
+cp "$SRC"/info.json "$SRC"/*.lua "$DEST"/
 cp -r "$SRC/graphics" "$DEST"/
 echo "Installé dans $DEST"
