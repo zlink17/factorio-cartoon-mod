@@ -481,6 +481,31 @@ local function detail_items()
   end
 end
 
+-- Vue rapprochée : les décorations de Nauvis (plantes, cailloux, taches), plusieurs exemplaires de chaque.
+local NAUVIS_DECORATIVES = { "green-hairy-grass", "green-carpet-grass", "green-small-grass", "brown-hairy-grass",
+  "brown-carpet-grass", "green-asterisk", "green-asterisk-mini", "brown-asterisk", "brown-asterisk-mini",
+  "red-asterisk", "green-pita", "green-pita-mini", "red-pita", "brown-fluff", "brown-fluff-dry", "green-bush-mini",
+  "garballo", "garballo-mini-dry", "green-croton", "red-croton", "green-desert-bush", "red-desert-bush",
+  "white-desert-bush", "small-rock", "tiny-rock", "medium-rock", "medium-sand-rock", "muddy-stump",
+  "light-mud-decal", "dark-mud-decal", "cracked-mud-decal", "red-desert-decal", "sand-decal", "sand-dune-decal",
+  "lichen-decal", "shroom-decal", "worms-decal" }
+
+local function detail_decoratives()
+  local s = scene("detail-decorations", 2, GROUND, 2)
+  for i, name in ipairs(NAUVIS_DECORATIVES) do
+    local page, k = math.floor((i - 1) / 24), (i - 1) % 24
+    local x, y = page * (s.w + 8) + (k % 6) * 5.3, s.y + math.floor(k / 6) * 4.5
+    if prototypes.decorative[name] then
+      local list = {}
+      for j, d in ipairs({ { 1, 1 }, { 3, 1.5 }, { 2, 2.6 } }) do
+        list[j] = { name = name, position = { x + d[1], y + d[2] }, amount = 1 }
+      end
+      pcall(surface.create_decoratives, { check_collision = false, decoratives = list })
+    end
+    label(name, x + 2.6, y + 3.7, 0.4)
+  end
+end
+
 -- Vue rapprochée : les sols de Nauvis côte à côte (on y voit les transitions).
 local function detail_grounds()
   local names = { "grass-1", "grass-2", "grass-3", "grass-4", "dry-dirt", "dirt-1", "dirt-2", "dirt-3", "dirt-4",
@@ -504,7 +529,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

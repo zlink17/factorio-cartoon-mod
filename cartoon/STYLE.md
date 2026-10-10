@@ -98,6 +98,12 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   et de cuivre sont tournées en sens inverse (−35° et +35°), comme dans l'original, pour les distinguer d'un coup
   d'œil. Teintes vives de l'original (circuits vert, rouge, bleu ; packs de science à leurs couleurs), ajoutées à la
   palette. Cadrage 58 px, contour 0,45. Générées par `blender/items.py`. **[VALIDÉ]**
+- **Décorations** (touffes, buissons, rameaux, cailloux, taches au sol) : procédural 2D (`terrain/decoratives.py`),
+  à la place et à l'emprise des éléments de l'original (lus dans son canal alpha, sans son ombre intégrée). Seule
+  la silhouette est contournée (pas chaque brin), d'un **contour teinté** (version foncée de la plante) : la
+  végétation reste en arrière-plan, les bâtiments ressortent. **Une touffe sur cinq** seulement (l'original en
+  couvre la carte ; en aplats, toutes les garder fait un tapis). Ombre à plat portée vers la droite. Taches au sol en
+  aplat de la teinte moyenne de l'original, bord plus sombre, **à 60 % d'opacité**, sans contour ni ombre. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

@@ -8,18 +8,18 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 168 | 4143 | 4 % |
+| `base` | 837 | 4143 | 20 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **186** | **8246** | **2 %** |
+| **Total** | **855** | **8246** | **10 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 99 | 5483 |
+| sprite | 768 | 5483 |
 | icone | 74 | 1525 |
 | ombre | 13 | 822 |
 | lumiere | 0 | 135 |
@@ -35,51 +35,51 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 |---|---:|---:|---:|
 | achievement | 0 | 59 | 0 |
 
-### decorative : 0 / 759
+### decorative : 669 / 759
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
 | big-rock | 0 | 20 | 0 |
-| brown-asterisk | 0 | 20 | 0 |
-| brown-asterisk-mini | 0 | 12 | 0 |
-| brown-carpet-grass | 0 | 12 | 0 |
-| brown-fluff | 0 | 20 | 0 |
-| brown-fluff-dry | 0 | 20 | 0 |
-| brown-hairy-grass | 0 | 20 | 0 |
-| cracked-mud-decal | 0 | 30 | 0 |
-| dark-mud-decal | 0 | 30 | 0 |
+| ✅ brown-asterisk | 20 | 20 | 0 |
+| ✅ brown-asterisk-mini | 12 | 12 | 0 |
+| ✅ brown-carpet-grass | 12 | 12 | 0 |
+| ✅ brown-fluff | 20 | 20 | 0 |
+| ✅ brown-fluff-dry | 20 | 20 | 0 |
+| ✅ brown-hairy-grass | 20 | 20 | 0 |
+| ✅ cracked-mud-decal | 30 | 30 | 0 |
+| ✅ dark-mud-decal | 30 | 30 | 0 |
 | enemy-decal | 0 | 16 | 0 |
-| garballo | 0 | 20 | 0 |
-| garballo-mini-dry | 0 | 20 | 0 |
-| green-asterisk | 0 | 20 | 0 |
-| green-asterisk-mini | 0 | 12 | 0 |
-| green-bush-mini | 0 | 12 | 0 |
-| green-carpet-grass | 0 | 12 | 0 |
-| green-croton | 0 | 20 | 0 |
-| green-desert-bush | 0 | 12 | 0 |
-| green-hairy-grass | 0 | 20 | 0 |
-| green-pita | 0 | 15 | 0 |
-| green-pita-mini | 0 | 15 | 0 |
-| green-small-grass | 0 | 12 | 0 |
+| ✅ garballo | 20 | 20 | 0 |
+| ✅ garballo-mini-dry | 20 | 20 | 0 |
+| ✅ green-asterisk | 20 | 20 | 0 |
+| ✅ green-asterisk-mini | 12 | 12 | 0 |
+| ✅ green-bush-mini | 12 | 12 | 0 |
+| ✅ green-carpet-grass | 12 | 12 | 0 |
+| ✅ green-croton | 20 | 20 | 0 |
+| ✅ green-desert-bush | 12 | 12 | 0 |
+| ✅ green-hairy-grass | 20 | 20 | 0 |
+| ✅ green-pita | 15 | 15 | 0 |
+| ✅ green-pita-mini | 15 | 15 | 0 |
+| ✅ green-small-grass | 12 | 12 | 0 |
 | huge-rock | 0 | 16 | 0 |
-| lichen-decal | 0 | 16 | 0 |
-| light-mud-decal | 0 | 30 | 0 |
-| medium-rock | 0 | 12 | 0 |
-| muddy-stump | 0 | 10 | 0 |
+| ✅ lichen-decal | 16 | 16 | 0 |
+| ✅ light-mud-decal | 30 | 30 | 0 |
+| ✅ medium-rock | 12 | 12 | 0 |
+| ✅ muddy-stump | 10 | 10 | 0 |
 | nuclear-ground-patch | 0 | 6 | 0 |
-| red-asterisk | 0 | 20 | 0 |
-| red-croton | 0 | 20 | 0 |
-| red-desert-bush | 0 | 20 | 0 |
-| red-desert-decal | 0 | 12 | 0 |
-| red-pita | 0 | 15 | 0 |
-| sand-decal | 0 | 30 | 0 |
-| sand-dune-decal | 0 | 30 | 0 |
-| sand-rock | 0 | 48 | 0 |
-| shroom-decal | 0 | 16 | 0 |
-| small-rock | 0 | 16 | 0 |
-| tiny-rock | 0 | 16 | 0 |
-| white-desert-bush | 0 | 20 | 0 |
-| worms-decal | 0 | 16 | 0 |
+| ✅ red-asterisk | 20 | 20 | 0 |
+| ✅ red-croton | 20 | 20 | 0 |
+| ✅ red-desert-bush | 20 | 20 | 0 |
+| ✅ red-desert-decal | 12 | 12 | 0 |
+| ✅ red-pita | 15 | 15 | 0 |
+| ✅ sand-decal | 30 | 30 | 0 |
+| ✅ sand-dune-decal | 30 | 30 | 0 |
+| ◐ sand-rock | 16 | 48 | 0 |
+| ✅ shroom-decal | 16 | 16 | 0 |
+| ✅ small-rock | 16 | 16 | 0 |
+| ✅ tiny-rock | 16 | 16 | 0 |
+| ✅ white-desert-bush | 20 | 20 | 0 |
+| ✅ worms-decal | 16 | 16 | 0 |
 
 ### entity : 75 / 2289
 
