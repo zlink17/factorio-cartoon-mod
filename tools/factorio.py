@@ -56,15 +56,27 @@ def run(*args, mods=(), timeout=600):
     return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd="/tmp")
 
 
+def no_steam_relaunch():
+    """Lancé hors de Steam, le jeu se fait relancer par Steam, qui demande de confirmer les arguments (dialogue
+    « Lancer le jeu avec des arguments personnalisés »). Un steam_appid.txt à côté de l'exécutable l'évite : le jeu
+    démarre directement (Steam doit être ouvert). Sans effet sur un lancement normal depuis Steam ; une vérification
+    des fichiers du jeu par Steam peut le supprimer, on le recrée donc à chaque lancement."""
+    appid = EXE.parent / "steam_appid.txt"
+    if not appid.exists():
+        appid.write_text("427520", encoding="ascii")
+
+
 def start(*args, mods=()):
     """Lance factorio.exe (avec fenêtre) dans l'instance isolée, sans attendre ; voir stop()."""
+    no_steam_relaunch()
     prepare(mods)
     cmd = [str(EXE), "--config", winpath(WORK / "config.ini"), "--mod-directory", winpath(WORK / "mods"), *args]
     return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd="/tmp")
 
 
 def running():
-    """Vrai si une instance isolée tourne (Steam relance le jeu : le processus lancé par start() ne la suit pas)."""
+    """Vrai si une instance isolée tourne (sans steam_appid.txt, Steam relance le jeu et le processus lancé par
+    start() ne la suit pas : on cherche donc l'instance par sa ligne de commande)."""
     marker = winpath(WORK / "config.ini").replace("'", "''")
     script = ("@(Get-CimInstance Win32_Process -Filter \"Name='factorio.exe'\" | "
               f"Where-Object {{ $_.CommandLine -like '*{marker}*' }}).Count")

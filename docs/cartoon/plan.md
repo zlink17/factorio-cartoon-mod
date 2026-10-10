@@ -90,15 +90,18 @@ Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'
 
 ## 4. Étape 1 : valider l'existant en jeu
 
-Avec le banc d'essai, vérifier ce qui n'a jamais été vu à l'écran et corriger :
+Avec le banc d'essai (vues rapprochées « detail-* » à la résolution du jeu, machines en marche, et captures animées
+« anim-* » en GIF), vérifier ce qui n'a jamais été vu à l'écran et corriger :
 
-- [ ] Bras robotisés (ordre des 4 orientations de plateforme, longue portée)
-- [ ] Souterrains (capot, pièces « patch » laissées vides)
-- [ ] Animation des répartiteurs
-- [ ] Assembleurs 1 à 3 (animation, ombres)
-- [ ] Minerais (lisibilité des 8 étapes, contraste sur chaque sol)
-- [ ] Sols (transitions encore en fondu doux : décider si on refait les masques)
-- [ ] Revue de cohérence générale : une capture de base de début de partie, jugée d'un coup d'œil.
+- [x] Bras robotisés : orientations des plateformes, positions des pinces et mouvement identiques à l'original (5 bras, 4 directions)
+- [x] Souterrains : capot du bon côté pour l'entrée et la sortie dans les 4 directions, objets cachés dessous
+- [x] Animation des répartiteurs : animés dans les 4 directions et les 4 niveaux
+- [x] Assembleurs 1 à 3 : animés en marche, ombres en place
+- [x] Minerais : **corrigé**, les gisements formaient des bandes horizontales (tas trop plats et trop petits aux étapes
+      moyennes, voir `FIELD_*` dans `ore.py`) ; ils sont maintenant continus comme l'original
+- [ ] Répartiteurs : la tête cartoon (barre fine) pèse beaucoup moins que l'original (bloc épais) ; **à trancher**
+- [ ] Sols : transitions encore en fondu doux (masques d'origine) ; **à trancher** : garder ou refaire des masques nets
+- [ ] Revue de cohérence générale par Bastien : comparaisons dans `.cache/vitrine/comparaison/`
 
 ---
 

@@ -34,6 +34,12 @@ ORES = {                                   # nom : (couleur, couleur du dessus p
 }
 
 # par étape : nombre de blocs, rayon min et max d'un bloc (en cases)
+# gisements : tas larges à toutes les étapes, comme l'original (environ 1,6 x 1,5 case : les tas voisins, posés à une
+# case d'écart, se chevauchent et le gisement paraît continu) ; seul le nombre de blocs diminue avec la richesse
+FIELD_SPREAD = (0.45, 0.011)     # rayon de dispersion des blocs : a + b * nombre de blocs (en cases)
+FIELD_ASPECT = 1.2               # étirement en profondeur : compense le raccourcissement de la vue à 30°
+FIELD_DY = -0.06                 # décalage vers le bas de l'écran (l'original est centré un peu plus bas)
+
 STAGES = [(16, 0.15, 0.23), (14, 0.14, 0.21), (12, 0.14, 0.2), (10, 0.13, 0.19), (8, 0.12, 0.18),
           (6, 0.12, 0.17), (3, 0.11, 0.15), (2, 0.1, 0.14)]
 
@@ -61,7 +67,8 @@ def chunk(x, y, r, m, rng, lift=0.0):
     return o
 
 
-def build_pile(name, count, lo, hi, seed, spread=None):
+def build_pile(name, count, lo, hi, seed, spread=None, aspect=0.85, dy=0.0):
+    """Tas de `count` blocs dispersés dans un disque de rayon `spread`, étiré de `aspect` en profondeur."""
     reset()
     m = mat("ore", P[ORES[name]])
     rng = Rng(seed)
@@ -71,18 +78,20 @@ def build_pile(name, count, lo, hi, seed, spread=None):
     while len(spots) < count and tries < 600:
         tries += 1
         a, d = rng.u(0, math.tau), spread * math.sqrt(rng.u())
-        x, y, r = d * math.cos(a), d * math.sin(a) * 0.85, rng.u(lo, hi)
-        if all(math.hypot(x - sx, (y - sy) * 1.15) > (r + sr) * 0.62 for sx, sy, sr in spots):
+        x, y, r = d * math.cos(a), d * math.sin(a) * aspect, rng.u(lo, hi)
+        if all(math.hypot(x - sx, (y - sy) * 1.15 * 0.85 / aspect) > (r + sr) * 0.62 for sx, sy, sr in spots):
             spots.append((x, y, r))
     for x, y, r in sorted(spots, key=lambda s: -s[1]):          # de l'arrière vers l'avant
         lift = max(0.0, 1.0 - math.hypot(x, y) / spread) * r * 1.1      # le centre du tas est plus haut
-        chunk(x, y, r, m, rng, lift)
+        chunk(x, y + dy, r, m, rng, lift)
 
 
 def render_cell(name, stage, variation, out):
     count, lo, hi = STAGES[stage]
     seed = stage * 8 + variation + 100 * list(ORES).index(name)
-    return render_with_shadow(lambda: build_pile(name, count, lo, hi, seed), os.path.join(out, "_ore.png"), CELL,
+    spread = FIELD_SPREAD[0] + FIELD_SPREAD[1] * count
+    return render_with_shadow(lambda: build_pile(name, count, lo, hi, seed, spread, FIELD_ASPECT, FIELD_DY),
+                              os.path.join(out, "_ore.png"), CELL,
                               CELL / PX_PER_TILE, SHADOW, OUTLINE)[1]
 
 
