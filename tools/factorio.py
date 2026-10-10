@@ -11,6 +11,7 @@ Chemins réglables par variables d'environnement :
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -38,7 +39,13 @@ def prepare(mods=()):
     (WORK / "config.ini").write_text(
         "[path]\nread-data=__PATH__executable__/../../data\n"
         f"write-data={winpath(WORK / 'write')}\n", encoding="utf-8")
-    mod_list = [{"name": name, "enabled": True} for name in [*OFFICIAL, *mods]]
+    # Factorio active tout mod présent dans le dossier mais absent de la liste : on désactive donc explicitement
+    # les mods installés (mod cartoon, mod pixel, banc d'essai) qui ne sont pas demandés.
+    installed = {re.sub(r"_\d+\.\d+\.\d+(\.zip)?$", "", p.name) for p in (WORK / "mods").iterdir()
+                 if p.is_dir() or p.suffix == ".zip"}
+    wanted = [*OFFICIAL, *mods]
+    mod_list = [{"name": name, "enabled": True} for name in wanted]
+    mod_list += [{"name": name, "enabled": False} for name in sorted(installed - set(wanted))]
     (WORK / "mods" / "mod-list.json").write_text(json.dumps({"mods": mod_list}, indent=2), encoding="utf-8")
 
 
@@ -47,6 +54,32 @@ def run(*args, mods=(), timeout=600):
     prepare(mods)
     cmd = [str(EXE), "--config", winpath(WORK / "config.ini"), "--mod-directory", winpath(WORK / "mods"), *args]
     return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd="/tmp")
+
+
+def start(*args, mods=()):
+    """Lance factorio.exe (avec fenêtre) dans l'instance isolée, sans attendre ; voir stop()."""
+    prepare(mods)
+    cmd = [str(EXE), "--config", winpath(WORK / "config.ini"), "--mod-directory", winpath(WORK / "mods"), *args]
+    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd="/tmp")
+
+
+def running():
+    """Vrai si une instance isolée tourne (Steam relance le jeu : le processus lancé par start() ne la suit pas)."""
+    marker = winpath(WORK / "config.ini").replace("'", "''")
+    script = ("@(Get-CimInstance Win32_Process -Filter \"Name='factorio.exe'\" | "
+              f"Where-Object {{ $_.CommandLine -like '*{marker}*' }}).Count")
+    out = subprocess.run(["powershell.exe", "-NoProfile", "-Command", script], capture_output=True, text=True,
+                         cwd="/tmp").stdout.strip()
+    return out not in ("", "0")
+
+
+def stop():
+    """Ferme les instances isolées (reconnues à leur config), jamais le jeu du joueur."""
+    marker = winpath(WORK / "config.ini").replace("'", "''")
+    script = ("Get-CimInstance Win32_Process -Filter \"Name='factorio.exe'\" | "
+              f"Where-Object {{ $_.CommandLine -like '*{marker}*' }} | "
+              "ForEach-Object { Stop-Process -Id $_.ProcessId -Force }")
+    subprocess.run(["powershell.exe", "-NoProfile", "-Command", script], capture_output=True, cwd="/tmp")
 
 
 def log_errors():

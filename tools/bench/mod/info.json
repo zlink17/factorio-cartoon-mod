@@ -1,0 +1,9 @@
+{
+  "name": "cartoon-bench",
+  "version": "0.1.0",
+  "title": "Banc d'essai des textures",
+  "author": "zlink17",
+  "factorio_version": "2.0",
+  "dependencies": ["base >= 2.0.0", "? space-age", "? factorio-cartoon-mod", "? factorio-pixel-mod"],
+  "description": "Scénario « vitrine » : construit des scènes de test et en prend des captures (tools/bench.py)."
+}

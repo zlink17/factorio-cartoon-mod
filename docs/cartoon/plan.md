@@ -74,7 +74,7 @@ Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'
       obtenir `data-raw-dump.json`, en extraire chaque fichier PNG référencé avec son prototype, sa taille, son nombre
       d'images et son rôle (sprite, ombre, masque, effet, icône). Produit la liste de travail de chaque lot et
       `couverture.md`. Les fichiers à ne pas refaire (masques, effets, reflets) y sont marqués une fois pour toutes.
-- [ ] **Banc d'essai en jeu automatisé** : un petit mod de test (ou scénario) dont le `control.lua` pose une vitrine
+- [x] **Banc d'essai en jeu automatisé** (`tools/bench.py`, scénario dans `tools/bench/mod/`) : un petit mod de test (ou scénario) dont le `control.lua` pose une vitrine
       (chaque entité, dans chaque direction, convoyeurs chargés d'objets, sols et nature) et prend des captures avec
       `game.take_screenshot`, lancé en ligne de commande depuis WSL. Même vitrine avec et sans le mod : comparaison
       côte à côte. Si Factorio refuse de démarrer, l'erreur est lue dans `factorio-current.log`.

@@ -86,6 +86,11 @@ pour l'ordre de chargement).
   listée dans le manifeste, quelle que soit sa clé. `tools/check_mod.py --jeu` vérifie en jeu qu'il n'en manque aucune.
 - **`factorio.exe --dump-data`** (lancé depuis WSL dans une instance isolée, `tools/factorio.py`) donne tous les prototypes
   après chargement : c'est la source de l'inventaire et du test de chargement. Il tourne en 3 s, même jeu ouvert.
+- **Lancer le jeu depuis WSL** : Steam relance lui-même `factorio.exe` (le processus lancé se termine tout de suite) ;
+  on reconnaît l'instance isolée à sa ligne de commande (`tools/factorio.py`, `running()`/`stop()`). Un mod présent
+  dans le dossier de mods mais absent de `mod-list.json` est **activé** par défaut : il faut le désactiver explicitement.
+- **Captures en jeu** : `game.take_screenshot` sur une surface dédiée, sans joueur, puis
+  `game.set_wait_for_screenshots_to_finish()` ; un fichier « fini.txt » écrit au tick suivant signale la fin.
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
   « mirrored » (`.wslconfig`). `bpy` demande Python 3.11 (environnement `.venv` créé avec `uv`).
 

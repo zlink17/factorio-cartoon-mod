@@ -40,6 +40,11 @@ Remplace les textures par une version cartoon : aplats de couleur, gros contours
 # --jeu : charge aussi le mod dans une instance isolée de Factorio (peut tourner jeu ouvert)
 .venv/bin/python tools/check_mod.py cartoon --jeu
 
+# banc d'essai en jeu : captures de scènes de test (catalogue des bâtiments, convoyeurs, usine, minerais, nature,
+# sols, objets...) avec et sans le mod, comparaisons côte à côte dans .cache/vitrine/comparaison/
+# (ouvre une fenêtre Factorio isolée ~40 s par passe ; --sans-origine réutilise les captures d'origine)
+.venv/bin/python tools/bench.py cartoon --sans-origine
+
 # inventaire des images du jeu : couverture (docs/cartoon/couverture.md) et liste de travail d'un lot
 .venv/bin/python tools/inventory.py cartoon
 .venv/bin/python tools/inventory.py cartoon liste entity/stone-furnace
