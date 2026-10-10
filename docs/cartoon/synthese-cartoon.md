@@ -15,6 +15,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
    --sans-origine` (captures et comparaisons dans `.cache/vitrine/comparaison/`, ouvre une fenêtre Factorio ~40 s).
 6. Avant de commiter un lot : `.venv/bin/python tools/inventory.py cartoon` (couverture), cocher le lot dans le plan.
+7. Après le commit : `tools/install_mod.sh cartoon` met à jour le mod dans le jeu de Bastien (accord permanent).
+   Le banc d'essai et `check_mod.py --jeu` utilisent une instance isolée et ne touchent pas à son jeu.
 
 Règles de travail avec Bastien : prévenir **avant** d'installer une application ou une dépendance sur sa machine ;
 solutions gratuites uniquement ; cohérence du style prioritaire ; les choix de style sont les siens (proposer, puis
