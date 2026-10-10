@@ -1,5 +1,7 @@
 # Mod Pixel
 
+Point d'étape complet : [SYNTHESE.md](SYNTHESE.md). Guide de style : [STYLE.md](STYLE.md).
+
 Remplace les textures par une version en pixel art, dessinée en code avec Pillow.
 Palette partagée dans `pillow/palette.py` : jamais de noir pur, ombres vers le bleu/violet, lumières vers le jaune/cyan.
 
