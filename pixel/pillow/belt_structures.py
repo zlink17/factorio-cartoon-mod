@@ -78,7 +78,7 @@ def add_face(img, mask):
 # ---------------------------------------------------------------- souterrain
 # Capot en voûte (demi-cylindre couché dans le sens du flux) : plaque bombée de la teinte vive du convoyeur du même niveau (chevrons de sa teinte foncée),
 # chevrons qui suivent le flux, anneau d'acier à rivets à chaque bout, face avant sombre (hauteur) et ombre portée.
-UG_LEN = 12        # longueur du capot dans le sens du flux (px)
+UG_LEN = 13        # longueur du capot dans le sens du flux : bout fermé 3, voûte 5, bouche 5 (px)
 UG_WIDTH = 14      # largeur en travers (px)
 FACE = 3           # hauteur de la face avant (px)
 
@@ -116,18 +116,24 @@ def underground_cell(direction, entering, tier):
             hood.putpixel((x, y), 255)
             if abs(lat) > UG_WIDTH / 2 - 1:
                 c = P["steel_dark"]                                    # flancs : contour
-            elif d_ug < 3:                                             # anneau côté enterré, plus épais
+            elif d_ug < 3:                                             # bout fermé (côté enterré) : mur plein à rivets
                 c = belt.shade(d_ug, out_n)
-                if d_ug >= 2 and (abs(lat) in (2.5, 4.5) or abs(lat) > 5.5):
-                    c = P["steel_light"] if abs(lat) in (2.5, 4.5) else c      # rivets
-            elif d_belt < 2:                                           # anneau côté tapis
-                c = belt.shade(d_belt, in_n)
-                if d_belt >= 1 and abs(lat) in (1.5, 4.5):
-                    c = P["steel_light"]                               # rivets
-            elif d_belt < 3:                                           # bouche : trait sombre avec un chevron du tapis qui entre
-                c = light if abs(lat) < 1.5 else P["steel_dark"]
+                if d_ug >= 2 and abs(lat) in (1.5, 4.5):
+                    c = P["steel_light"]
+            elif d_belt < 5:                                           # bouche ouverte côté tapis
+                if d_belt < 1:
+                    c = belt.shade(d_belt, in_n)                       # lèvre de l'ouverture
+                elif abs(lat) >= 4.5:
+                    c = belt.shade(1 + (abs(lat) - 4.5), (0, 0)) if abs(lat) < 5.5 else P["steel"]   # piédroits
+                else:
+                    # intérieur du tunnel : de plus en plus sombre vers le bout fermé, avec le chevron du tapis
+                    k = d_belt - 1                                     # 0 (près de la lèvre) à 3 (au fond)
+                    f_ = (0.85, 0.6, 0.38, 0.22)[min(3, int(k))]
+                    u_tip = (3 if entering else UG_LEN - 2) + 1.5      # pointe du chevron, dans le sens du flux
+                    chev = abs(lat) < 2.6 and int(u) == int(u_tip - abs(lat) + 0.5)
+                    c = darken(light if chev else belt.BASE[tier], f_ if not chev else max(f_, 0.55))
             else:
-                # surface bombée : plaque de la teinte vive du niveau, chevrons de la teinte foncée ; plus sombre sur le flanc
+                # voûte : plaque de la teinte vive du niveau, chevrons de la teinte foncée ; plus sombre sur le flanc
                 # opposé à la lumière
                 shade = 1.0 if lat_abs < -3 else 0.88 if lat_abs < 3 else 0.7
                 ph = (u + abs(lat) * 0.55) % 6
