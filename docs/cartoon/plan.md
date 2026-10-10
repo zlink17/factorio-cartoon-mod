@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
+Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées ; prochaine action : lot 2.1, puis 2.8.** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -103,9 +103,9 @@ Avec le banc d'essai (vues rapprochées « detail-* » à la résolution du jeu,
       à la couleur du niveau
 - [x] Sols : **décidé** : masques de transition nets (`terrain/masks.py` : flou léger, seuil, anticrénelage ; partagés
       avec des sols de Space Age)
-- [ ] **Constat** : les décorations d'origine (touffes d'herbe réalistes) jurent fortement sur les sols en aplats
+- [x] **Constat** (reporté au lot 2.8) : les décorations d'origine (touffes d'herbe réalistes) jurent fortement sur les sols en aplats
       (capture `monde-02`) ; le lot 2.8 « Décorations » est à avancer juste après les objets (2.1)
-- [ ] Revue de cohérence générale par Bastien : comparaisons dans `.cache/vitrine/comparaison/`
+- [x] Revue de cohérence générale par Bastien (comparaisons dans `.cache/vitrine/comparaison/`) : validée
 
 ---
 
@@ -127,7 +127,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | [ ] 2.5 Tuyaux | Tuyau (28 variantes de raccord), tuyau souterrain, couvercles de tuyaux, tuyaux des assembleurs 2 et 3 | B | Vue de dessus (règle des objets au sol) |
 | [ ] 2.6 Petits bâtiments | Laboratoire, radar, petite lampe | B | |
 | [ ] 2.7 Nature | Rochers, arbres (559 fichiers : ~15 espèces × variantes × feuillage), poissons | B ? | Le plus gros lot de l'étape : prototype sur une espèce d'arbre d'abord |
-| [ ] 2.8 Décorations | Touffes d'herbe, buissons, cailloux, taches (759 fichiers) | P ou B | Beaucoup de petits sprites : viser un générateur paramétré |
+| [ ] 2.8 Décorations | Touffes d'herbe, buissons, cailloux, taches (759 fichiers) | P ou B | Beaucoup de petits sprites : viser un générateur paramétré. **À faire juste après 2.1** (les touffes d'origine jurent sur nos sols) |
 | [ ] 2.9 Eau et falaises | Eau (profonde, peu profonde, verte, boue), falaises | P / B | Les falaises ont de nombreuses orientations |
 | [ ] 2.10 Personnage | Inactif, course, minage, mort, avec et sans arme, 3 niveaux d'armure | B | Modèle articulé : nouveau savoir-faire (rig + animation) |
 | [ ] 2.11 Chargeurs et lecteur de convoyeur | Chargeurs 1 à 3 + turbo, lecteur de convoyeur, paratonnerre | B | Restes de la synthèse |

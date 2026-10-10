@@ -1,7 +1,28 @@
 # Mod Cartoon : synthèse du travail
 
-État au 10 octobre 2026. Ce document résume ce qui a été fait, comment, ce qu'on a appris en chemin et ce qui reste.
-Le guide de style de référence est [`cartoon/STYLE.md`](../cartoon/STYLE.md) ; le mode d'emploi des outils est dans [`cartoon/README.md`](../cartoon/README.md).
+État au 10 octobre 2026 (fin de l'étape 1 du plan). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
+des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
+
+## 0. Reprendre le travail (nouvelle session)
+
+1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
+   étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées.**
+2. **Prochaine action : étape 2, lot 2.1 « Objets sur les convoyeurs »** (plaques, engrenage, câble, circuits, acier,
+   briques, bois, plastique, soufre, batterie, packs de science... ~40 icônes), avec `lib.save_icon`. Ensuite le
+   **lot 2.8 « Décorations »**, avancé : les touffes d'herbe d'origine jurent sur nos sols en aplats.
+3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
+4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
+5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
+   --sans-origine` (captures et comparaisons dans `.cache/vitrine/comparaison/`, ouvre une fenêtre Factorio ~40 s).
+6. Avant de commiter un lot : `.venv/bin/python tools/inventory.py cartoon` (couverture), cocher le lot dans le plan.
+
+Règles de travail avec Bastien : prévenir **avant** d'installer une application ou une dépendance sur sa machine ;
+solutions gratuites uniquement ; cohérence du style prioritaire ; les choix de style sont les siens (proposer, puis
+demander) ; messages de commit en français.
+
+`.cache/` (non versionné) contient le dump des prototypes, les rendus de `build.py` et les captures du banc : tout se
+régénère (`tools/factorio.py` refait le dump à chaque nouvelle version du jeu).
 
 ## 1. Objectif
 
@@ -25,16 +46,24 @@ cartoon/
   mod/        le mod installable (info.json, Lua, manifest.lua, graphics/overrides/)
   blender/    générateurs 3D : style.py (source de vérité), lib.py, assembler*.py, animate.py, belt.py, inserter.py,
               underground.py, splitter.py, pole.py, ore.py
-  terrain/    ground.py : sols de Nauvis
+  terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets)
+  lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
-tools/        build_manifest.py (génère le manifeste), install_mod.sh (installe dans Factorio), check_mod.py (contrôle), inventory.py (inventaire et couverture), factorio.py (instance isolée du jeu)
-docs/         notes de session et cette synthèse
+tools/
+  factorio.py       pilote une instance isolée de Factorio depuis WSL (dump des prototypes, lancement, arrêt)
+  inventory.py      inventaire des 8 246 images du jeu, rôle et prototypes ; couverture (docs/cartoon/couverture.md)
+  build.py          produit un lot, contrôle, installe dans le mod ; --verifier : test de reproductibilité
+  check_mod.py      contrôle du mod (tailles, alpha, ombres vides, manifeste) ; --jeu : test de chargement
+  bench.py, bench/  banc d'essai en jeu : scénario « vitrine », captures avec et sans le mod, comparaisons, GIF
+  build_manifest.py, install_mod.sh   manifeste ; installation dans le Factorio du joueur
+docs/cartoon/ plan.md (feuille de route), synthese-cartoon.md (ce fichier), couverture.md (généré)
 ```
 
-Principe commun : un générateur écrit des PNG dans `cartoon/mod/graphics/overrides/<jeu>/...`, **au même chemin que l'original** ;
-`tools/build_manifest.py` liste les fichiers dans `manifest.lua` ; `data-final-fixes.lua` remplace dans tous les prototypes
-les chemins `__base__/graphics/...` listés (clés `filename`, `icon`, `picture`, `spritesheet`). Ce qui n'est pas refait reste d'origine.
+Principe commun : un générateur écrit l'arborescence de `graphics/overrides` (`<jeu>/entity/<nom>/...`, `<jeu>/icons/...`),
+**au même chemin que l'original** ; `tools/build.py` le lance dans `.cache/build/`, contrôle et copie dans
+`cartoon/mod/graphics/overrides/`, puis régénère `manifest.lua` ; `data-final-fixes.lua` remplace dans tous les
+prototypes toute chaîne listée dans le manifeste. Ce qui n'est pas refait reste d'origine.
 Le mod déclare `! factorio-pixel-mod` (incompatible avec le mod pixel du même repo) et `? space-age` (dépendance optionnelle,
 pour l'ordre de chargement).
 
@@ -50,18 +79,18 @@ pour l'ordre de chargement).
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (153 sprites remplacés)
+## 5. Ce qui est fait (156 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
 | Assembleurs 1, 2, 3 | Planches animées de 32 images, ombres (animées pour 2 et 3), icônes. Niveau 2 : bras articulé ; niveau 3 : deux bras et deux pistons. | `assembler.py`, `animate.py`, `assembler_extras.py` |
 | Convoyeurs | Jaune, rouge, bleu et turbo (Space Age) : 20 rangées (droits, 8 courbes, bouts de ligne) × 16, 32 ou 64 images ; stries ton sur ton et flèches colorées comme l'original ; icônes. | `belt.py` |
 | Souterrains | Trois niveaux + turbo : capot courbé le long du flux, bouche sombre à linteau, entrée et sortie différentes. | `underground.py` |
-| Répartiteurs | Trois niveaux + turbo : tête de 2 cases animée (chariot d'une voie à l'autre, pignons), moitiés haute et basse pour l'est et l'ouest. | `splitter.py` |
+| Répartiteurs | Trois niveaux + turbo : tête de 2 cases animée, bloc gris portant deux chevrons à la couleur du niveau (chariot d'une voie à l'autre, pignons), moitiés haute et basse pour l'est et l'ouest. | `splitter.py` |
 | Bras robotisés | À charbon, de base, à longue portée, rapide, en vrac : plateformes (4 orientations), mains, ombres, icônes. | `inserter.py` |
 | Pylônes et câbles | Poteau, poteau moyen, pylône, sous-station (4 variantes chacun, ombres, icônes) ; câbles cuivre, rouge, vert, ombre, surbrillance. | `pole.py` |
-| Minerais | Fer, cuivre, charbon, pierre, uranium : gisements (8 étapes × 8 variantes), calque lumineux de l'uranium, 20 icônes (aussi les objets sur les convoyeurs). | `ore.py` |
-| Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; les masques de transition restent d'origine. | `terrain/ground.py` |
+| Minerais | Fer, cuivre, charbon, pierre, uranium : gisements (8 étapes × 8 variantes, tas larges qui se chevauchent : gisement continu), calque lumineux de l'uranium, 20 icônes (aussi les objets sur les convoyeurs). | `ore.py` |
+| Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
 
@@ -106,19 +135,16 @@ pour l'ordre de chargement).
 
 ## 7. Ce qui reste
 
-À vérifier en jeu (jamais vu à l'écran, seulement en aperçus composés) : bras robotisés (ordre des 4 orientations de plateforme,
-bras à longue portée), capot des souterrains (pièces « patch » laissées vides), animation des répartiteurs, sols (aspect des
-transitions, qui restent des fondus doux).
-
-À faire, par ordre de priorité envisagé :
-1. **Objets sur les convoyeurs** : plaques, engrenage, câble, circuit, bâton, acier, brique, plastique, soufre, batterie... (une vingtaine d'icônes couvre l'essentiel).
-2. **Rochers**, puis **arbres** (des dizaines de modèles et de planches), puis **décorations du sol** (touffes, cailloux), **eau** et **falaises**.
-3. **Chargeurs**, lecteur de convoyeur, tuyaux des assembleurs 2 et 3 (`-pipe-N/E/S/W`), paratonnerre, reflets sur l'eau des pylônes.
-4. Pièces « patch » des souterrains, patch « gelé » d'Aquilo (turbo), masques de transition du sol plus nets.
-5. Fours, personnage, GUI et icônes de l'interface, autres planètes.
+Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, version 0.1 publiée), 3 (milieu de partie),
+4 (fin de partie), 5 (interface), 6 (Space Age). Points ouverts notés pendant l'étape 1 :
+- les décorations d'origine jurent sur les sols en aplats : lot 2.8 à avancer juste après le lot 2.1 ;
+- pièces « patch » des souterrains laissées vides (les objets passent un instant sur le bord du capot : à peine visible) ;
+- eau et bords d'eau encore d'origine (lot 2.9) ; tuyaux des assembleurs 2 et 3 (lot 2.5) ; patch « gelé » d'Aquilo (étape 6).
 
 ## 8. Chiffres
 
-- 153 sprites remplacés : 75 d'entités, 41 d'icônes, 19 de terrain, 5 de câbles (jeu `core`), 13 pour Space Age.
-- ~2 700 lignes de code (générateurs Blender, terrain, ComfyUI, outils) ; 37 Mo d'images dans `cartoon/mod/graphics` (dont 14 Mo de sols).
+- 156 fichiers remplacés sur 8 246 à couvrir (2 %) : 75 d'entités, 41 d'icônes, 22 de terrain (19 planches, 3 masques),
+  5 de câbles (jeu `core`), 13 pour Space Age.
+- ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
+- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 261 captures en ~40 s par passe.
 - Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon`.
