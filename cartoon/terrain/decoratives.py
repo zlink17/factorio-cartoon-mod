@@ -37,13 +37,19 @@ YELLOW_GREEN = ("#5f6c2a", "#86933a", "#aab452")
 BROWN = ("#644a2c", "#8a6a40", "#ad8a58")
 RED = ("#6e3226", "#9a4434", "#c0644a")
 WHITE = ("#8a8572", "#bdb69d", "#ddd6bd")
+RUST = ("#5c2f1f", "#84452b", "#a9643f")          # buisson roux
+DRY_PINK = ("#7a5a4c", "#a5806a", "#c8a68c")      # buisson sec rosé
+PALE = ("#8c8074", "#c4b5a6", "#e6dacb")          # buisson blanc du désert
+STRAW = ("#8f6a38", "#c0924f", "#e0b876")         # paille
+TRUNK = ("#5e3d1f", "#86592e", "#ad7d45")         # tronc des petits palmiers
+DRY_FROND = ("#7a4a22", "#a8682f", "#cf8a45")     # palmes sèches, orangées
 ROCK = ("#6b5d4c", "#8f7d66", "#b3a084")
 SAND_ROCK = ("#9a7c52", "#bf9c68", "#dcbd88")
 STUMP = ("#55391f", "#7a5332", "#a7784c")
 
 # taille d'un élément (px du fichier, 64 px par case) : un amas plus grand est pavé de plusieurs éléments ;
 # None = un seul élément par amas, à sa taille
-UNIT = {"tuft": 24, "bush": None, "rock": None, "stump": None, "decal": None, "blade": None, "twig": None, "puff": None, "spiky": None, "leaf": None}
+UNIT = {"clump": None, "palm": None, "straw": None, "tuft": 24, "bush": None, "rock": None, "stump": None, "decal": None, "blade": None, "twig": None, "puff": None, "leaf": None}
 
 # présence minimale du corps de l'original dans une case pour y poser un élément (familles clairsemées : plus haut)
 DENSITY = {"green-carpet-grass": 0.4, "brown-carpet-grass": 0.4}
@@ -63,16 +69,16 @@ FAMILIES = {
     "green-pita": ("blade", GREEN),
     "green-pita-mini": ("blade", GREEN),
     "red-pita": ("blade", RED),
-    "brown-fluff": ("spiky", BROWN),
-    "brown-fluff-dry": ("spiky", BROWN),
+    "brown-fluff": ("clump", RUST),
+    "brown-fluff-dry": ("clump", DRY_PINK),
     "green-bush-mini": ("puff", GREEN),
-    "garballo": ("puff", YELLOW_GREEN),
-    "garballo-mini-dry": ("spiky", BROWN),
+    "garballo": ("palm", GREEN),
+    "garballo-mini-dry": ("palm", DRY_FROND),
     "green-croton": ("leaf", GREEN),
     "red-croton": ("leaf", RED),
     "green-desert-bush": ("bush", YELLOW_GREEN),
-    "red-desert-bush": ("spiky", BROWN),
-    "white-desert-bush": ("spiky", WHITE),
+    "red-desert-bush": ("straw", STRAW),
+    "white-desert-bush": ("clump", PALE),
     # cailloux et souche : la silhouette de l'original, taillée en facettes
     "small-rock": ("rock", ROCK),
     "tiny-rock": ("rock", ROCK),
@@ -219,11 +225,10 @@ def draw_twig(box, rng, layers):
             layers.append((bumpy(px, py, r, r * 0.75, 3, 0.2, rng), 2 if math.sin(a) < 0 else 1))
 
 
-def bumpy(cx, cy, rx, ry, bumps, depth, rng, phase=0.0, spiky=False):
-    """Contour bosselé (nuage) : ellipse dont le rayon ondule en `bumps` bosses (pointes si `spiky`)."""
+def bumpy(cx, cy, rx, ry, bumps, depth, rng, phase=0.0):
+    """Contour bosselé (nuage) : ellipse dont le rayon ondule en `bumps` bosses."""
     ang = np.linspace(0, math.tau, bumps * 10, endpoint=False)
-    wave = np.abs(np.sin(ang * bumps / 2 + phase))
-    k = 1 + depth * ((1 - wave) ** 2 if spiky else wave)
+    k = 1 + depth * np.abs(np.sin(ang * bumps / 2 + phase))
     return np.stack([cx + np.cos(ang) * rx * k, cy + np.sin(ang) * ry * k], 1).astype(np.float32)
 
 
@@ -238,15 +243,40 @@ def draw_puff(box, rng, layers):
     layers.append((bumpy(cx + rx * 0.35, cy + ry * 0.4, rx * 0.4, ry * 0.3, 5, 0.15, rng), 0, "plein"))
 
 
-def draw_spiky(box, rng, layers):
-    """Buisson sec ébouriffé : silhouette hérissée de pointes, plus sombre en bas à droite."""
+def draw_straw(box, rng, layers):
+    """Touffe de paille dressée : nombreux brins fins en éventail, à la taille de l'amas."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2 + h * 0.05
-    rx, ry = w * 0.36, h * 0.34
-    layers.append((bumpy(cx, cy, rx, ry, 13, 0.32, rng, rng.u(0, 3), spiky=True), 1))
-    layers.append((bumpy(cx - rx * 0.2, cy - ry * 0.3, rx * 0.5, ry * 0.4, 7, 0.25, rng, spiky=True), 2, "plein"))
-    layers.append((bumpy(cx + rx * 0.35, cy + ry * 0.45, rx * 0.45, ry * 0.3, 7, 0.25, rng, spiky=True), 0, "plein"))
+    cx, by = (x0 + x1) / 2, y1 - h * 0.05
+    n = 11
+    for i in range(n):
+        f = (i + 0.5) / n
+        ang = (f - 0.5) * 1.3 + rng.u(-0.12, 0.12)
+        length = h * rng.u(0.8, 1.0) * (1 - abs(f - 0.5) * 0.5)
+        layers.append((blade_poly(cx + (f - 0.5) * w * 0.12, by, length, ang, max(3.0, w * 0.07), (f - 0.5) * 0.4),
+                       (0, 2, 1)[i % 3]))
+
+
+def draw_palm(box, rng, layers):
+    """Petit palmier : tronc court effilé, bouquet de palmes au sommet."""
+    x0, y0, x1, y1 = box
+    w, h = x1 - x0, y1 - y0
+    bx, by = x0 + w * 0.48, y1
+    tx, ty = x0 + w * (0.5 + rng.u(-0.06, 0.06)), y0 + h * 0.58          # tronc court, un peu penché
+    tw = max(5.0, w * 0.22)
+    layers.append((np.array([(bx - tw * 0.55, by), (tx - tw * 0.4, ty), (tx + tw * 0.4, ty), (bx + tw * 0.55, by)],
+                            np.float32), "tronc"))
+    for k in range(1, 4):                                                # cernes du tronc
+        t = k / 4
+        x, y, hw = bx + (tx - bx) * t, by + (ty - by) * t, tw * (0.55 - 0.15 * t)
+        layers.append((np.array([(x - hw, y - 1.5), (x + hw, y - 1.5), (x + hw, y + 1.5), (x - hw, y + 1.5)],
+                                np.float32), "cerne", "plein"))
+    n = 8
+    for i in range(n):
+        ang = -1.6 + 3.2 * (i + 0.5) / n + rng.u(-0.12, 0.12)
+        length = min(w * 0.45, h * 0.55) * rng.u(0.85, 1.05)
+        layers.append((blade_poly(tx, ty, length, ang, max(5.0, w * 0.14), 0.5 * math.copysign(1, ang)),
+                       2 if abs(ang) < 0.8 else (1 if i % 2 else 0)))
 
 
 def draw_bush(box, rng, layers):
@@ -306,7 +336,7 @@ def draw_leaf(box, rng, layers):
                                  (mid[0] + side[0], mid[1] + side[1])], np.float32), 2 if i in (2, 3) else (1 if i % 2 else 0)))
 
 
-DRAW = {"stump": draw_stump, "rock": draw_rock, "tuft": draw_tuft, "bush": draw_bush, "spiky": draw_spiky, "blade": draw_blade, "twig": draw_twig, "puff": draw_puff, "leaf": draw_leaf}
+DRAW = {"straw": draw_straw, "palm": draw_palm, "stump": draw_stump, "rock": draw_rock, "tuft": draw_tuft, "bush": draw_bush, "blade": draw_blade, "twig": draw_twig, "puff": draw_puff, "leaf": draw_leaf}
 
 
 # --- composition ------------------------------------------------------------------------------------------------
@@ -336,12 +366,18 @@ def render(orig, kind, tones, seed, outline, density=0.18):
     shadow = np.zeros((H, W), np.uint8)
     for layer in layers:                    # aplats, sans contour : les brins se distinguent par leur ton
         poly, tone = layer[:2]
+        if tone == "tronc":
+            col = hx(TRUNK[1])
+        elif tone == "cerne":
+            col = hx(TRUNK[0])
+        else:
+            col = cols[tone]
         inner = len(layer) > 2                                      # tache d'ombrage : seulement sur l'existant
         p = np.round(poly).astype(np.int32)
         m = np.zeros((H, W), np.uint8)
         cv2.fillPoly(m, [p], 255)
         sel = (m > 0) & (alpha > 0) if inner else m > 0
-        color[sel] = cols[tone]
+        color[sel] = col
         if inner:
             continue
         alpha[sel] = 1.0
@@ -362,6 +398,63 @@ def render(orig, kind, tones, seed, outline, density=0.18):
     rgba[..., :3] = color * alpha[..., None]
     rgba[..., 3] = alpha * 255
     rgba[sh, 3] = SHADOW_ALPHA * 255                                # ombre noire semi-transparente
+    small = cv2.resize(rgba, (w, h), interpolation=cv2.INTER_AREA)
+    a = np.clip(small[..., 3:4] / 255.0, 1e-6, 1)
+    return np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
+
+
+def render_clump(orig, tones, outline, seed=0):
+    """Buisson touffu : des lobes ronds posés sur le corps de l'original (sans son ombre), de l'arrière vers l'avant ;
+    chaque lobe a une tache claire en haut à gauche, les lobes du bas et de droite sont plus sombres. Contour sur la
+    silhouette, ombre à plat portée vers la droite."""
+    h, w = orig.shape[:2]
+    H, W = h * SS, w * SS
+    rng = Rng(seed)
+    body = cv2.erode(body_mask(orig), np.ones((2, 2), np.uint8))
+    ys, xs = np.nonzero(body)
+    if len(xs) == 0:
+        return np.zeros_like(orig)
+    r = float(np.clip(min(xs.max() - xs.min(), ys.max() - ys.min()) * 0.16, 3.0, 9.0))     # rayon d'un lobe (px)
+    lobes = []
+    step = r * 1.1
+    for y in np.arange(ys.min(), ys.max() + 1, step):
+        for x in np.arange(xs.min(), xs.max() + 1, step):
+            cell = body[int(y):int(y + step), int(x):int(x + step)]
+            if cell.size and cell.mean() > 0.3:
+                lobes.append((x + step / 2 + rng.u(-0.25, 0.25) * r, y + step / 2 + rng.u(-0.25, 0.25) * r,
+                              r * rng.u(0.85, 1.15)))
+    if not lobes:
+        lobes = [((xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2, r)]
+    pad = OUTLINE_PX + 1                                         # les lobes restent dans le cadre du fichier
+    lobes = [(float(np.clip(x, rr + pad, w - rr - pad)), float(np.clip(y, rr + pad, h - rr - pad)), rr)
+             for x, y, rr in ((x, y, min(rr, (min(w, h) - 2 * pad) / 2)) for x, y, rr in lobes)]
+    cx0, cy0 = np.mean([l[0] for l in lobes]), np.mean([l[1] for l in lobes])
+    cols = [hx(t) for t in tones]
+    color = np.zeros((H, W, 3), np.float32)
+    m = np.zeros((H, W), np.uint8)
+    for x, y, rr in sorted(lobes, key=lambda l: l[1]):          # de l'arrière vers l'avant
+        X, Y, R = x * SS, y * SS, rr * SS
+        disc = np.zeros((H, W), np.uint8)
+        cv2.circle(disc, (int(X), int(Y)), int(R), 1, -1)
+        base = cols[0] if (x - cx0) + (y - cy0) > r * 1.2 else cols[1]   # côté bas-droit : plus sombre
+        color[disc > 0] = base
+        spot = np.zeros((H, W), np.uint8)
+        cv2.circle(spot, (int(X - R * 0.3), int(Y - R * 0.3)), int(R * 0.55), 1, -1)
+        color[(spot > 0) & (disc > 0)] = cols[2] if base == cols[1] else cols[1]
+        m |= disc
+    alpha = m.astype(np.float32)
+    thick = max(1, int(round(OUTLINE_PX * SS)))
+    disk = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * thick + 1, 2 * thick + 1))
+    edge = (cv2.dilate(m, disk) > 0) & (m == 0)
+    color[edge] = OUTLINE_BGR if outline == "noir" else tuple(int(c * 0.55) for c in cols[0])
+    alpha[edge] = 1
+    base_y = np.nonzero(m.any(1))[0].max()
+    sh = cv2.warpAffine(m, np.float32([[1, -SHADOW_SHEAR, SHADOW_SHEAR * base_y],
+                                       [0, SHADOW_FLAT, base_y * (1 - SHADOW_FLAT)]]), (W, H))
+    rgba = np.zeros((H, W, 4), np.float32)
+    rgba[..., :3] = color * alpha[..., None]
+    rgba[..., 3] = alpha * 255
+    rgba[(sh > 0) & (alpha == 0), 3] = SHADOW_ALPHA * 255
     small = cv2.resize(rgba, (w, h), interpolation=cv2.INTER_AREA)
     a = np.clip(small[..., 3:4] / 255.0, 1e-6, 1)
     return np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
@@ -404,6 +497,8 @@ def build_family(family, out, outline):
         orig = cv2.imread(os.path.join(FACTORIO_DATA, folder_of(family), f), cv2.IMREAD_UNCHANGED)
         if kind == "decal":
             im = render_decal(orig)
+        elif kind == "clump":
+            im = render_clump(orig, tones, outline, zlib.crc32(f.encode()))
         else:
             im = render(orig, kind, tones, zlib.crc32(f.encode()), outline, DENSITY.get(family, 0.18))
         path = os.path.join(out, folder_of(family).replace("graphics/", ""), f)

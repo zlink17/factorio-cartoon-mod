@@ -90,7 +90,7 @@ pour l'ordre de chargement).
 | Pylônes et câbles | Poteau, poteau moyen, pylône, sous-station (4 variantes chacun, ombres, icônes) ; câbles cuivre, rouge, vert, ombre, surbrillance. | `pole.py` |
 | Minerais | Fer, cuivre, charbon, pierre, uranium : gisements (8 étapes × 8 variantes, tas larges qui se chevauchent : gisement continu), calque lumineux de l'uranium, 20 icônes (aussi les objets sur les convoyeurs). | `ore.py` |
 | Objets intermédiaires | 30 icônes (aussi les objets sur les convoyeurs) : plaques, poutre, engrenage, câble, tige, 3 circuits, brique, bois, plastique, soufre, batterie, moteurs, cadre de robot, structure légère, combustibles, explosifs, uranium 235 et 238, 7 packs de science. Vue à 45° et rotation libre (plaques de fer et de cuivre en miroir, comme l'original). | `items.py` |
-| Décorations de Nauvis | 669 fichiers, 37 familles : touffes et buissons (une touffe sur cinq, contour teinté), rameaux, agaves, crotons, buissons secs hérissés, cailloux en facettes, souches, taches au sol à 60 %. Procédural 2D, placé d'après le canal alpha de l'original. | `terrain/decoratives.py` |
+| Décorations de Nauvis | 669 fichiers, 37 familles : touffes et buissons (une touffe sur cinq, contour teinté), rameaux, agaves, crotons, buissons touffus en lobes (roux, rosé, blanc), touffes de paille, petits palmiers (garballo), cailloux en facettes, souches, taches au sol à 60 %. Procédural 2D, placé d'après le canal alpha de l'original. | `terrain/decoratives.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
