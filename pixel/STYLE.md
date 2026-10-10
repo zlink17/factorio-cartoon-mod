@@ -26,3 +26,7 @@ Référence pour tout sprite du mod pixel. Les couleurs vivent dans `pillow/pale
 ## Animation
 - 32 images par boucle, planche 8 x 4 comme l'original. Tout mouvement doit se refermer : engrenages à nombre entier de dents par boucle (2), pistons et bras en sinus. **[VALIDÉ]**
 - Voyant du moteur qui clignote : indique visuellement que la machine travaille. **[PROVISOIRE]**
+
+## Structures de convoyeurs
+- Souterrain : le tapis s'enfonce dans une rampe qui se rétrécit et s'assombrit (trame de damier, laisse voir le tapis animé du jeu), puis passe sous un linteau en acier avec un bandeau de la couleur du niveau. **[VALIDÉ par Bastien comme direction, à juger en jeu]**
+- Répartiteur : poteaux d'extrémité, cloison avec nez diviseur côté entrée, rail à trois engrenages (acier, moyeu orange) qui tournent, capots à chevrons de la couleur du niveau côté sortie, deux voyants qui clignotent en alternance. **[PROVISOIRE]**

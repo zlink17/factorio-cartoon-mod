@@ -83,10 +83,10 @@ for _, name in ipairs({ "inserter", "fast-inserter", "long-handed-inserter", "bu
   end
 end
 
--- Répartiteurs : une image de 160 x 88 (nord, sud) ou 88 x 160 (est, ouest), 32 images en planche 8 x 4. Le motif est
+-- Répartiteurs : une image de 160 x 104 (nord, sud) ou 104 x 160 (est, ouest), 32 images en planche 8 x 4. Le motif est
 -- centré sur l'entité et l'ombre est cuite dans l'image ; les pièces annexes de l'original ne servent plus.
 local SPLITTER_FRAME = {
-  north = { 160, 88 }, south = { 160, 88 }, east = { 88, 160 }, west = { 88, 160 },
+  north = { 160, 104 }, south = { 160, 104 }, east = { 104, 160 }, west = { 104, 160 },
 }
 -- Le lane-splitter réutilise les sprites du répartiteur de base.
 for _, entry in ipairs({ { "splitter", "splitter" }, { "splitter", "fast-splitter" }, { "splitter", "express-splitter" },
