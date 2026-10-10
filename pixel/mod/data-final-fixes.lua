@@ -57,6 +57,10 @@ local HAND_SIZES = {
   hand_closed_picture = { 72, 168 }, hand_closed_shadow = { 72, 168 },
   hand_open_picture = { 72, 168 }, hand_open_shadow = { 72, 168 },
 }
+-- (le stack-inserter de Space Age réutilise l'ombre de la tige du burner, seule sa hauteur change)
+local stack = data.raw["inserter"]["stack-inserter"]
+if stack and stack.hand_base_shadow then stack.hand_base_shadow.height = 136 end
+
 for _, name in ipairs({ "inserter", "fast-inserter", "long-handed-inserter", "burner-inserter", "bulk-inserter" }) do
   local proto = data.raw["inserter"][name]
   if proto then
@@ -84,9 +88,11 @@ end
 local SPLITTER_FRAME = {
   north = { 160, 88 }, south = { 160, 88 }, east = { 88, 160 }, west = { 88, 160 },
 }
-for _, name in ipairs({ "splitter", "fast-splitter", "express-splitter" }) do
-  local proto = data.raw["splitter"][name]
-  if proto then
+-- Le lane-splitter réutilise les sprites du répartiteur de base.
+for _, entry in ipairs({ { "splitter", "splitter" }, { "splitter", "fast-splitter" }, { "splitter", "express-splitter" },
+                         { "lane-splitter", "lane-splitter" } }) do
+  local proto = data.raw[entry[1]] and data.raw[entry[1]][entry[2]]
+  if proto and proto.structure then
     for dir, size in pairs(SPLITTER_FRAME) do
       local s = proto.structure[dir]
       s.width, s.height, s.shift = size[1], size[2], { 0, 0 }
