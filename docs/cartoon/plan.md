@@ -51,9 +51,9 @@ de zéro et redonne les mêmes fichiers.
 
 ### 2.3 Contrôle avant chaque installation
 
-`tools/check_sizes.py` (déjà là) devient une commande de contrôle unique qui vérifie aussi : fichier du manifeste
-existant et inversement, nombre d'images cohérent, icônes avec leurs mipmaps (les icônes font 120 × 64 : 64 + 32 +
-16 + 8), canal alpha présent, ombres non vides.
+`tools/check_mod.py cartoon --jeu` : tailles identiques à l'original (donc mipmaps des icônes conservées), canal
+alpha, ombres non vides, manifeste à jour, images inutilisées, et test de chargement dans une instance isolée de
+Factorio (le mod se charge, aucun prototype ne pointe encore vers un original remplacé).
 
 ### 2.4 Suivi
 
@@ -69,8 +69,8 @@ existant et inversement, nombre d'images cohérent, icônes avec leurs mipmaps (
 
 Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'étape qui rend le reste réaliste.**
 
-- [ ] **Commiter le travail en cours** (minerais, `ore.py`, icônes, retouches de `STYLE.md` et `style.py`).
-- [ ] **Inventaire automatique** (`tools/inventory.py`) : lancer `factorio.exe --dump-data` (accessible depuis WSL) pour
+- [x] **Commiter le travail en cours** (minerais, `ore.py`, icônes, retouches de `STYLE.md` et `style.py`).
+- [x] **Inventaire automatique** (`tools/inventory.py`) : lancer `factorio.exe --dump-data` (accessible depuis WSL) pour
       obtenir `data-raw-dump.json`, en extraire chaque fichier PNG référencé avec son prototype, sa taille, son nombre
       d'images et son rôle (sprite, ombre, masque, effet, icône). Produit la liste de travail de chaque lot et
       `couverture.md`. Les fichiers à ne pas refaire (masques, effets, reflets) y sont marqués une fois pour toutes.

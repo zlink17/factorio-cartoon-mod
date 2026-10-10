@@ -28,7 +28,7 @@ cartoon/
   terrain/    ground.py : sols de Nauvis
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
-tools/        build_manifest.py (génère le manifeste), install_mod.sh (installe dans Factorio), check_sizes.py (contrôle)
+tools/        build_manifest.py (génère le manifeste), install_mod.sh (installe dans Factorio), check_mod.py (contrôle), inventory.py (inventaire et couverture), factorio.py (instance isolée du jeu)
 docs/         notes de session et cette synthèse
 ```
 
@@ -66,7 +66,7 @@ pour l'ordre de chargement).
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
 
 - **Une planche de mauvaise taille empêche Factorio de démarrer** (« sprite rectangle is outside the actual sprite size »).
-  Le cas qui nous a piégés : le répartiteur express a un côté ouest de 94 px au lieu de 90. `tools/check_sizes.py` compare chaque
+  Le cas qui nous a piégés : le répartiteur express a un côté ouest de 94 px au lieu de 90. `tools/check_mod.py` compare chaque
   sprite du mod à l'original ; à lancer avant chaque installation. Le journal est dans `AppData\Roaming\Factorio\factorio-current.log`.
 - **Les tailles et décalages viennent des prototypes** (`data/*/prototypes/...`), pas des noms de fichiers : il faut les lire
   (taille d'image, nombre d'images, `shift`, `line_length`).
@@ -77,10 +77,15 @@ pour l'ordre de chargement).
 - **Le convoyeur turbo décale d'une demi-boucle les cases voisines** (`alternate`) : 64 images, flèche toutes les 2 cases.
 - **Raccords** : le motif d'un virage de convoyeur est étiré sur la longueur de l'arc pour se raccorder aux droits à chaque image.
 - **Les ombres sont des fichiers séparés** (`draw_as_shadow`) ; une multiplication sur des octets (255 × 255) avait vidé toutes les
-  ombres des pylônes sans erreur visible : le contrôle d'ombres vides est maintenant dans `check_sizes.py`.
+  ombres des pylônes sans erreur visible : le contrôle d'ombres vides est maintenant dans `check_mod.py`.
 - **Contraste** : des sprites bruns sur un sol brun disparaissent ; il faut des teintes claires et de vraies ombres.
 - **Le sol** est composé de planches de textures de 64 px par case (variantes de 1, 2, 4, 8 cases) mélangées par des masques ; on
   peut remplacer les textures sans toucher aux masques, à condition qu'aucun détail ne touche le bord d'une cellule.
+- **Les variantes sont souvent des listes** (`filenames = {...}` : arbres, rochers, décorations, 2 179 références) et
+  certaines clés sont rares (`small_icon`, `mask_spritesheet`...) : `data-final-fixes.lua` remplace donc **toute chaîne**
+  listée dans le manifeste, quelle que soit sa clé. `tools/check_mod.py --jeu` vérifie en jeu qu'il n'en manque aucune.
+- **`factorio.exe --dump-data`** (lancé depuis WSL dans une instance isolée, `tools/factorio.py`) donne tous les prototypes
+  après chargement : c'est la source de l'inventaire et du test de chargement. Il tourne en 3 s, même jeu ouvert.
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
   « mirrored » (`.wslconfig`). `bpy` demande Python 3.11 (environnement `.venv` créé avec `uv`).
 

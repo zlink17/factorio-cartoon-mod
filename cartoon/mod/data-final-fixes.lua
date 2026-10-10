@@ -25,7 +25,9 @@ local function walk(tbl)
   for key, value in pairs(tbl) do
     if type(value) == "table" then
       walk(value)
-    elseif (key == "filename" or key == "icon" or key == "picture" or key == "spritesheet") and type(value) == "string" then
+    elseif type(value) == "string" then
+      -- toute chaîne listée : filename, icon, spritesheet, mais aussi les listes « filenames » (variantes),
+      -- small_icon, mask_spritesheet...
       tbl[key] = remap(value)
     end
   end

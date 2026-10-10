@@ -36,8 +36,13 @@ Remplace les textures par une version cartoon : aplats de couleur, gros contours
 # pylônes électriques (4 modèles) et câbles ; le convoyeur turbo (Space Age) est dans belt.py, underground.py et splitter.py
 .venv/bin/python cartoon/blender/pole.py sortie/ tous
 
-# contrôle : chaque sprite du mod doit avoir la taille de l'original, sinon Factorio ne démarre pas
-.venv/bin/python tools/check_sizes.py cartoon
+# contrôle : tailles (sinon Factorio ne démarre pas), alpha, ombres vides, manifeste ;
+# --jeu : charge aussi le mod dans une instance isolée de Factorio (peut tourner jeu ouvert)
+.venv/bin/python tools/check_mod.py cartoon --jeu
+
+# inventaire des images du jeu : couverture (docs/cartoon/couverture.md) et liste de travail d'un lot
+.venv/bin/python tools/inventory.py cartoon
+.venv/bin/python tools/inventory.py cartoon liste entity/stone-furnace
 ```
 
 Ensuite, copier les fichiers produits dans `mod/graphics/overrides/base/...` (entité, ombre, `icons/`), puis
