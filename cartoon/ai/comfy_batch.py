@@ -8,7 +8,7 @@ ControlNet + modèle cartoon), tu l'exportes avec « Save (API Format) », puis 
 sur chaque image d'un dossier en changeant l'image d'entrée, la graine et, si demandé, le prompt.
 
 Exemple (PowerShell, ComfyUI lancé sur le port 8188) :
-    py tools\\complex\\comfy_batch.py --workflow workflow_api.json ^
+    py ai\\comfy_batch.py --workflow workflow_api.json ^
         --input entrees\\ --output sorties\\ --seeds 4 ^
         --prompt "cartoon game sprite, thick dark outline, flat colors, top-down"
 
@@ -102,7 +102,7 @@ def prompt_node(wf, ref, role):
 
 
 def patch(wf, image_name, seed, prompt=None, negative=None, image_node=None,
-          positive_node=None, negative_node=None):
+          positive_node=None, negative_node=None, denoise=None, cn_strength=None):
     wf = json.loads(json.dumps(wf))                      # copie profonde
     # image d'entrée
     if image_node is None:
@@ -115,6 +115,11 @@ def patch(wf, image_name, seed, prompt=None, negative=None, image_node=None,
     sid, snode = sampler(wf)
     key = "noise_seed" if "noise_seed" in snode["inputs"] else "seed"
     snode["inputs"][key] = seed
+    if denoise is not None:
+        snode["inputs"]["denoise"] = denoise
+    if cn_strength is not None:
+        for _, node in nodes_of(wf, "ControlNetApplyAdvanced") + nodes_of(wf, "ControlNetApply"):
+            node["inputs"]["strength"] = cn_strength
     # prompts : on suit les liens positive/negative du sampler (à travers les nœuds ControlNet)
     if prompt is not None:
         pid = positive_node or prompt_node(wf, snode["inputs"].get("positive"), "positive")
@@ -170,6 +175,8 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, help="Graine fixe (avec --seeds 1)")
     ap.add_argument("--prompt", help="Remplace le prompt positif")
     ap.add_argument("--negative", help="Remplace le prompt négatif")
+    ap.add_argument("--denoise", type=float, help="Remplace le denoise du sampler (0 à 1)")
+    ap.add_argument("--cn-strength", type=float, help="Remplace la force du ControlNet")
     ap.add_argument("--image-node", help="Id du nœud LoadImage (sinon le premier)")
     ap.add_argument("--positive-node", help="Id du nœud de prompt positif (sinon suivi depuis le KSampler)")
     ap.add_argument("--negative-node", help="Id du nœud de prompt négatif")
@@ -201,7 +208,7 @@ def main(argv=None):
         for k in range(a.seeds):
             seed = a.seed if (a.seed is not None and a.seeds == 1) else random.randint(0, 2**32 - 1)
             patched = patch(wf, name or os.path.basename(path), seed, a.prompt, a.negative,
-                            a.image_node, a.positive_node, a.negative_node)
+                            a.image_node, a.positive_node, a.negative_node, a.denoise, a.cn_strength)
             if a.dry_run:
                 print(json.dumps(patched, indent=1, ensure_ascii=False))
                 continue

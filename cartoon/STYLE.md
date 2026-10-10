@@ -1,7 +1,7 @@
 # Guide de style des sprites
 
 Document de référence : **tout sprite du mod (filtre, Blender, IA ou dessin) doit le respecter**.
-Les valeurs chiffrées vivent dans `tools/blender/style.py` (source de vérité pour les rendus Blender).
+Les valeurs chiffrées vivent dans `cartoon/blender/style.py` (source de vérité pour les rendus Blender).
 Si on change une règle, on la change ici *et* dans `style.py`, dans le même commit.
 
 Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer ou à caler.
@@ -19,7 +19,7 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer ou
 - **Parois en tronc de pyramide** : les machines sont plus larges en bas qu'en haut (2,6 → 2,15 pour un assembleur), donc les côtés gauche et droit restent visibles. **[CALÉ]**
 - **Silhouette** : une machine 3x3 mesure environ 2,6 cases de large (pas 3), centrée dans son emprise. **[CALÉ]**
 - **Convoyeurs, tuyaux au sol, rails : vue directement du dessus**, jamais inclinés. **[VALIDÉ]**
-- Les ombres portées sont des sprites séparés, comme dans le jeu (pas d'ombre dans le sprite principal). **[PROVISOIRE]**
+- Les ombres portées sont des sprites séparés, comme dans le jeu (pas d'ombre dans le sprite principal). Ombre noire unie, soleil en haut à gauche : chaque point est projeté au sol de (0,3 x hauteur) vers la droite, sans décalage vertical (`SUN_SHEAR`). **[CALÉ]**
 
 > Correction : une première version de ce guide disait « sol non raccourci, 35° ». Les mesures sur le sprite original ont montré que c'était faux.
 
@@ -44,7 +44,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 
 ## 5. Palette
 
-**Couleurs de l'assembleur 1 original, conservées** : dominante gris-vert (parois), cuivre rouillé (plaques, tuyaux), fer sombre et laiton. Le style cartoon vient des aplats et des contours, pas d'un changement de teintes. 3 teintes maximum par objet. Valeurs dans `style.py` (`PALETTE_HEX`). **[VALIDÉ]**
+**Couleurs de l'assembleur 1 original, conservées** (les assembleurs 2 et 3 gardent leur teinte d'origine : bleu et vert-jaune) : dominante gris-vert (parois), cuivre rouillé (plaques, tuyaux), fer sombre et laiton. Le style cartoon vient des aplats et des contours, pas d'un changement de teintes. 3 teintes maximum par objet. Valeurs dans `style.py` (`PALETTE_HEX`). **[VALIDÉ]**
 
 | Nom | Hex | Usage |
 |---|---|---|
@@ -57,6 +57,10 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 | white | #d9d0bc | métal clair, reflets |
 | red | #a8462f | rouge brique, braises |
 | ore_iron | #5f7f9a | minerai de fer |
+| steel_blue | #55789b | corps de l'assembleur 2 |
+| navy | #3d5a78 | panneaux avant de l'assembleur 2 |
+| olive | #97a03f | corps de l'assembleur 3 |
+| olive_dark | #6c7430 | panneaux avant de l'assembleur 3 |
 
 À définir : cuivre (minerai), charbon, pierre, uranium, fluides. **[PROVISOIRE]**
 
@@ -66,7 +70,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 - **Même cadre et même emprise que le sprite original**, au pixel près, pour remplacer le fichier sans toucher au reste du mod. L'assembleur 1 est calé automatiquement : cadre 214 × 226 px, pixels opaques de (25, 2) à (188, 199), recouvrement de silhouette de 92 %. `assembler.py` règle lui-même l'échelle et le décalage de la caméra par mesure. **[VALIDÉ]**
 - Les fichiers de Factorio sont des planches : l'assembleur 1 contient 32 images d'animation (8 colonnes × 4 lignes de 214 × 226 px). **[CALÉ]**
 - Rendu Blender : moteur Cycles CPU, 4 échantillons, sur-échantillonnage 2x puis réduction (bords nets), transformation de vue « Standard », matériaux en émission (aplats, sans éclairage). **[VALIDÉ]**
-- Les sprites refaits vont dans `graphics/overrides/<mod>/...` avec le même chemin que l'original. **[VALIDÉ]**
+- Les sprites refaits vont dans `cartoon/mod/graphics/overrides/<jeu>/...` avec le même chemin que l'original. **[VALIDÉ]**
 
 ## 7. Règles par type d'objet
 
@@ -78,7 +82,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 
 ## 8. Approche IA (si utilisée)
 
-Même règles : mêmes contours, même palette, même projection. Voir `tools/complex/style_guide.md` pour le prompt. Tout sprite généré doit être comparé à une planche de référence rendue par Blender avant d'être accepté.
+Même règles : mêmes contours, même palette, même projection. Voir `cartoon/ai/prompt.md` pour le prompt. Tout sprite généré doit être comparé à une planche de référence rendue par Blender avant d'être accepté.
 
 ## 9. Checklist avant de valider un sprite
 

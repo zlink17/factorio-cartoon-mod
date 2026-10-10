@@ -2,13 +2,13 @@
 """Prépare une image générée par IA pour l'utiliser comme sprite Factorio.
 
 Usage :
-    python tools/complex/postprocess.py --input gemini_out.png \\
+    python cartoon/ai/postprocess.py --input gemini_out.png \\
         --reference "<data>/base/graphics/entity/assembling-machine-1/assembling-machine-1.png" \\
         --mod base --path entity/assembling-machine-1/assembling-machine-1.png
 
 - détoure le fond (couleur du coin supérieur gauche, avec tolérance),
 - redimensionne à la taille exacte du sprite original,
-- écrit le résultat dans graphics/overrides/<mod>/<path> puis régénère manifest.lua.
+- écrit le résultat dans cartoon/mod/graphics/overrides/<mod>/<path> puis régénère manifest.lua.
 """
 import argparse
 import sys
@@ -17,7 +17,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent      # racine du repo
+MOD_DIR = ROOT / "cartoon" / "mod"
 sys.path.insert(0, str(ROOT / "tools"))
 
 from build_manifest import build_manifest  # noqa: E402
@@ -54,10 +55,10 @@ def main():
     out = remove_background(gen, args.tolerance)
     out = cv2.resize(out, (w, h), interpolation=cv2.INTER_AREA)
 
-    dst = ROOT / "graphics" / "overrides" / args.mod / args.path
+    dst = MOD_DIR / "graphics" / "overrides" / args.mod / args.path
     dst.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(dst), out)
-    build_manifest()
+    build_manifest("cartoon")
     print(f"OK {dst.relative_to(ROOT)} ({w}x{h})")
 
 

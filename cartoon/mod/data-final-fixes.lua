@@ -1,7 +1,7 @@
 -- Remplace les chemins de textures du jeu par leur version cartoon.
--- manifest.lua (généré par tools/build_manifest.py) associe chaque texture
--- remplacée à sa source : "generated" (filtre) ou "overrides" (refaite).
--- Exemple : ["__base__/graphics/x.png"] = "overrides"
+-- manifest.lua (généré par tools/build_manifest.py) liste les textures refaites,
+-- stockées sous graphics/overrides/<mod>/ avec le même chemin que l'original.
+-- Exemple : ["__base__/graphics/x.png"] = true
 
 local MOD = "__factorio-cartoon-mod__"
 local manifest = require("manifest")
@@ -9,12 +9,11 @@ local manifest = require("manifest")
 local visited = {}
 
 local function remap(path)
-  local source = manifest[path]
-  if source then
-    -- "__base__/graphics/x.png" -> "__factorio-cartoon-mod__/graphics/<source>/base/x.png"
+  if manifest[path] then
+    -- "__base__/graphics/x.png" -> "__factorio-cartoon-mod__/graphics/overrides/base/x.png"
     local mod, rest = path:match("^__(.-)__/graphics/(.+)$")
     if mod and rest then
-      return MOD .. "/graphics/" .. source .. "/" .. mod .. "/" .. rest
+      return MOD .. "/graphics/overrides/" .. mod .. "/" .. rest
     end
   end
   return path

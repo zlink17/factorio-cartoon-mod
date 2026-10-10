@@ -1,20 +1,20 @@
-# Approche complexe : assets refaits par IA
+# IA : assets refaits par un modèle d'image
 
-Les sprites sont regénérés par un modèle d'image (Gemini) à partir de l'original, puis remis au bon format.
-Ils sont rangés dans `graphics/overrides/` et **ont la priorité** sur ceux de l'approche simple.
+Les sprites sont regénérés par un modèle d'image (ComfyUI en local, ou Gemini) à partir de l'original ou d'un rendu Blender, puis remis au bon format.
+Ils sont rangés dans `cartoon/mod/graphics/overrides/`.
 
 ## Workflow
 
-1. Générer une planche de référence du style (voir `style_guide.md`) et la garder pour toutes les générations.
-2. Pour chaque sprite : envoyer l'original + la planche de référence + le prompt de `style_guide.md`.
+1. Générer une planche de référence du style (voir `prompt.md`) et la garder pour toutes les générations.
+2. Pour chaque sprite : envoyer l'original + la planche de référence + le prompt de `prompt.md`.
 3. Sauvegarder l'image obtenue, puis la préparer :
    ```bash
-   python tools/complex/postprocess.py --input sortie.png \
+   python cartoon/ai/postprocess.py --input sortie.png \
      --reference "<data>/base/graphics/entity/foo/foo.png" \
      --mod base --path entity/foo/foo.png
    ```
 4. Le script détoure le fond, redimensionne à la taille exacte et met à jour `manifest.lua`.
-5. Commit de `graphics/overrides/` (ces fichiers sont versionnés, contrairement à `graphics/generated/`).
+5. Commit de `cartoon/mod/graphics/overrides/` (ces fichiers sont versionnés).
 
 ## Limites connues
 
@@ -39,7 +39,7 @@ sur chaque image d'un dossier. Il n'a **aucune dépendance** (bibliothèque stan
    l'enregistrement normal : le script refuse un workflow « interface ».
 3. **Lancer** (ComfyUI ouvert) :
    ```powershell
-   py tools\complex\comfy_batch.py --workflow workflow_api.json --input entrees\ --output sorties\ `
+   py ai\comfy_batch.py --workflow workflow_api.json --input entrees\ --output sorties\ `
        --seeds 4 --prompt "cartoon game sprite, thick dark outline, flat colors"
    ```
    `--seeds 4` produit 4 variantes par image. `--dry-run` affiche le workflow modifié sans l'envoyer.

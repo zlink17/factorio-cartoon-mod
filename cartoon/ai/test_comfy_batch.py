@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test de comfy_batch.py contre un faux serveur ComfyUI (aucun vrai ComfyUI nécessaire).
 
-Usage : python tools/complex/test_comfy_batch.py
+Usage : python cartoon/ai/test_comfy_batch.py
 Vérifie : envoi de l'image, remplacement de l'image / de la graine / des prompts,
 attente du résultat, téléchargement, refus d'un workflow non exporté en format API.
 """

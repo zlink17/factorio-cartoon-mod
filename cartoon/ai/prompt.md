@@ -1,6 +1,6 @@
 # Guide de style cartoon (prompt IA)
 
-**Le guide de référence est `STYLE.md` à la racine du repo.** Ce fichier n'en est que la version à donner à un modèle d'image : en cas de conflit, `STYLE.md` l'emporte.
+**Le guide de référence est `cartoon/STYLE.md`.** Ce fichier n'en est que la version à donner à un modèle d'image : en cas de conflit, `cartoon/STYLE.md` l'emporte.
 
 ## Règles visuelles
 
@@ -20,4 +20,4 @@
 
 ## Planche de référence
 
-Ajouter ici le fichier choisi une fois le style validé : `tools/complex/reference_sheet.png`.
+Ajouter ici le fichier choisi une fois le style validé : `cartoon/ai/reference_sheet.png`.

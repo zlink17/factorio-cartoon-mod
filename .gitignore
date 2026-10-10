@@ -1,5 +1,3 @@
-# Sprites produits par le filtre (approche simple) : dérivés des assets Factorio, à régénérer
-graphics/generated/
 __pycache__/
 *.pyc
 .venv/
