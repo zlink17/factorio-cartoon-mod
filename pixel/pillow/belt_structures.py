@@ -76,14 +76,16 @@ def add_face(img, mask):
 
 
 # ---------------------------------------------------------------- souterrain
-# Comme dans Factorio, le capot couvre toute la case : une voûte (demi-cylindre couché dans le sens du flux) dont la
-# plaque porte des chevrons, avec un anneau d'acier à rivets à chaque bout. Le bout enterré est fermé ; du côté du
-# tapis, une porte sombre laisse voir le chevron du tapis qui entre ou qui sort (entrée et sortie sont des miroirs).
-# La plaque a la teinte vive du convoyeur du même niveau, les chevrons sa teinte foncée.
-UG_LEN = 16        # longueur du capot dans le sens du flux : bout fermé 3, voûte 9, porte 4 (px)
-UG_WIDTH = 16      # largeur en travers (px)
-FACE = 3           # hauteur de la face avant (px)
-DOOR_HALF = (0, 6.5, 5.5, 4.5)       # demi-largeur de la porte selon la profondeur depuis le bord (px)
+# Conventions vérifiées en jeu avec le mod cartoon (cartoon/blender/underground.py) :
+# - le capot couvre la moitié aval de la case pour une entrée (le tapis y plonge) et la moitié amont pour une sortie ;
+# - la cellule « sortie » de la colonne d est celle d'une sortie dont le flux va vers la direction opposée à d ;
+# - les rangées 2 et 3 (chargement par le côté, est et ouest) reprennent les rangées 0 et 1 ;
+# - les pièces « patch » restent vides.
+# Le capot est une voûte à chevrons, de la teinte vive du convoyeur du même niveau : haute à la bouche (côté tapis, où
+# l'on voit une ouverture sombre), plus basse vers le bout enterré où le toit rejoint le sol.
+OPPOSITE = {"N": "S", "S": "N", "E": "W", "W": "E"}
+HOOD_LEN = 10              # longueur du capot dans le sens du flux (px)
+FACE = 4                   # hauteur de la face avant (px)
 
 
 def tile_coords(direction, x, y):
@@ -97,67 +99,75 @@ def darken(c, f):
 
 
 def underground_cell(direction, entering, tier):
-    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[."""
+    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. `direction` : sens du flux ; `entering` : entrée ou sortie."""
     light, dark = BELT[tier]
     base = belt.BASE[tier]
     horiz = direction in "EW"
+    fl = FLOW[direction]
+    mouth_n = (-fl[0], -fl[1]) if entering else fl             # normale de la bouche (vers le tapis)
+    s_lo, s_hi = (7, 7 + HOOD_LEN) if entering else (-1, -1 + HOOD_LEN)
     img = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
     hood = Image.new("L", (48, 48), 0)
-    fl = FLOW[direction]
-    out_n = fl if entering else (-fl[0], -fl[1])        # normale du bout enterré
-    in_n = (-out_n[0], -out_n[1])                       # normale du bout côté tapis
-    for ty in range(belt.T):
-        for tx in range(belt.T):
-            u, lat = tile_coords(direction, tx, ty)
-            d_ug = (UG_LEN - u) if entering else u        # distance au bout enterré (0 = au bord)
-            d_belt = UG_LEN - d_ug
-            lat_abs = (ty + 0.5 - 8) if horiz else (tx + 0.5 - 8)    # axe transversal absolu : lumière en haut à gauche
+    for ty in range(-3, belt.T + 3):
+        for tx in range(-3, belt.T + 3):
+            s, lat = tile_coords(direction, tx, ty)
+            if not (s_lo <= s < s_hi and abs(lat) < 8):
+                continue
+            dm = (s - s_lo) if entering else (s_hi - s)          # distance à la bouche : 0 à la bouche, HOOD_LEN au bout enterré
+            u = s - s_lo
+            lat_abs = (ty + 0.5 - 8) if horiz else (tx + 0.5 - 8)
             x, y = tx + 16, ty + 16
             hood.putpixel((x, y), 255)
             if abs(lat) > 7:
-                c = P["steel_dark"]                                   # contour des flancs
-            elif d_ug < 3:                                            # bout fermé : anneau plein à rivets
-                c = belt.shade(d_ug, out_n)
-                if d_ug >= 1 and abs(lat) in (1.5, 3.5, 5.5):
-                    c = P["steel_light"]
-            elif d_belt < 4:                                          # côté tapis : lèvre puis porte
-                k = int(d_belt)
-                if k == 0:
-                    c = belt.shade(0, in_n)
-                elif abs(lat) >= DOOR_HALF[k]:
-                    c = belt.shade(k, in_n) if abs(lat) < DOOR_HALF[k] + 1 else P["steel"]   # piédroits
-                else:
-                    f_ = (0.85, 0.6, 0.35)[k - 1]                     # de plus en plus sombre vers l'intérieur
-                    u_tip = 3.5 if entering else UG_LEN - 3.5          # pointe du chevron, dans le sens du flux
-                    chev = abs(lat) < 3.2 and int(u) == int(u_tip - abs(lat) * 0.7)
-                    c = darken(light, max(f_, 0.6)) if chev else darken(base, f_)
-            elif abs(lat) > 6:                                        # bords de la voûte : arêtes éclairées / ombrées
-                c = P["steel_light"] if lat_abs < 0 else P["steel"]
+                c = P["steel_dark"]                               # contour des flancs
+            elif dm < 1.2:
+                c = belt.shade(dm, mouth_n)                        # linteau de la bouche
+            elif dm >= HOOD_LEN - 1.5:
+                c = belt.shade(HOOD_LEN - dm, (-mouth_n[0], -mouth_n[1]))    # mur du bout enterré, bas
+            elif abs(lat) > 6:
+                c = P["steel_light"] if lat_abs < 0 else P["steel"]   # bords de la voûte
             else:
-                # voûte : lumineuse du côté de la lumière, plus sombre du côté opposé
-                shade = 1.0 if lat_abs < -3 else 0.9 if lat_abs < 2 else 0.78 if lat_abs < 5 else 0.62
-                ph = (u + abs(lat) * 0.5) % 5
-                c = darken(dark, shade) if ph < 2 else darken(light, shade)
+                # voûte : plus sombre vers le bout enterré (le toit descend), plus claire côté lumière
+                slope = 1.0 - 0.16 * dm / HOOD_LEN
+                side = 1.0 if lat_abs < -3 else 0.92 if lat_abs < 2 else 0.8 if lat_abs < 5 else 0.68
+                ph = (u + abs(lat) * 0.5) % 3.4
+                c = darken(dark, 0.7 * slope * side) if ph < 1.3 else darken(light, slope * side)
             img.putpixel((x, y), c)
-    # hauteur : face avant sur FACE px sous le bord sud du capot
+    # face avant sur FACE px sous le bord sud ; si la bouche regarde le sud, on y voit l'ouverture du tunnel
+    mouth_south = mouth_n == (0, 1)
     src = hood.copy()
-    for y in range(47):
+    for y in range(48 - FACE - 1):
         for x in range(48):
             if src.getpixel((x, y)) and not src.getpixel((x, y + 1)):
+                lat_x = x + 0.5 - 24
                 for k in range(1, FACE + 1):
-                    if y + k < 48 and not src.getpixel((x, y + k)):
-                        img.putpixel((x, y + k), P["steel"] if k == 1 else P["steel_dark"])
-                        hood.putpixel((x, y + k), 255)
+                    if src.getpixel((x, y + k)):
+                        continue
+                    if mouth_south:
+                        if k == 1:
+                            c = P["steel_light"]                           # linteau
+                        elif abs(lat_x) >= 5.5:
+                            c = P["steel"] if k < FACE else P["steel_dark"]   # piédroits
+                        else:
+                            f_ = (0, 0.8, 0.5, 0.3)[min(k - 1, 3)]          # tunnel de plus en plus sombre
+                            chev = abs(lat_x) < 2.6 and k == 2 and int(abs(lat_x)) == (0 if entering else 1)
+                            c = darken(light, 0.9) if chev else darken(base, f_)
+                    else:
+                        c = P["steel"] if k == 1 else P["steel_dark"]
+                    img.putpixel((x, y + k), c)
+                    hood.putpixel((x, y + k), 255)
     return with_shadow(img, hood)
 
 
 def underground_sheet(tier):
+    cells = {(d, e): underground_cell(d, e, tier) for d in "NESW" for e in (False, True)}
     out = Image.new("RGBA", (48 * 4, 48 * 4), (0, 0, 0, 0))
-    for col, direction in enumerate("NESW"):
-        for row, entering in enumerate((False, True, False, True)):
-            if row >= 2 and direction in "NS":
-                continue
-            out.alpha_composite(underground_cell(direction, entering, tier), (48 * col, 48 * row))
+    for col, d in enumerate("NESW"):
+        for row, entering in ((0, False), (1, True)):
+            src = cells[(d, True)] if entering else cells[(OPPOSITE[d], False)]
+            out.alpha_composite(src, (48 * col, 48 * row))
+            if d in "EW":                                 # chargement par le côté : mêmes images
+                out.alpha_composite(src, (48 * col, 48 * (row + 2)))
     return out
 
 

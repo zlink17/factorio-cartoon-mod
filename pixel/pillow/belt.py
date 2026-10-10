@@ -102,24 +102,34 @@ def piece(row, frame, tier):
     return img
 
 
-# Capuchons (rangées 12 à 19) : la partie du tapis qui dépasse du capot d'un souterrain, au bord arrière de la case,
-# avec le chevron qui avance (animé comme le tapis). Deux rangées par bord (début / fin), même dessin.
-CAP_FLOW = [(0, 1), (0, 1), (-1, 0), (-1, 0), (0, -1), (0, -1), (1, 0), (1, 0)]     # sud, ouest, nord, est
-CAP_EDGE = [(0, -2), (0, -2), (14, 0), (14, 0), (0, 14), (0, 14), (-2, 0), (-2, 0)]  # début du bandeau (x, y) dans la case
+# Bouts de ligne (rangées 12 à 19), comme dans le mod cartoon : une bande de tapis au bord aval de la case, prolongée
+# d'un rouleau en acier qui dépasse de 2 px. Les chevrons avancent vers l'extérieur (sens du flux) ; les rangées paires
+# (12, 14, 16, 18) sont animées, les impaires fixes. Rangées : haut (nord), droite (est), bas (sud), gauche (ouest).
+CAP_FLOW = [(0, -1), (0, -1), (1, 0), (1, 0), (0, 1), (0, 1), (-1, 0), (-1, 0)]
 CAP_PAD = 2
+CAP_BAND = 3          # largeur de la bande de tapis, dans la case
+CAP_ROLLER = 2        # largeur du rouleau, hors de la case
 
 
 def cap_piece(row, frame, tier):
     """Image de 20 x 20 : la case plus 2 px de marge ; (i, j) correspond au pixel (i - 2, j - 2) de la case."""
     flow = CAP_FLOW[row - 12]
-    ex, ey = CAP_EDGE[row - 12]
+    off = (frame // 2) if row % 2 == 0 else 0
     img = Image.new("RGBA", (T + 2 * CAP_PAD, T + 2 * CAP_PAD), (0, 0, 0, 0))
-    horizontal = flow[0] == 0               # flux vertical : le bandeau est horizontal
-    for j in range(4):
-        for i in range(T):
-            x, y = (ex + i, ey + j) if horizontal else (ex + j, ey + i)
-            c = straight_pixel(x, y, flow, frame // 2, tier)
-            img.putpixel((x + CAP_PAD, y + CAP_PAD), c)
+    for y in range(-CAP_PAD, T + CAP_PAD):
+        for x in range(-CAP_PAD, T + CAP_PAD):
+            px, py = x + 0.5, y + 0.5
+            s = {(1, 0): px, (-1, 0): T - px, (0, -1): T - py, (0, 1): py}[flow]
+            across = py if flow[0] else px
+            if not 0 <= across < T:
+                continue
+            if T - CAP_BAND <= s < T:
+                img.putpixel((x + CAP_PAD, y + CAP_PAD), straight_pixel(x, y, flow, off, tier))
+            elif T <= s < T + CAP_ROLLER:
+                c = shade(s - T, flow)
+                if s - T >= 1 and int(across) % 4 == 1:
+                    c = P["steel_light"]                       # rivets du rouleau
+                img.putpixel((x + CAP_PAD, y + CAP_PAD), c)
     return img
 
 
