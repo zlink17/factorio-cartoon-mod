@@ -28,5 +28,5 @@ Référence pour tout sprite du mod pixel. Les couleurs vivent dans `pillow/pale
 - Voyant du moteur qui clignote : indique visuellement que la machine travaille. **[PROVISOIRE]**
 
 ## Structures de convoyeurs
-- Souterrain : le tapis s'enfonce dans une rampe qui se rétrécit et s'assombrit (trame de damier, laisse voir le tapis animé du jeu), puis passe sous un linteau en acier avec un bandeau de la couleur du niveau. **[VALIDÉ par Bastien comme direction, à juger en jeu]**
+- Souterrain : capot de 16 x 12 px relevé sur la capture de référence de Bastien : toit tan avec un petit chevron clair du côté enterré, rampe de chevrons emboîtés (acier, orange, rouge) dans un cadre orange à contour prune. Orienté selon le flux, recoloré par niveau (rouge et bleu pour rapide et express) ; en sortie, la rampe est du côté de la case voisine. **[VALIDÉ comme direction, à juger en jeu]**
 - Répartiteur : poteaux d'extrémité, cloison avec nez diviseur côté entrée, rail à trois engrenages (acier, moyeu orange) qui tournent, capots à chevrons de la couleur du niveau côté sortie, deux voyants qui clignotent en alternance. **[PROVISOIRE]**

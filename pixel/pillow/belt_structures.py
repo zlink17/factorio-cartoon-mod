@@ -12,7 +12,7 @@ import math, os, sys
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from palette import P, BELT
+from palette import P, BELT, hx
 from pixutil import autoshade
 import belt
 
@@ -76,52 +76,66 @@ def add_face(img, mask):
 
 
 # ---------------------------------------------------------------- souterrain
-BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
-HOOD = 6          # profondeur du linteau (px)
-RAMP = 8          # longueur de la rampe (px)
+# Dessin relevé pixel par pixel sur la capture de référence (16 px de large, 13 de haut) : entrée d'un souterrain
+# dont le flux monte. Le toit (tan, petit chevron clair) est du côté enterré ; devant, la rampe porte des chevrons
+# emboîtés (acier, orange, rouge) dans un cadre orange à contour prune.
+# m contour, o cadre / remplissage, r remplissage foncé, t toit, l clair, s acier, w reflet, . transparent
+_GRID = [
+    "ldmommmmmmmmmmmmomgg",
+    "lsmotttttlltttttomGG",
+    "lsmottttllllttttomGG",
+    "lsmotttlllllltttomGG",
+    "lsmooosssoosssooomGG",
+    "lsmoosssoooosssoomGG",
+    "ssmosssoooooosssomGG",
+    "lsrossooollooossorGG",
+    "lsmorrrrssssrrrromGG",
+    "lsrorrssssssssrrorGG",
+    "lsmrrsssrrrrsssrrmGG",
+    "lsGrssrrrrrrrrssrGGG",
+]
+ENTRANCE = [row[2:18] for row in _GRID]       # 12 rangées x 16 colonnes
+ROOF_ROWS = 4                                  # rangées du toit (contour compris)
+UG_LEN = len(ENTRANCE)
 
 
-def tile_coords(direction, x, y):
-    """(s, lat) d'un pixel (x, y) de la case : s avance dans le sens du flux (0 à 16), lat va en travers (-8 à 8)."""
-    px, py = x + 0.5, y + 0.5
-    return {"E": (px, py - 8), "W": (belt.T - px, py - 8), "N": (belt.T - py, px - 8), "S": (py, px - 8)}[direction]
+def ug_colors(tier):
+    """Teintes de la capture par niveau : cadre, remplissage foncé, toit, contour (acier inchangé)."""
+    base = {"m": P["maroon"], "o": P["orange"], "r": P["red"], "t": P["tan"], "l": P["steel_light"], "s": P["steel"],
+            "w": P["white"]}
+    if tier == "red":
+        base.update(m=hx("5a2030"), o=BELT["red"][0], r=BELT["red"][1], t=hx("f4b8a8"))
+    elif tier == "blue":
+        base.update(m=P["blue_out"], o=BELT["blue"][0], r=BELT["blue"][1], t=hx("c4e8f8"))
+    return base
+
+
+def ug_art(entering, tier):
+    """Dessin 16 x 12 pour un flux qui monte : toit en haut si on entre, en bas si on sort. Les chevrons montent toujours."""
+    col = ug_colors(tier)
+    rows = ENTRANCE if entering else ENTRANCE[ROOF_ROWS:] + ENTRANCE[:ROOF_ROWS]
+    img = Image.new("RGBA", (16, UG_LEN), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in col:
+                img.putpixel((x, y), col[ch])
+    return img
 
 
 def underground_cell(direction, entering, tier):
-    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. `d` = distance au bord enterré (0 = au bord)."""
-    fx, fy = FLOW[direction]
-    out_dir = (fx, fy) if entering else (-fx, -fy)           # direction du bord enterré
-    hood = Image.new("L", (48, 48), 0)
+    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. Le dessin (16 x 12) est collé du côté enterré."""
+    art = ug_art(entering, tier)
+    # on tourne le dessin (flux vers le nord) vers la direction voulue
+    art = {"N": art, "E": art.rotate(-90, expand=True), "S": art.rotate(180), "W": art.rotate(90, expand=True)}[direction]
     img = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
-    light, dark = BELT[tier]
-    for ty in range(belt.T):
-        for tx in range(belt.T):
-            s, lat = tile_coords(direction, tx, ty)
-            d = (belt.T - s) if entering else s
-            x, y = tx + 16, ty + 16
-            if d < HOOD:
-                hood.putpixel((x, y), 255)
-                if d < 2:
-                    c = belt.shade(d, out_dir)               # bord du linteau : contour puis lumière ou ombre
-                elif d < HOOD - 2:
-                    c = light if (abs(lat) % 4) < 2 else belt.BASE[tier]     # bandeau de la couleur du niveau
-                elif d < HOOD - 1:
-                    c = P["steel_mid"]
-                else:
-                    c = P["steel_dark"]
-                img.putpixel((x, y), c)
-            elif d < HOOD + RAMP:
-                # rampe : la tranchée se rétrécit vers le linteau (murs en acier) et s'assombrit (trame de plus en
-                # plus dense) ; le tapis animé reste visible entre les murs
-                t = 1 - (d - HOOD) / RAMP
-                wall = 5.5 - 1.5 * t
-                if abs(lat) > wall:
-                    img.putpixel((x, y), P["steel_dark"] if abs(lat) - wall < 1 else P["steel"])
-                elif BAYER[y % 4][x % 4] / 16 < 0.15 + 0.8 * t:
-                    img.putpixel((x, y), P["steel_dark"] if t < 0.6 else P["blue_out"])
-    # hauteur du linteau : face avant sur les 2 px sous son bord sud
-    add_face(img, hood)
-    return with_shadow(img, hood)
+    w, h = art.size
+    fx, fy = FLOW[direction]
+    end = (fx, fy) if entering else (-fx, -fy)       # côté du bord enterré
+    x0 = 16 + (belt.T - w if end[0] > 0 else 0)
+    y0 = 16 + (belt.T - h if end[1] > 0 else 0)
+    img.alpha_composite(art, (x0, y0))
+    mask = img.getchannel("A").point(lambda v: 255 if v else 0)
+    return with_shadow(img, mask)
 
 
 def underground_sheet(tier):
@@ -229,18 +243,32 @@ def splitter_sheet(direction, tier):
 if __name__ == "__main__":
     o = sys.argv[1] if len(sys.argv) > 1 else "out"
     os.makedirs(o, exist_ok=True)
-    # souterrains : ligne droite vers l'est (tapis animé dessous), entrée puis sortie, pour juger du raccord
+    # souterrains posés sur des convoyeurs animés : lignes vers l'est, le nord, l'ouest et le sud (entrée puis sortie)
     rows = []
     for tier in ("yellow", "red", "blue"):
-        line = Image.new("RGBA", (16 * 7, 16 * 3), P["grass"])
-        for i in range(7):
-            line.alpha_composite(belt.piece(0, 5, tier), (i * 16, 16))
-        line.alpha_composite(underground_cell("E", True, tier), (2 * 16 - 16, 0))
-        line.alpha_composite(underground_cell("E", False, tier), (4 * 16 - 16, 0))
-        rows.append(line.resize((line.width * 5, line.height * 5), Image.NEAREST))
-    c = Image.new("RGBA", (rows[0].width, rows[0].height * 3))
-    for i, r in enumerate(rows):
-        c.paste(r, (0, i * r.height))
+        parts = []
+        for direction, brow in (("E", 0), ("N", 2), ("W", 1), ("S", 3)):
+            n = 7
+            horiz = direction in "EW"
+            line = Image.new("RGBA", (16 * n, 16 * 3) if horiz else (16 * 3, 16 * n), P["grass"])
+            for i in range(n):
+                line.alpha_composite(belt.piece(brow, 5, tier), (i * 16, 16) if horiz else (16, i * 16))
+            fx, fy = FLOW[direction]
+            ent, ext = (2, 4) if (fx > 0 or fy > 0) else (4, 2)          # case d'entrée / de sortie sur la ligne
+            for idx, entering in ((ent, True), (ext, False)):
+                cell = underground_cell(direction, entering, tier)
+                line.alpha_composite(cell, (idx * 16 - 16, 0) if horiz else (0, idx * 16 - 16))
+            parts.append(line.resize((line.width * 4, line.height * 4), Image.NEAREST))
+        wtot = sum(p.width for p in parts) + 20 * len(parts)
+        row = Image.new("RGBA", (wtot, max(p.height for p in parts)), P["grass"])
+        x = 0
+        for p in parts:
+            row.paste(p, (x, 0)); x += p.width + 20
+        rows.append(row)
+    c = Image.new("RGBA", (max(r.width for r in rows), sum(r.height for r in rows)), P["grass"])
+    y = 0
+    for r in rows:
+        c.paste(r, (0, y)); y += r.height
     c.save(f"{o}/ug_all.png")
     # répartiteurs : 4 orientations, 3 niveaux
     prev = Image.new("RGBA", (4 * 150, 3 * 125), P["grass"])
