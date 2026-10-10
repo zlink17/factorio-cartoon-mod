@@ -11,7 +11,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-import belt, belt_structures as bs, inserter, ore, poles, wire
+import belt, belt_structures as bs, inserter, ore, poles, terrain, wire
 from assembler import draw_assembler, shadow_of, N_FRAMES, W, H, SCALE
 
 OVR = ROOT / "pixel" / "mod" / "graphics" / "overrides" / "base"
@@ -128,6 +128,17 @@ for name in poles.SPECS:
     print(name, "ok")
 lua.append("}")
 (ROOT / "pixel" / "mod" / "poles_data.lua").write_text("\n".join(lua) + "\n", encoding="utf-8")
+
+# terrain de Nauvis : planches des sols terrestres (x4) et masques de transition à bords nets
+TERR = OVR / "terrain"
+(TERR / "masks").mkdir(parents=True, exist_ok=True)
+for name in terrain.TERRAINS:
+    up(terrain.sheet(name)).save(TERR / f"{name}.png")
+print("terrain ok")
+MASKS = Path("/mnt/c/Program Files (x86)/Steam/steamapps/common/Factorio/data/base/graphics/terrain/masks")
+for n in (1, 3, 4):
+    terrain.quantize_mask(Image.open(MASKS / f"transition-{n}.png")).save(TERR / "masks" / f"transition-{n}.png")
+print("masques ok")
 
 # minerais : planche 8 x 8 (étapes x variantes), 128 px par cellule
 for kind in ore.RAMPS:
