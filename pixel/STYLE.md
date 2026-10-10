@@ -28,5 +28,5 @@ Référence pour tout sprite du mod pixel. Les couleurs vivent dans `pillow/pale
 - Voyant du moteur qui clignote : indique visuellement que la machine travaille. **[PROVISOIRE]**
 
 ## Structures de convoyeurs
-- Souterrain : capot de 16 x 12 px relevé sur la capture de référence de Bastien : toit tan avec un petit chevron clair du côté enterré, rampe de chevrons emboîtés (acier, orange, rouge) dans un cadre orange à contour prune. Orienté selon le flux, recoloré par niveau (rouge et bleu pour rapide et express) ; en sortie, la rampe est du côté de la case voisine. **[VALIDÉ comme direction, à juger en jeu]**
+- Souterrain : capot en voûte (demi-cylindre couché dans le sens du flux), 14 px de large sur 12 de long, d'après les souterrains de Factorio. Plaque bombée de la teinte vive du convoyeur du même niveau (jaune, rouge, bleu) avec des chevrons de sa teinte foncée, flanc opposé à la lumière plus sombre, anneau d'acier à rivets à chaque bout, petit chevron du tapis dans la bouche côté tapis, face avant sombre de 3 px et ombre portée. **[PROVISOIRE, à juger en jeu]**
 - Répartiteur : poteaux d'extrémité, cloison avec nez diviseur côté entrée, rail à trois engrenages (acier, moyeu orange) qui tournent, capots à chevrons de la couleur du niveau côté sortie, deux voyants qui clignotent en alternance. **[PROVISOIRE]**

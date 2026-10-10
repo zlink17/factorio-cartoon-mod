@@ -76,66 +76,73 @@ def add_face(img, mask):
 
 
 # ---------------------------------------------------------------- souterrain
-# Dessin relevé pixel par pixel sur la capture de référence (16 px de large, 13 de haut) : entrée d'un souterrain
-# dont le flux monte. Le toit (tan, petit chevron clair) est du côté enterré ; devant, la rampe porte des chevrons
-# emboîtés (acier, orange, rouge) dans un cadre orange à contour prune.
-# m contour, o cadre / remplissage, r remplissage foncé, t toit, l clair, s acier, w reflet, . transparent
-_GRID = [
-    "ldmommmmmmmmmmmmomgg",
-    "lsmotttttlltttttomGG",
-    "lsmottttllllttttomGG",
-    "lsmotttlllllltttomGG",
-    "lsmooosssoosssooomGG",
-    "lsmoosssoooosssoomGG",
-    "ssmosssoooooosssomGG",
-    "lsrossooollooossorGG",
-    "lsmorrrrssssrrrromGG",
-    "lsrorrssssssssrrorGG",
-    "lsmrrsssrrrrsssrrmGG",
-    "lsGrssrrrrrrrrssrGGG",
-]
-ENTRANCE = [row[2:18] for row in _GRID]       # 12 rangées x 16 colonnes
-ROOF_ROWS = 4                                  # rangées du toit (contour compris)
-UG_LEN = len(ENTRANCE)
+# Capot en voûte (demi-cylindre couché dans le sens du flux) : plaque bombée de la teinte vive du convoyeur du même niveau (chevrons de sa teinte foncée),
+# chevrons qui suivent le flux, anneau d'acier à rivets à chaque bout, face avant sombre (hauteur) et ombre portée.
+UG_LEN = 12        # longueur du capot dans le sens du flux (px)
+UG_WIDTH = 14      # largeur en travers (px)
+FACE = 3           # hauteur de la face avant (px)
 
 
-def ug_colors(tier):
-    """Teintes de la capture par niveau : cadre, remplissage foncé, toit, contour (acier inchangé)."""
-    base = {"m": P["maroon"], "o": P["orange"], "r": P["red"], "t": P["tan"], "l": P["steel_light"], "s": P["steel"],
-            "w": P["white"]}
-    if tier == "red":
-        base.update(m=hx("5a2030"), o=BELT["red"][0], r=BELT["red"][1], t=hx("f4b8a8"))
-    elif tier == "blue":
-        base.update(m=P["blue_out"], o=BELT["blue"][0], r=BELT["blue"][1], t=hx("c4e8f8"))
-    return base
+def tile_coords(direction, x, y):
+    """(s, lat) d'un pixel (x, y) de la case : s avance dans le sens du flux (0 à 16), lat va en travers (-8 à 8)."""
+    px, py = x + 0.5, y + 0.5
+    return {"E": (px, py - 8), "W": (belt.T - px, py - 8), "N": (belt.T - py, px - 8), "S": (py, px - 8)}[direction]
 
 
-def ug_art(entering, tier):
-    """Dessin 16 x 12 pour un flux qui monte : toit en haut si on entre, en bas si on sort. Les chevrons montent toujours."""
-    col = ug_colors(tier)
-    rows = ENTRANCE if entering else ENTRANCE[ROOF_ROWS:] + ENTRANCE[:ROOF_ROWS]
-    img = Image.new("RGBA", (16, UG_LEN), (0, 0, 0, 0))
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch in col:
-                img.putpixel((x, y), col[ch])
-    return img
+def darken(c, f):
+    return (int(c[0] * f), int(c[1] * f), int(c[2] * f), c[3])
 
 
 def underground_cell(direction, entering, tier):
-    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. Le dessin (16 x 12) est collé du côté enterré."""
-    art = ug_art(entering, tier)
-    # on tourne le dessin (flux vers le nord) vers la direction voulue
-    art = {"N": art, "E": art.rotate(-90, expand=True), "S": art.rotate(180), "W": art.rotate(90, expand=True)}[direction]
+    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. Le capot est collé du côté enterré."""
+    light, dark = BELT[tier]
+    base = belt.BASE[tier]
+    horiz = direction in "EW"
     img = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
-    w, h = art.size
-    fx, fy = FLOW[direction]
-    end = (fx, fy) if entering else (-fx, -fy)       # côté du bord enterré
-    x0 = 16 + (belt.T - w if end[0] > 0 else 0)
-    y0 = 16 + (belt.T - h if end[1] > 0 else 0)
-    img.alpha_composite(art, (x0, y0))
-    mask = img.getchannel("A").point(lambda v: 255 if v else 0)
-    return with_shadow(img, mask)
+    hood = Image.new("L", (48, 48), 0)
+    s0 = (belt.T - UG_LEN) if entering else 0
+    out_n = FLOW[direction] if entering else (-FLOW[direction][0], -FLOW[direction][1])   # normale du bout enterré
+    in_n = (-out_n[0], -out_n[1])                                                          # normale du bout côté tapis
+    for ty in range(belt.T):
+        for tx in range(belt.T):
+            s, lat = tile_coords(direction, tx, ty)
+            if not (s0 <= s < s0 + UG_LEN and abs(lat) < UG_WIDTH / 2):
+                continue
+            u = s - s0                                   # 0 à UG_LEN, dans le sens du flux
+            d_ug = (UG_LEN - u) if entering else u       # distance au bout enterré
+            d_belt = UG_LEN - d_ug
+            lat_abs = (ty + 0.5 - 8) if horiz else (tx + 0.5 - 8)    # axe transversal absolu : la lumière vient du haut gauche
+            x, y = tx + 16, ty + 16
+            hood.putpixel((x, y), 255)
+            if abs(lat) > UG_WIDTH / 2 - 1:
+                c = P["steel_dark"]                                    # flancs : contour
+            elif d_ug < 3:                                             # anneau côté enterré, plus épais
+                c = belt.shade(d_ug, out_n)
+                if d_ug >= 2 and (abs(lat) in (2.5, 4.5) or abs(lat) > 5.5):
+                    c = P["steel_light"] if abs(lat) in (2.5, 4.5) else c      # rivets
+            elif d_belt < 2:                                           # anneau côté tapis
+                c = belt.shade(d_belt, in_n)
+                if d_belt >= 1 and abs(lat) in (1.5, 4.5):
+                    c = P["steel_light"]                               # rivets
+            elif d_belt < 3:                                           # bouche : trait sombre avec un chevron du tapis qui entre
+                c = light if abs(lat) < 1.5 else P["steel_dark"]
+            else:
+                # surface bombée : plaque de la teinte vive du niveau, chevrons de la teinte foncée ; plus sombre sur le flanc
+                # opposé à la lumière
+                shade = 1.0 if lat_abs < -3 else 0.88 if lat_abs < 3 else 0.7
+                ph = (u + abs(lat) * 0.55) % 6
+                c = darken(dark, shade) if ph < 2 else darken(light, shade)
+            img.putpixel((x, y), c)
+    # hauteur : face avant sur FACE px sous le bord sud du capot
+    src = hood.copy()
+    for y in range(47):
+        for x in range(48):
+            if src.getpixel((x, y)) and not src.getpixel((x, y + 1)):
+                for k in range(1, FACE + 1):
+                    if y + k < 48 and not src.getpixel((x, y + k)):
+                        img.putpixel((x, y + k), P["steel"] if k == 1 else P["steel_dark"])
+                        hood.putpixel((x, y + k), 255)
+    return with_shadow(img, hood)
 
 
 def underground_sheet(tier):
