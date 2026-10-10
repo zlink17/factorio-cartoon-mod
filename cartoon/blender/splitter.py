@@ -7,8 +7,8 @@ Pour chaque niveau, écrit les fichiers du prototype d'origine (<jeu>/entity/<no
   <nom>-east-top_patch.png, -west-top_patch.png         la moitié haute, dessinée par-dessus les objets (est et ouest)
   <nom>-icon.png                                        icône 64 px + mipmaps
 
-La tête est un bloc de 2 cases de large (couleur du niveau), une cloison au milieu, un chariot qui va
-d'une voie à l'autre et deux pignons qui tournent avec lui. Le modèle est rendu une fois par image sur un grand canevas centré sur
+La tête est un bloc gris de 2 cases de large portant deux chevrons à la couleur du niveau, une cloison au milieu,
+un chariot qui va d'une voie à l'autre et deux pignons qui tournent avec lui. Le modèle est rendu une fois par image sur un grand canevas centré sur
 l'entité, puis découpé aux fenêtres de l'original (taille et décalage des prototypes) : l'est et l'ouest
 sont des entités verticales de 2 cases, dont la moitié haute est une pièce à part (« top_patch »).
 Les convoyeurs dessous sont ceux de belt.py (le moteur les anime avec la planche des convoyeurs).
@@ -57,13 +57,18 @@ DIR_OVERRIDES = {
     },
 }
 
-HALF_LEN = 0.3           # demi-profondeur de la tête le long du flux
+HALF_LEN = 0.33          # demi-profondeur de la tête le long du flux
 HALF_WIDTH = 0.97        # demi-largeur (2 cases)
-HEIGHT = 0.26
+HEIGHT = 0.3             # assez haut pour que la face avant se voie, assez bas pour tenir dans le cadre du nord (70 px)
+CHEVRON = (0.2, 0.3, 0.09)   # chevrons du dessus : recul des branches, demi-envergure, épaisseur (en cases)
 
 
 def build_head(direction, phase, belt):
-    """Ajoute la tête du répartiteur à la scène (sans réinitialiser)."""
+    """Ajoute la tête du répartiteur à la scène (sans réinitialiser).
+
+    Un bloc gris acier (il doit ressortir sur les bords des convoyeurs, qui ont la couleur du niveau), deux chevrons
+    à la couleur du niveau sur le dessus (un par voie, dans le sens du flux, comme ceux de l'original), une cloison centrale, et un mécanisme bas : un chariot qui va d'une voie à l'autre le long
+    d'un rail, deux pignons aux extrémités qui tournent avec lui (crémaillère)."""
     (fx, fy), _, _ = DIRS[direction]
     lx, ly = -fy, fx
     rail, dark = mat("body", P[BELTS[belt]["rail"]]), mat("dark", P["dark"])
@@ -75,24 +80,28 @@ def build_head(direction, phase, belt):
     def slab(s0, s1, d0, d1, z0, z1, m, nu=4, nv=8):
         prism(lambda u, v: to_world(s0 + (s1 - s0) * u, d0 + (d1 - d0) * v), nu, nv, z0, z1, m)
 
-    slab(-HALF_LEN, HALF_LEN, -HALF_WIDTH, HALF_WIDTH, 0.0, HEIGHT, rail)               # bloc
-    slab(-HALF_LEN + 0.07, HALF_LEN - 0.07, -HALF_WIDTH + 0.08, HALF_WIDTH - 0.08, HEIGHT, HEIGHT + 0.03, dark)   # plateau
-    slab(-HALF_LEN - 0.1, HALF_LEN + 0.1, -0.04, 0.04, 0.0, HEIGHT + 0.08, steel, 8, 1)                      # cloison centrale
-    # mécanisme : un chariot qui va d'une voie à l'autre le long d'un rail, et deux pignons aux extrémités qui
-    # tournent avec lui (crémaillère) ; deux petits coulisseaux de part et d'autre vont en sens inverse
-    travel, gear_r = 0.52, 0.15
+    def chevron(s_tip, d_center, z0, z1, m):
+        back, half, thick = CHEVRON
+
+        def f(u, v):
+            d = (v - 0.5) * 2 * half                          # de -half à +half, la pointe au milieu (v = 0,5)
+            s = s_tip - back * abs(d) / half + (u - 0.5) * thick
+            return to_world(s, d_center + d)
+        prism(f, 1, 2, z0, z1, m)
+
+    slab(-HALF_LEN, HALF_LEN, -HALF_WIDTH, HALF_WIDTH, 0.0, HEIGHT, steel)                 # bloc
+    top = HEIGHT
+    for lane in (-0.5, 0.5):
+        chevron(0.12, lane, top, top + 0.03, rail)                                           # un chevron par voie
+    slab(-HALF_LEN, HALF_LEN, -0.05, 0.05, 0.0, top + 0.06, dark, 8, 1)                      # cloison centrale
+    travel, gear_r = 0.52, 0.13
     pos = travel * math.sin(2 * math.pi * phase)
-    top = HEIGHT + 0.03
-    slab(-0.1, 0.1, -0.74, 0.74, top, top + 0.025, steel, 2, 16)                               # rail
-    slab(-0.19, 0.19, pos - 0.19, pos + 0.19, top, top + 0.15, light, 2, 2)                    # chariot
-    slab(-0.1, 0.1, pos - 0.1, pos + 0.1, top + 0.15, top + 0.19, dark, 2, 2)
-    for k, s in enumerate((-0.25, 0.25)):
-        c = -pos * (1 if k else -1) * 0.9
-        slab(s - 0.045, s + 0.045, c - 0.09, c + 0.09, top, top + 0.08, steel, 2, 2)           # coulisseaux
+    slab(-0.24, -0.16, -0.74, 0.74, top, top + 0.02, steel, 2, 16)                           # rail (bord arrière)
+    slab(-0.27, -0.13, pos - 0.14, pos + 0.14, top, top + 0.09, light, 2, 2)                 # chariot
     spin = math.degrees(pos / gear_r)
-    for side in (-0.8, 0.8):
-        x, y = to_world(0.0, side)
-        gear((x, y, top + 0.06), gear_r, 0.1, 8, spin, light, dark)
+    for side in (-0.82, 0.82):
+        x, y = to_world(-0.2, side)
+        gear((x, y, top + 0.04), gear_r, 0.07, 8, spin, light, dark)
     return to_world
 
 
