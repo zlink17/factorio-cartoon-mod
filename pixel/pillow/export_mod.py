@@ -11,7 +11,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-import belt, inserter, ore
+import belt, belt_structures as bs, inserter, ore
 from assembler import draw_assembler, shadow_of, N_FRAMES, W, H, SCALE
 
 OVR = ROOT / "pixel" / "mod" / "graphics" / "overrides" / "base"
@@ -66,12 +66,26 @@ for kind in inserter.RAMPS:
     sp = inserter.sprites(kind)
     for part in ("hand-base", "hand-open", "hand-closed", "platform"):
         sp[part].save(d / f"{kind}-{part}.png")
-    if kind == "burner-inserter":
+    if kind in ("burner-inserter", "bulk-inserter"):      # le burner fournit les ombres communes ; le vrac a les siennes (mains plus larges)
         for part, img in sp["shadow"].items():
+            if kind == "bulk-inserter" and part == "hand-base":
+                continue
             alpha = img.getchannel("A").point(lambda v: 90 if v else 0)
             img.putalpha(alpha)
             img.save(d / f"{kind}-{part}-shadow.png")
     print(kind, "ok")
+
+# souterrains (planche 768 x 768 comme l'original) et répartiteurs (32 images par orientation)
+for tier, ug, sp in (("yellow", "underground-belt", "splitter"), ("red", "fast-underground-belt", "fast-splitter"),
+                     ("blue", "express-underground-belt", "express-splitter")):
+    d = GAME / ug
+    d.mkdir(parents=True, exist_ok=True)
+    up(bs.underground_sheet(tier)).save(d / f"{ug}-structure.png")
+    d = GAME / sp
+    d.mkdir(parents=True, exist_ok=True)
+    for direction in ("north", "east", "south", "west"):
+        up(bs.splitter_sheet(direction[0].upper(), tier)).save(d / f"{sp}-{direction}.png")
+    print(ug, sp, "ok")
 
 # minerais : planche 8 x 8 (étapes x variantes), 128 px par cellule
 for kind in ore.RAMPS:

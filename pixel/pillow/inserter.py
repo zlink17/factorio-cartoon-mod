@@ -17,9 +17,11 @@ RAMPS = {
     "fast-inserter": (P["blue_out"], P["blue_dark"], P["blue"], P["blue_light"]),
     "long-handed-inserter": (hx("5a2030"), hx("a83a48"), hx("dc6a5e"), hx("ffa898")),
     "burner-inserter": (P["steel_dark"], P["steel"], P["steel_mid"], P["steel_light"]),
+    "bulk-inserter": (hx("36521f"), hx("5f8a2c"), hx("8cbc3c"), hx("c6ea6e")),
 }
 BASE_SIZE = (4, 17)      # tige : 32 x 136 à x8
 HAND_SIZE = (9, 21)      # main : 72 x 168 à x8
+BULK_WIDTH = {True: 16, False: 12}   # inserter en vrac : main ouverte 128 px, fermée 96 px de large à x8
 PLAT_SIZE = (26, 20)     # plateforme : 104 x 80 à x4
 
 
@@ -44,21 +46,24 @@ def base_bone(kind):
 
 def hand(kind, opened):
     ramp = RAMPS[kind]
+    bulk = kind == "bulk-inserter"
+    w = BULK_WIDTH[opened] if bulk else HAND_SIZE[0]
+    c = w // 2
+    fw = 3 if bulk else 2                    # largeur des doigts
+    inset = 0 if opened else (1 if bulk else 2)
 
     def draw(d):
-        gap = 0 if opened else 2
-        d.rectangle((0 + gap, 0, 1 + gap, 4), fill=255)                # doigts
-        d.rectangle((7 - gap - 1 + 1, 0, 8 - gap, 4), fill=255) if False else d.rectangle((7 - gap, 0, 8 - gap, 4), fill=255)
-        d.rectangle((0 + (0 if opened else 1), 3, 8 - (0 if opened else 1), 5), fill=255)   # traverse
-        d.rectangle((2, 5, 6, 17), fill=255)                           # bras
-        d.ellipse((1, 16, 7, 20), fill=255)                            # coude
-    img = autoshade(poly_mask(HAND_SIZE, draw), ramp)
-    out_c = ramp[0]
-    for y in (8, 11, 14):                                              # petites fenêtres sombres du bras
-        img.putpixel((4, y), out_c)
-        img.putpixel((4, y + 1), out_c)
-    img.putpixel((4, 18), P["steel_light"])
-    img.putpixel((4, 19), P["steel_dark"])
+        d.rectangle((inset, 0, inset + fw - 1, 4), fill=255)                  # doigts
+        d.rectangle((w - 1 - inset - fw + 1, 0, w - 1 - inset, 4), fill=255)
+        d.rectangle((inset, 3, w - 1 - inset, 5), fill=255)                    # traverse
+        d.rectangle((c - 2, 5, c + 2, 17), fill=255)                           # bras
+        d.ellipse((c - 3, 16, c + 3, 20), fill=255)                            # coude
+    img = autoshade(poly_mask((w, HAND_SIZE[1]), draw), ramp)
+    for y in (8, 11, 14):                                                      # petites fenêtres sombres du bras
+        img.putpixel((c, y), ramp[0])
+        img.putpixel((c, y + 1), ramp[0])
+    img.putpixel((c, 18), P["steel_light"])
+    img.putpixel((c, 19), P["steel_dark"])
     return img
 
 

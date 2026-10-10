@@ -57,10 +57,18 @@ local HAND_SIZES = {
   hand_closed_picture = { 72, 168 }, hand_closed_shadow = { 72, 168 },
   hand_open_picture = { 72, 168 }, hand_open_shadow = { 72, 168 },
 }
-for _, name in ipairs({ "inserter", "fast-inserter", "long-handed-inserter", "burner-inserter" }) do
+for _, name in ipairs({ "inserter", "fast-inserter", "long-handed-inserter", "burner-inserter", "bulk-inserter" }) do
   local proto = data.raw["inserter"][name]
   if proto then
-    for key, size in pairs(HAND_SIZES) do
+    local sizes = HAND_SIZES
+    if name == "bulk-inserter" then   -- mains plus larges : ouverte 128 px, fermée 96 px
+      sizes = {
+        hand_base_picture = { 32, 136 }, hand_base_shadow = { 32, 136 },
+        hand_closed_picture = { 96, 168 }, hand_closed_shadow = { 96, 168 },
+        hand_open_picture = { 128, 168 }, hand_open_shadow = { 128, 168 },
+      }
+    end
+    for key, size in pairs(sizes) do
       if proto[key] then proto[key].width, proto[key].height = size[1], size[2] end
     end
     local sheet = proto.platform_picture and proto.platform_picture.sheet
@@ -68,5 +76,23 @@ for _, name in ipairs({ "inserter", "fast-inserter", "long-handed-inserter", "bu
       sheet.width, sheet.height = 104, 80
       sheet.shift = util.by_pixel(1.5, 1)
     end
+  end
+end
+
+-- Répartiteurs : une image de 160 x 88 (nord, sud) ou 88 x 160 (est, ouest), 32 images en planche 8 x 4. Le motif est
+-- centré sur l'entité et l'ombre est cuite dans l'image ; les pièces annexes de l'original ne servent plus.
+local SPLITTER_FRAME = {
+  north = { 160, 88 }, south = { 160, 88 }, east = { 88, 160 }, west = { 88, 160 },
+}
+for _, name in ipairs({ "splitter", "fast-splitter", "express-splitter" }) do
+  local proto = data.raw["splitter"][name]
+  if proto then
+    for dir, size in pairs(SPLITTER_FRAME) do
+      local s = proto.structure[dir]
+      s.width, s.height, s.shift = size[1], size[2], { 0, 0 }
+      s.frame_count, s.line_length, s.scale = 32, 8, 0.5
+    end
+    proto.structure_patch = { north = util.empty_sprite(), east = util.empty_sprite(),
+                              south = util.empty_sprite(), west = util.empty_sprite() }
   end
 end
