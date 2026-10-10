@@ -40,6 +40,10 @@ PALETTE_HEX = {
     "white":  "#d9d0bc",   # métal clair, reflets
     "red":    "#a8462f",   # rouge brique, braises
     "ore_iron": "#5f7f9a",
+    "green":  "#6f9a3c",   # bras en vrac
+    "tan":    "#dcb878",   # bois clair du petit poteau (ressort sur le sol brun)
+    "coral":  "#e5835a",   # poteau moyen : teinte distincte du petit poteau
+    "steel_light": "#c3ced2",   # acier clair des pylônes
     "tread":  "#625343",   # stries en relief des convoyeurs (ton sur ton avec la bande)
     # assembleurs 2 et 3 : une teinte de corps par niveau + sa version foncée pour les panneaux avant
     "steel_blue": "#55789b",  # assembleur 2 : acier bleu

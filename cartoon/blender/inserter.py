@@ -1,4 +1,4 @@
-"""Bras robotisés (burner-inserter, inserter, long-handed-inserter, fast-inserter).
+"""Bras robotisés (burner-inserter, inserter, long-handed-inserter, fast-inserter, bulk-inserter).
 
 Usage : python cartoon/blender/inserter.py <dossier_sortie> [bras|tous]
 
@@ -8,8 +8,9 @@ Pour chaque bras, écrit les fichiers du prototype d'origine, au même format :
   <nom>-hand-open.png     la pince ouverte, 72 x 164, vue de dessus
   <nom>-hand-closed.png   la pince fermée, 72 x 164
   <nom>-icon.png          icône 64 px + mipmaps (120 x 64)
-et, une seule fois (les quatre bras partagent les ombres de la pince du bras à charbon) :
+et, une seule fois (les bras partagent les ombres de la main du bras à charbon) :
   burner-inserter-hand-{base,open,closed}-shadow.png
+sauf le bras en vrac, qui a ses propres ombres de pince : bulk-inserter-hand-{open,closed}-shadow.png
 
 Les pièces de la main sont dessinées vues de dessus parce que le moteur les fait tourner autour du
 pivot : un dessus pur reste juste quel que soit l'angle. La plateforme, elle, est fixe et suit la
@@ -32,6 +33,8 @@ INSERTERS = {
     "inserter":             dict(color="yellow"),
     "long-handed-inserter": dict(color="red"),
     "fast-inserter":        dict(color="steel_blue"),
+    # le bras en vrac a une pince à part : deux tubes, deux bras articulés, deux patins ; ombres de pince propres
+    "bulk-inserter":        dict(color="green", hand="bulk", open_size=(130, 164), closed_size=(100, 164)),
 }
 
 HAND_PX = 128                  # px par case des pièces de la main (scale 0.25 dans le prototype)
@@ -120,6 +123,21 @@ def build_hand_base(color):
     box((0, -0.5, 0.06), (0.08, 0.06, 0.1), m["dark"], 0.01)                    # pointe
 
 
+def build_bulk_hand(color, opened):
+    """Deux tubes parallèles, puis deux bras articulés (acier clair) qui écartent ou resserrent deux patins."""
+    reset()
+    m = materials(color)
+    for sx in (-1, 1):
+        box((sx * 0.1, -0.25, 0.0), (0.15, 0.8, 0.1), m["main"], 0.04)            # tube
+        cyl((sx * 0.1, 0.17, 0.08), 0.07, 0.1, m["dark"], verts=14)               # articulation
+        pad = (sx * (0.43 if opened else 0.31), 0.5)
+        elbow = (sx * (0.3 if opened else 0.17), 0.3)
+        rod((sx * 0.1, 0.17, 0.1), (*elbow, 0.1), 0.045, m["light"])
+        rod((*elbow, 0.1), (*pad, 0.1), 0.045, m["light"])
+        cyl((*elbow, 0.1), 0.055, 0.1, m["dark"], verts=12)
+        box((*pad, 0.09), (0.14, 0.2, 0.1), m["light"], 0.03)                      # patin
+
+
 def build_hand(color, opened):
     reset()
     m = materials(color)
@@ -173,10 +191,13 @@ def build_inserter(name, out):
     color = INSERTERS[name]["color"]
     cells = [render_platform_cell(color, d, out) for d in range(4)]
     cv2.imwrite(os.path.join(out, f"{name}-platform.png"), np.hstack(cells))
+    cfg = INSERTERS[name]
+    hand = build_bulk_hand if cfg.get("hand") == "bulk" else build_hand
+    tmp = os.path.join(out, "_p.png")
     parts = {
-        "hand-base": render_part(lambda: build_hand_base(color), HAND_BASE_SIZE[::1], HAND_PX, os.path.join(out, "_p.png")),
-        "hand-open": render_part(lambda: build_hand(color, True), HAND_SIZE, HAND_PX, os.path.join(out, "_p.png")),
-        "hand-closed": render_part(lambda: build_hand(color, False), HAND_SIZE, HAND_PX, os.path.join(out, "_p.png")),
+        "hand-base": render_part(lambda: build_hand_base(color), HAND_BASE_SIZE, HAND_PX, tmp),
+        "hand-open": render_part(lambda: hand(color, True), cfg.get("open_size", HAND_SIZE), HAND_PX, tmp),
+        "hand-closed": render_part(lambda: hand(color, False), cfg.get("closed_size", HAND_SIZE), HAND_PX, tmp),
     }
     for part, im in parts.items():
         cv2.imwrite(os.path.join(out, f"{name}-{part}.png"), im)
@@ -198,10 +219,15 @@ if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "inserter_out"
     which = sys.argv[2] if len(sys.argv) > 2 else "tous"
     os.makedirs(out, exist_ok=True)
-    first = None
+    first, saved = None, {}
     for name in (INSERTERS if which == "tous" else [which]):
         parts = build_inserter(name, out)
+        saved[name] = parts
         first = first or parts
         print("OK", name, flush=True)
     build_shadows(first, out)
     print("OK ombres")
+    if "bulk-inserter" in saved:
+        for part in ("open", "closed"):
+            cv2.imwrite(os.path.join(out, f"bulk-inserter-hand-{part}-shadow.png"),
+                        silhouette_shadow(saved["bulk-inserter"][f"hand-{part}"]))

@@ -179,7 +179,7 @@ def flatten_to_shadow(kx, ky):
 
 
 def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0.0, supersample=None, shift_y=0.0,
-                 outline=True, outline_units=None):
+                 outline=True, outline_units=None, shift_x=0.0):
     """Rend la scène courante avec la projection du guide de style.
 
     Le rendu est fait à `supersample` fois la taille puis réduit (alpha prémultiplié).
@@ -204,6 +204,7 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
     cam.data.type = "ORTHO"
     cam.data.ortho_scale = scale   # couvre la plus grande dimension du rendu
     cam.data.shift_y = shift_y
+    cam.data.shift_x = shift_x
     cam.data.clip_end = 100
     cam.rotation_euler = (p, 0, 0)
     sc = bpy.context.scene

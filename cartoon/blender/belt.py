@@ -31,12 +31,15 @@ FRAME = 128
 PX_PER_TILE = 64
 MARGIN = 2 / PX_PER_TILE          # recouvrement de 2 px entre cases voisines (contours)
 
-# frames : images par rangée ; rail : couleur des rails et des flèches ;
+# frames : images par rangée ; rail : couleur des rails et des flèches ; game : jeu ou extension du sprite (base par défaut) ;
 # arrow_every : une strie sur n porte une flèche (comme l'original : 1/2 pour le basique, 1/4 ensuite)
 BELTS = {
     "transport-belt":         dict(frames=16, rail="yellow", arrow_every=2),
     "fast-transport-belt":    dict(frames=32, rail="red", arrow_every=4),
     "express-transport-belt": dict(frames=32, rail="steel_blue", arrow_every=4),
+    # turbo (Space Age) : 64 images, et le moteur décale d'une demi-boucle les cases voisines (« alternate ») :
+    # une flèche toutes les 8 stries = toutes les 2 cases, raccordées d'une case à l'autre
+    "turbo-transport-belt":   dict(frames=64, rail="green", arrow_every=8, game="space-age"),
 }
 
 HALF = 0.5                 # demi-largeur de la case
