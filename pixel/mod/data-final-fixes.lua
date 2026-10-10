@@ -89,7 +89,7 @@ local SPLITTER_FRAME = {
   north = { 160, 104 }, south = { 160, 104 }, east = { 104, 160 }, west = { 104, 160 },
 }
 -- Le lane-splitter réutilise les sprites du répartiteur de base.
-for _, entry in ipairs({ { "splitter", "splitter" }, { "splitter", "fast-splitter" }, { "splitter", "express-splitter" },
+for _, entry in ipairs({ { "splitter", "splitter" }, { "splitter", "fast-splitter" }, { "splitter", "express-splitter" }, { "splitter", "turbo-splitter" },
                          { "lane-splitter", "lane-splitter" } }) do
   local proto = data.raw[entry[1]] and data.raw[entry[1]][entry[2]]
   if proto and proto.structure then

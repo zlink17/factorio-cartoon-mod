@@ -42,4 +42,5 @@ BELT = {
     "yellow": (hx("e8b85a"), hx("a8743a")),
     "red": (hx("dc6a5e"), hx("8e3a48")),
     "blue": (hx("6cb4dc"), hx("3f6fa8")),
+    "green": (hx("92cf5c"), hx("4f8a3f")),      # turbo (Space Age)
 }

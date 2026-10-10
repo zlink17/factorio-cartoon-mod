@@ -57,4 +57,10 @@ return {
   ["__base__/graphics/icons/assembling-machine-1.png"] = true,
   ["__base__/graphics/icons/assembling-machine-2.png"] = true,
   ["__base__/graphics/icons/assembling-machine-3.png"] = true,
+  ["__space-age__/graphics/entity/turbo-splitter/turbo-splitter-east.png"] = true,
+  ["__space-age__/graphics/entity/turbo-splitter/turbo-splitter-north.png"] = true,
+  ["__space-age__/graphics/entity/turbo-splitter/turbo-splitter-south.png"] = true,
+  ["__space-age__/graphics/entity/turbo-splitter/turbo-splitter-west.png"] = true,
+  ["__space-age__/graphics/entity/turbo-transport-belt/turbo-transport-belt.png"] = true,
+  ["__space-age__/graphics/entity/turbo-underground-belt/turbo-underground-belt-structure.png"] = true,
 }

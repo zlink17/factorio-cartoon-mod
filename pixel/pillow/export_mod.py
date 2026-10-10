@@ -87,6 +87,17 @@ for tier, ug, sp in (("yellow", "underground-belt", "splitter"), ("red", "fast-u
         up(bs.splitter_sheet(direction[0].upper(), tier)).save(d / f"{sp}-{direction}.png")
     print(ug, sp, "ok")
 
+# turbo (Space Age) : tapis de 64 images, souterrain et répartiteur, dans le dossier du mod « space-age »
+SA = OVR.parent / "space-age" / "entity"
+(SA / "turbo-transport-belt").mkdir(parents=True, exist_ok=True)
+up(belt.sheet("green", 64)).save(SA / "turbo-transport-belt" / "turbo-transport-belt.png")
+(SA / "turbo-underground-belt").mkdir(parents=True, exist_ok=True)
+up(bs.underground_sheet("green")).save(SA / "turbo-underground-belt" / "turbo-underground-belt-structure.png")
+(SA / "turbo-splitter").mkdir(parents=True, exist_ok=True)
+for direction in ("north", "east", "south", "west"):
+    up(bs.splitter_sheet(direction[0].upper(), "green")).save(SA / "turbo-splitter" / f"turbo-splitter-{direction}.png")
+print("turbo ok")
+
 # minerais : planche 8 x 8 (étapes x variantes), 128 px par cellule
 for kind in ore.RAMPS:
     d = GAME / kind

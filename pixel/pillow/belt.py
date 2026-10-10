@@ -16,8 +16,8 @@ from palette import P, BELT, hx
 CELL = 32           # px d'art par cellule ; la case occupe [8, 24[
 T = 16              # px d'art par case
 PITCH = 8           # pas des chevrons
-# Couleur du fond du tapis, par niveau : brun (basique), bordeaux (rapide), marine (express)
-BASE = {"yellow": hx("6b5638"), "red": hx("6e3446"), "blue": hx("33507a")}
+# Couleur du fond du tapis, par niveau : brun (basique), bordeaux (rapide), marine (express), vert sombre (turbo)
+BASE = {"yellow": hx("6b5638"), "red": hx("6e3446"), "blue": hx("33507a"), "green": hx("3b5d3f")}
 LIGHT = (-1 / math.sqrt(2), -1 / math.sqrt(2))   # direction vers la lumière (haut gauche)
 
 # (coin, vecteur coin -> milieu du bord d'entrée, vecteur coin -> milieu du bord de sortie)
