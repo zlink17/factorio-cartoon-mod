@@ -194,13 +194,39 @@ def sulfur():
         o.rotation_euler = (-d * 1.8 * math.sin(a), d * 1.8 * math.cos(a), rng.u(0, 6))
 
 
+def stadium(length, width, z0, h, m, verts=16):
+    """Prisme vertical à base de pilule (rectangle aux bouts en demi-cercle), long selon x."""
+    import bmesh
+    r, c = width / 2, length / 2 - width / 2
+    pts = [(c + r * math.cos(a), r * math.sin(a)) for a in (math.pi * (k / verts - 0.5) for k in range(verts + 1))]
+    pts += [(-x, -y) for x, y in pts]
+    bm = bmesh.new()
+    low = [bm.verts.new((x, y, z0)) for x, y in pts]
+    high = [bm.verts.new((x, y, z0 + h)) for x, y in pts]
+    bm.faces.new(low[::-1]); bm.faces.new(high)
+    n = len(pts)
+    for k in range(n):
+        bm.faces.new((low[k], low[(k + 1) % n], high[(k + 1) % n], high[k]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    mesh = bpy.data.meshes.new("stadium")
+    bm.to_mesh(mesh); bm.free()
+    o = bpy.data.objects.new("stadium", mesh)
+    bpy.context.scene.collection.objects.link(o)
+    mesh.materials.append(m)
+    return o
+
+
 def battery():
-    """Pile couchée, deux bornes rouge et bleue sur le dessus."""
+    """Pile debout en forme de pilule, posée en diagonale : panneau clair en creux sur le dessus, borne rouge à
+    l'avant et borne bleue à l'arrière, coiffées de laiton (comme l'original)."""
     reset()
-    box((0, 0, 0.22), (0.62, 0.95, 0.44), mat("case", P["dark_grey"]), bevel=0.14)
-    for x, c in ((-0.15, "sci_red"), (0.15, "sci_blue")):
-        cyl((x, -0.25, 0.47), 0.09, 0.08, mat(c, P[c]), verts=20)
-    turn(-25)
+    stadium(0.9, 0.46, 0, 0.62, mat("case", P["dark_grey"]))
+    stadium(0.78, 0.34, 0.62, 0.012, mat("panel", P["glass"]))
+    brass = mat("cap", P["brass"])
+    for x, c in ((-0.22, "sci_red"), (0.22, "sci_blue")):
+        cyl((x, 0, 0.66), 0.12, 0.07, mat(c, P[c]), verts=24)
+        cyl((x, 0, 0.72), 0.065, 0.06, brass, verts=20)
+    turn(55)
 
 
 def engine_unit():
@@ -272,17 +298,34 @@ def solid_fuel():
     turn(-25)
 
 
+def orient(tilt, yaw):
+    """Bascule toute la scène de `tilt` degrés (tilt > 0 : le bout +x descend) puis la tourne de `yaw` degrés."""
+    from mathutils import Matrix
+    rot = Matrix.Rotation(math.radians(yaw), 4, "Z") @ Matrix.Rotation(math.radians(tilt), 4, "Y")
+    bpy.context.view_layer.update()
+    for o in bpy.context.scene.objects:
+        if o.type == "MESH":
+            o.matrix_world = rot @ o.matrix_world
+
+
 def explosives():
-    """Fagot de bâtons de dynamite rouges liés par deux bandes grises, avec une mèche."""
+    """Fagot hexagonal de sept bâtons de dynamite serré par deux larges bandes argentées, une mèche noire sortant du
+    bâton central. Comme l'original, les bouts (anneau rouge, cœur sombre) sont présentés presque de face : le fagot
+    est construit le long de x, bout avant en +x, puis basculé (bout avant relevé vers le joueur) et tourné vers l'avant-gauche."""
     reset()
-    red, band, fuse = mat("stick", P["sci_red"]), mat("band", P["iron"]), mat("fuse", P["dark"])
-    r = 0.11
-    for dy, dz in ((0, 0), (2 * r, 0), (-2 * r, 0), (r, 1.7 * r), (-r, 1.7 * r), (0, 3.4 * r)):
-        lying_cyl((0, dy, r + dz), r, 0.85, red, verts=16)
-    for x in (-0.22, 0.22):
-        box((x, 0, 0.27), (0.07, 0.7, 0.56), band, bevel=0.05)
-    tube([(-0.43, 0, 0.3), (-0.55, -0.05, 0.25), (-0.6, -0.15, 0.1), (-0.68, -0.25, 0.04)], 0.025, fuse)
-    turn(-35)
+    red, band, core = mat("stick", P["sci_red"]), mat("band", P["steel_light"]), mat("core", P["dark_grey"])
+    r, length = 0.105, 1.05
+    e = length / 2
+    for k in range(7):
+        a = k * math.tau / 6
+        y, z = (0.0, 0.0) if k == 6 else (2 * r * math.cos(a), 2 * r * math.sin(a))
+        lying_cyl((0, y, z), r * 0.97, length, red, verts=16)
+        lying_cyl((e + 0.005, y, z), r * 0.42, 0.01, core, verts=12)
+    for x in (0.16, -0.26):
+        lying_cyl((x, 0, 0), 3 * r + 0.018, 0.14, band, verts=24)
+    tube([(e, 0, 0), (e + 0.08, 0, -0.08), (e + 0.1, 0.05, -0.25), (e + 0.05, 0.12, -0.4), (e + 0.15, 0.16, -0.5)],
+         0.03, mat("fuse", P["dark"]))
+    orient(-10, 232)
 
 
 def uranium(color):
