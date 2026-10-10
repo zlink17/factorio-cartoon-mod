@@ -17,7 +17,7 @@ import math, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import reset, mat, box, cyl, blob, gear, frustum, tri_plate, render_scene
+from lib import reset, mat, box, cyl, gear, frustum, tri_plate, render_scene
 
 P = S.PALETTE
 

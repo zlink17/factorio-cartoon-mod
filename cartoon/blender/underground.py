@@ -2,7 +2,7 @@
 
 Usage : python cartoon/blender/underground.py <dossier_sortie> [convoyeur|tous]
 
-Pour chaque niveau, écrit les fichiers du prototype d'origine :
+Pour chaque niveau, écrit les fichiers du prototype d'origine (<jeu>/entity/<nom>/ et <jeu>/icons/) :
   <nom>-structure.png              768 x 768 : 4 colonnes (nord, est, sud, ouest) de cellules de 192 x 192 ;
                                    rangée 0 = sortie, 1 = entrée, 2 et 3 = les mêmes pour l'est et l'ouest (chargement par le côté)
   <nom>-structure-back-patch.png   192 x 768, vide
@@ -24,7 +24,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
 from belt import BELTS, build_belt
-from lib import flatten_to_shadow, mat, mip_strip, render_icon, render_scene, reset
+from lib import entity_path, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset
 
 P = S.PALETTE
 CELL = 192
@@ -143,26 +143,8 @@ def build_scene(direction, entering, belt):
 
 def render_cell(direction, entering, belt, out):
     """Une cellule 192 x 192 : le capot et son ombre à plat (semi-transparente)."""
-    path = os.path.join(out, "_ug.png")
-    scale = CELL / PX_PER_TILE
-    build_scene(direction, entering, belt)
-    render_scene(path, size=CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline_units=OUTLINE)
-    sprite = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    build_scene(direction, entering, belt)
-    flatten_to_shadow(SHADOW[0], SHADOW[1])
-    render_scene(path, size=CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline=False)
-    shadow = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    shadow[:, :, :3] = 0
-    shadow[:, :, 3] = (shadow[:, :, 3] * SHADOW[2]).astype(np.uint8)
-    return over(sprite, shadow)
-
-
-def over(top, bottom):
-    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
-    oa = ta + ba * (1 - ta)
-    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
-    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
+    return render_with_shadow(lambda: build_scene(direction, entering, belt), os.path.join(out, "_ug.png"), CELL,
+                              CELL / PX_PER_TILE, SHADOW, OUTLINE)[1]
 
 
 def build_icon(belt, out):
@@ -185,11 +167,11 @@ def build_underground(name, out):
             sheet[row * CELL:(row + 1) * CELL, col * CELL:(col + 1) * CELL] = src
             if d in ("E", "W"):                       # chargement par le côté : mêmes images
                 sheet[(row + 2) * CELL:(row + 3) * CELL, col * CELL:(col + 1) * CELL] = src
-    cv2.imwrite(os.path.join(out, f"{name}-structure.png"), sheet)
+    cv2.imwrite(entity_path(out, name, f"{name}-structure.png"), sheet)
     empty = np.zeros((CELL, 4 * CELL, 4), np.uint8)
-    cv2.imwrite(os.path.join(out, f"{name}-structure-back-patch.png"), empty)
-    cv2.imwrite(os.path.join(out, f"{name}-structure-front-patch.png"), empty)
-    cv2.imwrite(os.path.join(out, f"{name}-icon.png"), build_icon(belt, out))
+    cv2.imwrite(entity_path(out, name, f"{name}-structure-back-patch.png"), empty)
+    cv2.imwrite(entity_path(out, name, f"{name}-structure-front-patch.png"), empty)
+    cv2.imwrite(icon_path(out, name), build_icon(belt, out))
 
 
 if __name__ == "__main__":

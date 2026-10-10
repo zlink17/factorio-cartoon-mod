@@ -1,4 +1,7 @@
-opencv-python
-numpy
-Pillow
-bpy
+# Environnement des générateurs du mod cartoon (Python 3.11 : imposé par bpy).
+#   uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r cartoon/blender/requirements.txt
+# Versions figées : un rendu doit pouvoir être refait à l'identique (tools/build.py --verifier).
+bpy==4.4.0
+numpy==2.4.6
+opencv-python==5.0.0.93
+Pillow==12.3.0

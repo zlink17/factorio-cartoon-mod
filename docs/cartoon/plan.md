@@ -78,9 +78,9 @@ Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'
       (chaque entité, dans chaque direction, convoyeurs chargés d'objets, sols et nature) et prend des captures avec
       `game.take_screenshot`, lancé en ligne de commande depuis WSL. Même vitrine avec et sans le mod : comparaison
       côte à côte. Si Factorio refuse de démarrer, l'erreur est lue dans `factorio-current.log`.
-- [ ] **Une commande de production** : `tools/build.py cartoon <lot>` lance le bon générateur, écrit dans les overrides,
+- [x] **Une commande de production** : `tools/build.py cartoon <lot>` (lots déclarés dans `cartoon/lots.py`) lance le bon générateur, écrit dans les overrides,
       régénère le manifeste et lance le contrôle. Fini la copie à la main depuis `sortie/`.
-- [ ] **Factoriser les générateurs Blender** : `lib.py` porte déjà le style ; y regrouper ce qui est dupliqué entre
+- [x] **Factoriser les générateurs Blender** (`lib.py` : chemins de sortie, sprite + ombre portée, fenêtre de découpe, planches, tiges) : `lib.py` porte déjà le style ; y regrouper ce qui est dupliqué entre
       `belt.py`, `splitter.py`, `underground.py`, `inserter.py`, `pole.py` (caméra calée sur un original, planches,
       ombres, icônes à mipmaps). Chaque nouveau lot doit coûter un modèle, pas un pipeline.
 - [ ] **Générateur d'icônes commun** : un rendu Blender à angle fixe pour les icônes (objets et entités), avec mipmaps.

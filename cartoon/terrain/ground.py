@@ -153,5 +153,7 @@ if __name__ == "__main__":
     which = sys.argv[2] if len(sys.argv) > 2 else "toutes"
     os.makedirs(out, exist_ok=True)
     for name in (TILES if which == "toutes" else [which]):
-        cv2.imwrite(os.path.join(out, f"{name}.png"), make_sheet(name))
+        path = os.path.join(out, "base", "terrain", f"{name}.png")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        cv2.imwrite(path, make_sheet(name))
         print("OK", name, flush=True)

@@ -2,7 +2,7 @@
 
 Usage : python cartoon/blender/inserter.py <dossier_sortie> [bras|tous]
 
-Pour chaque bras, écrit les fichiers du prototype d'origine, au même format :
+Pour chaque bras, écrit les fichiers du prototype d'origine (base/entity/<nom>/ et base/icons/), au même format :
   <nom>-platform.png      4 plateformes de 105 x 79 côte à côte (tripode + tambour, vue à 30°, ombre comprise)
   <nom>-hand-base.png     le bras, 32 x 136, vu de dessus (128 px par case)
   <nom>-hand-open.png     la pince ouverte, 72 x 164, vue de dessus
@@ -17,14 +17,13 @@ pivot : un dessus pur reste juste quel que soit l'angle. La plateforme, elle, es
 projection des bâtiments.
 """
 import math, os, sys
-import bpy
 import cv2
 import numpy as np
-from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import box, cyl, flatten_to_shadow, mat, mip_strip, render_icon, render_scene, reset
+from lib import (box, cyl, entity_path, icon_path, load, mat, mip_strip, render_icon, render_scene, render_with_shadow,
+                 reset, rod)
 
 P = S.PALETTE
 
@@ -50,17 +49,6 @@ HAND_OUTLINE = 0.011           # contour plus fin que le style de base : ces pi�
 PLATFORM_OUTLINE = 0.016
 
 
-def rod(p0, p1, r, m, verts=12):
-    """Cylindre entre deux points."""
-    p0, p1 = Vector(p0), Vector(p1)
-    d = p1 - p0
-    bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=d.length, location=(p0 + p1) / 2)
-    o = bpy.context.object
-    o.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
-    o.data.materials.append(m)
-    return o
-
-
 def materials(color):
     return dict(main=mat("main", P[color]), dark=mat("dark", P["dark"]), light=mat("light", P["white"]),
                 steel=mat("steel", P["grey"]))
@@ -84,33 +72,13 @@ def build_platform(color, direction):
 
 def render_platform_cell(color, direction, out):
     """Une cellule de 105 x 79 : l'ombre à plat (semi-transparente) sous la plateforme."""
-    path = os.path.join(out, "_plat.png")
     scale = PLATFORM_CELL[0] / PLATFORM_PX
     # le dessus du tambour (z = 0.5) est à 0,5 * sin(30°) * 64 = 16 px au-dessus de son pied : on cale la caméra
     # pour qu'il tombe en PLATFORM_DRUM (la caméra décale de shift * 105 px vers le bas)
     shift = (PLATFORM_DRUM[1] + 0.5 * math.sin(math.radians(S.PITCH_BUILDING_DEG)) * PLATFORM_PX
              - PLATFORM_CELL[1] / 2) / max(PLATFORM_CELL)
-    build_platform(color, direction)
-    render_scene(path, size=PLATFORM_CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_y=shift,
-                 outline_units=PLATFORM_OUTLINE)
-    im = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    sprite = im
-    build_platform(color, direction)
-    flatten_to_shadow(PLATFORM_SHADOW[0], PLATFORM_SHADOW[1])
-    render_scene(path, size=PLATFORM_CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_y=shift, outline=False)
-    shadow = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    shadow[:, :, :3] = 0
-    shadow[:, :, 3] = (shadow[:, :, 3] * PLATFORM_SHADOW[2]).astype(np.uint8)
-    return over(sprite, shadow)
-
-
-def over(top, bottom):
-    """Composition « top sur bottom » (RGBA, alpha non prémultiplié)."""
-    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
-    oa = ta + ba * (1 - ta)
-    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
-    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
+    return render_with_shadow(lambda: build_platform(color, direction), os.path.join(out, "_plat.png"), PLATFORM_CELL,
+                              scale, PLATFORM_SHADOW, PLATFORM_OUTLINE, shift_y=shift)[1]
 
 
 # --- la main : bras et pince, vus de dessus ----------------------------------------------------
@@ -153,9 +121,7 @@ def render_part(build, size, px_per_tile, path):
     build()
     render_scene(path, size=size, scale=max(size) / px_per_tile, pitch_deg=S.PITCH_TOPDOWN_DEG,
                  outline_units=HAND_OUTLINE)
-    im = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    return im
+    return load(path)
 
 
 def silhouette_shadow(im, rows=None):
@@ -190,7 +156,7 @@ def build_icon_model(color):
 def build_inserter(name, out):
     color = INSERTERS[name]["color"]
     cells = [render_platform_cell(color, d, out) for d in range(4)]
-    cv2.imwrite(os.path.join(out, f"{name}-platform.png"), np.hstack(cells))
+    cv2.imwrite(entity_path(out, name, f"{name}-platform.png"), np.hstack(cells))
     cfg = INSERTERS[name]
     hand = build_bulk_hand if cfg.get("hand") == "bulk" else build_hand
     tmp = os.path.join(out, "_p.png")
@@ -200,18 +166,18 @@ def build_inserter(name, out):
         "hand-closed": render_part(lambda: hand(color, False), cfg.get("closed_size", HAND_SIZE), HAND_PX, tmp),
     }
     for part, im in parts.items():
-        cv2.imwrite(os.path.join(out, f"{name}-{part}.png"), im)
+        cv2.imwrite(entity_path(out, name, f"{name}-{part}.png"), im)
     icon = render_icon(lambda: build_icon_model(color), os.path.join(out, "_icon.png"), ICON, 58)
-    cv2.imwrite(os.path.join(out, f"{name}-icon.png"), mip_strip(icon, ICON))
+    cv2.imwrite(icon_path(out, name), mip_strip(icon, ICON))
     return parts
 
 
 def build_shadows(parts, out):
     """Ombres de la main, communes aux quatre bras (fichiers du bras à charbon)."""
     base = silhouette_shadow(parts["hand-base"], rows=132)
-    cv2.imwrite(os.path.join(out, "burner-inserter-hand-base-shadow.png"), base)
+    cv2.imwrite(entity_path(out, "burner-inserter", "burner-inserter-hand-base-shadow.png"), base)
     for part in ("open", "closed"):
-        cv2.imwrite(os.path.join(out, f"burner-inserter-hand-{part}-shadow.png"),
+        cv2.imwrite(entity_path(out, "burner-inserter", f"burner-inserter-hand-{part}-shadow.png"),
                     silhouette_shadow(parts[f"hand-{part}"]))
 
 
@@ -229,5 +195,5 @@ if __name__ == "__main__":
     print("OK ombres")
     if "bulk-inserter" in saved:
         for part in ("open", "closed"):
-            cv2.imwrite(os.path.join(out, f"bulk-inserter-hand-{part}-shadow.png"),
+            cv2.imwrite(entity_path(out, "bulk-inserter", f"bulk-inserter-hand-{part}-shadow.png"),
                         silhouette_shadow(saved["bulk-inserter"][f"hand-{part}"]))

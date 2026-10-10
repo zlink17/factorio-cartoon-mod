@@ -2,7 +2,7 @@
 
 Usage : python cartoon/blender/splitter.py <dossier_sortie> [répartiteur|tous]
 
-Pour chaque niveau, écrit les fichiers du prototype d'origine (planches de 8 x 4 images) :
+Pour chaque niveau, écrit les fichiers du prototype d'origine (<jeu>/entity/<nom>/ et <jeu>/icons/, planches de 8 x 4 images) :
   <nom>-north.png, -east.png, -south.png, -west.png     la tête du répartiteur et son ombre
   <nom>-east-top_patch.png, -west-top_patch.png         la moitié haute, dessinée par-dessus les objets (est et ouest)
   <nom>-icon.png                                        icône 64 px + mipmaps
@@ -14,14 +14,12 @@ sont des entités verticales de 2 cases, dont la moitié haute est une pièce à
 Les convoyeurs dessous sont ceux de belt.py (le moteur les anime avec la planche des convoyeurs).
 """
 import math, os, sys
-import bpy
 import cv2
-import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
 from belt import BELTS, prism
-from lib import cyl, flatten_to_shadow, gear, mat, mip_strip, render_icon, render_scene, reset
+from lib import crop_centered, entity_path, gear, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset, sheet
 
 P = S.PALETTE
 PX_PER_TILE = 64
@@ -105,26 +103,8 @@ def build_scene(direction, phase, belt):
 
 def render_canvas(direction, phase, belt, out):
     """Le répartiteur et son ombre à plat sur un grand canevas centré sur l'entité."""
-    path = os.path.join(out, "_sp.png")
-    scale = CANVAS / PX_PER_TILE
-    build_scene(direction, phase, belt)
-    render_scene(path, size=CANVAS, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline_units=OUTLINE)
-    sprite = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    build_scene(direction, phase, belt)
-    flatten_to_shadow(SHADOW[0], SHADOW[1])
-    render_scene(path, size=CANVAS, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline=False)
-    shadow = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    shadow[:, :, :3] = 0
-    shadow[:, :, 3] = (shadow[:, :, 3] * SHADOW[2]).astype(np.uint8)
-    return sprite, over(sprite, shadow)
-
-
-def over(top, bottom):
-    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
-    oa = ta + ba * (1 - ta)
-    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
-    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
+    return render_with_shadow(lambda: build_scene(direction, phase, belt), os.path.join(out, "_sp.png"), CANVAS,
+                              CANVAS / PX_PER_TILE, SHADOW, OUTLINE)
 
 
 def window_origin(window):
@@ -133,14 +113,12 @@ def window_origin(window):
 
 
 def crop(canvas, window):
-    w, h, _, _ = window
-    x0, y0 = window_origin(window)
-    return canvas[y0:y0 + h, x0:x0 + w]
+    return crop_centered(canvas, window[:2], window[2:])
 
 
 def crop_patch(sprite, shadowed, patch, window):
     """Pièce du haut : avec l'ombre, sauf sur les lignes déjà couvertes par la structure (sinon l'ombre serait doublée)."""
-    out = crop(shadowed, patch).copy()
+    out = crop(shadowed, patch)
     x0, y0 = window_origin(patch)
     ws, hs, _, _ = window
     _, ys = window_origin(window)
@@ -148,12 +126,6 @@ def crop_patch(sprite, shadowed, patch, window):
     if hi > lo:
         out[lo:hi] = crop(sprite, patch)[lo:hi]
     return out
-
-
-def build_sheet(frames, size):
-    w, h = size
-    rows = N_FRAMES // COLUMNS
-    return np.vstack([np.hstack(frames[r * COLUMNS:(r + 1) * COLUMNS]) for r in range(rows)])
 
 
 def build_icon(belt, out):
@@ -173,10 +145,10 @@ def build_splitter(name, out):
             main.append(crop(shadowed, window))
             if patch:
                 top.append(crop_patch(sprite, shadowed, patch, window))
-        cv2.imwrite(os.path.join(out, f"{name}-{direction}.png"), build_sheet(main, window[:2]))
+        cv2.imwrite(entity_path(out, name, f"{name}-{direction}.png"), sheet(main, COLUMNS))
         if patch:
-            cv2.imwrite(os.path.join(out, f"{name}-{direction}-top_patch.png"), build_sheet(top, patch[:2]))
-    cv2.imwrite(os.path.join(out, f"{name}-icon.png"), build_icon(belt, out))
+            cv2.imwrite(entity_path(out, name, f"{name}-{direction}-top_patch.png"), sheet(top, COLUMNS))
+    cv2.imwrite(icon_path(out, name), build_icon(belt, out))
 
 
 if __name__ == "__main__":

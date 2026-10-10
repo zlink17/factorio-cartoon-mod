@@ -2,8 +2,8 @@
 
 Usage : python cartoon/blender/belt.py <dossier_sortie> [convoyeur|tous] [nb d'images max, pour tester]
 
-Écrit <convoyeur>-icon.png (icône 64 px + mipmaps, 120 x 64) et <convoyeur>.png : la planche de l'original, 20 rangées de `frames` images de 128 x 128 px
-(64 px par case, la case est centrée dans l'image).
+Écrit <jeu>/icons/<convoyeur>.png (icône 64 px + mipmaps, 120 x 64) et <jeu>/entity/<convoyeur>/<convoyeur>.png :
+la planche de l'original, 20 rangées de `frames` images de 128 x 128 px (64 px par case, la case est centrée dans l'image).
 
 Rangées (comme l'original) :
   0-3    droits : est, ouest, nord, sud
@@ -24,14 +24,14 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import mip_strip, reset, mat, render_scene
+from lib import entity_path, icon_path, mip_strip, reset, mat, render_scene
 
 P = S.PALETTE
 FRAME = 128
 PX_PER_TILE = 64
 MARGIN = 2 / PX_PER_TILE          # recouvrement de 2 px entre cases voisines (contours)
 
-# frames : images par rangée ; rail : couleur des rails et des flèches ; game : jeu ou extension du sprite (base par défaut) ;
+# frames : images par rangée ; rail : couleur des rails et des flèches ;
 # arrow_every : une strie sur n porte une flèche (comme l'original : 1/2 pour le basique, 1/4 ensuite)
 BELTS = {
     "transport-belt":         dict(frames=16, rail="yellow", arrow_every=2),
@@ -39,7 +39,7 @@ BELTS = {
     "express-transport-belt": dict(frames=32, rail="steel_blue", arrow_every=4),
     # turbo (Space Age) : 64 images, et le moteur décale d'une demi-boucle les cases voisines (« alternate ») :
     # une flèche toutes les 8 stries = toutes les 2 cases, raccordées d'une case à l'autre
-    "turbo-transport-belt":   dict(frames=64, rail="green", arrow_every=8, game="space-age"),
+    "turbo-transport-belt":   dict(frames=64, rail="green", arrow_every=8),
 }
 
 HALF = 0.5                 # demi-largeur de la case
@@ -201,7 +201,7 @@ def build_sheet(name, out, max_frames=None):
         for f in range(n):
             sheet[row * FRAME:(row + 1) * FRAME, f * FRAME:(f + 1) * FRAME] = render_row(row, f, cfg, out)
         print(f"{name} rangée {row}/{len(ROWS) - 1}", flush=True)
-    path = os.path.join(out, f"{name}.png")
+    path = entity_path(out, name)
     cv2.imwrite(path, sheet)
     return path
 
@@ -221,7 +221,7 @@ def build_icon(name, out):
                  outline_units=ICON_OUTLINE_PX * scale / ICON)
     im = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     os.remove(path)
-    path = os.path.join(out, f"{name}-icon.png")
+    path = icon_path(out, name)
     cv2.imwrite(path, mip_strip(im, ICON))
     return path
 

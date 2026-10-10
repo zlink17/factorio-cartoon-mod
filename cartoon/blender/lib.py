@@ -5,6 +5,34 @@ import bpy
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
 
+FACTORIO_DATA = os.environ.get("FACTORIO_DIR", "/mnt/c/Program Files (x86)/Steam/steamapps/common/Factorio") + "/data"
+
+
+# --- fichiers produits ------------------------------------------------------------------------------------------
+# Un générateur écrit l'arborescence de graphics/overrides : <sortie>/<jeu>/<chemin de l'original sous graphics/>.
+# tools/build.py génère dans un dossier temporaire, contrôle, puis copie dans le mod.
+
+def game_of(name):
+    """Jeu (base ou extension) qui définit un objet : les objets « turbo » viennent de Space Age."""
+    return "space-age" if name.startswith("turbo-") else "base"
+
+
+def target(out, rel):
+    """Chemin <out>/<rel> (dossiers créés), rel = chemin sous graphics/overrides, ex. base/icons/inserter.png."""
+    path = os.path.join(out, rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return path
+
+
+def entity_path(out, name, file=None):
+    """Fichier d'entité : <jeu>/entity/<nom>/<file> (par défaut <nom>.png)."""
+    return target(out, f"{game_of(name)}/entity/{name}/{file or name + '.png'}")
+
+
+def icon_path(out, name):
+    """Icône d'objet : <jeu>/icons/<nom>.png."""
+    return target(out, f"{game_of(name)}/icons/{name}.png")
+
 
 def reset():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -282,3 +310,75 @@ def render_icon(build, path, size=64, fill=60, outline_px=0.5, pitch_deg=S.PITCH
     im = draw(scale, shift)
     os.remove(path)
     return im
+
+
+# --- briques communes aux générateurs ---------------------------------------------------------------------------
+
+def rod(p0, p1, r, m, verts=12):
+    """Cylindre entre deux points."""
+    from mathutils import Vector
+    a, b = Vector(p0), Vector(p1)
+    d = b - a
+    bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=d.length, location=(a + b) / 2)
+    o = bpy.context.object
+    o.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
+    o.data.materials.append(m)
+    return o
+
+
+def load(path):
+    """Lit un rendu intermédiaire (RGBA) et supprime le fichier."""
+    import cv2
+    im = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    os.remove(path)
+    return im
+
+
+def over(top, bottom):
+    """Composition « top sur bottom » (RGBA, alpha non prémultiplié)."""
+    import numpy as np
+    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
+    oa = ta + ba * (1 - ta)
+    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
+    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
+
+
+def render_shadow(build, path, size, scale, shear, shift_x=0.0, shift_y=0.0):
+    """Ombre portée du modèle (`build()` crée la scène), projetée à plat (`shear` = décalage au sol par unité de
+    hauteur, x et y) et rendue avec la caméra des bâtiments : silhouette noire, alpha plein."""
+    build()
+    flatten_to_shadow(*shear)
+    render_scene(path, size=size, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_x=shift_x, shift_y=shift_y,
+                 outline=False)
+    shadow = load(path)
+    shadow[:, :, :3] = 0
+    return shadow
+
+
+def render_with_shadow(build, path, size, scale, shadow, outline_units=None, shift_x=0.0, shift_y=0.0):
+    """Rend le modèle puis son ombre portée, même caméra ; `shadow` = (décalage x, décalage y, opacité).
+    Renvoie (sprite seul, sprite posé sur son ombre semi-transparente)."""
+    import numpy as np
+    build()
+    render_scene(path, size=size, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_x=shift_x, shift_y=shift_y,
+                 outline_units=outline_units)
+    sprite = load(path)
+    flat = render_shadow(build, path, size, scale, shadow[:2], shift_x, shift_y)
+    flat[:, :, 3] = (flat[:, :, 3].astype(np.float32) * shadow[2]).astype(np.uint8)
+    return sprite, over(sprite, flat)
+
+
+def crop_centered(im, size, offset=(0, 0)):
+    """Fenêtre de `size` (largeur, hauteur) px dont le centre est à `offset` px du centre de `im` : sert à découper,
+    dans un grand canevas centré sur l'entité, le cadre d'un sprite de l'original (taille et `shift` du prototype)."""
+    (w, h), (ox, oy) = size, offset
+    x0 = int(round(im.shape[1] / 2 + ox - w / 2))
+    y0 = int(round(im.shape[0] / 2 + oy - h / 2))
+    return im[y0:y0 + h, x0:x0 + w].copy()
+
+
+def sheet(frames, columns):
+    """Planche : images de même taille rangées ligne par ligne, `columns` par ligne (comme les fichiers du jeu)."""
+    import numpy as np
+    rows = [frames[i:i + columns] for i in range(0, len(frames), columns)]
+    return np.vstack([np.hstack(row) for row in rows])

@@ -7,8 +7,7 @@ Les convoyeurs sont vus directement du dessus (PITCH = 0).
 
 Usage : python cartoon/blender/sprites_demo.py <dossier_sortie>
 """
-import math, os, sys
-import bpy
+import os, sys
 import cv2
 import numpy as np
 

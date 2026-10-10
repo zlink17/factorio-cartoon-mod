@@ -91,6 +91,9 @@ pour l'ordre de chargement).
   dans le dossier de mods mais absent de `mod-list.json` est **activé** par défaut : il faut le désactiver explicitement.
 - **Captures en jeu** : `game.take_screenshot` sur une surface dédiée, sans joueur, puis
   `game.set_wait_for_screenshots_to_finish()` ; un fichier « fini.txt » écrit au tick suivant signale la fin.
+- **Un sprite du mod peut ne plus correspondre à son générateur** (code retouché sans relancer le rendu) : c'était le
+  cas de la planche de l'assembleur 1 (teinte des panneaux avant). `tools/build.py cartoon tous --verifier` relance
+  tout de zéro et signale ces écarts ; les rendus Cycles sont reproductibles à ±3 près par canal.
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
   « mirrored » (`.wslconfig`). `bpy` demande Python 3.11 (environnement `.venv` créé avec `uv`).
 

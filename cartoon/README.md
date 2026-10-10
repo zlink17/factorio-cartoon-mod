@@ -11,49 +11,55 @@ Remplace les textures par une version cartoon : aplats de couleur, gros contours
 | `blender/` | Rendus 3D toon avec `bpy` : technique principale. Valeurs du style dans `blender/style.py`. |
 | `ai/` | Génération par IA (ComfyUI, SD 1.5 + ControlNet). Testée sur l'assembleur 1 : n'apporte rien de net par rapport à Blender, voir [ai/README.md](ai/README.md). |
 
-## Génération (depuis la racine du repo, avec le `.venv`)
+## Installation de l'environnement (une fois)
 
 ```bash
-# une image d'un assembleur : sortie, phase 0..1, facteur de taille, niveau 1..3
-.venv/bin/python cartoon/blender/assembler.py sortie/ 0 1 2
-
-# planche de 32 images + aperçu GIF
-.venv/bin/python cartoon/blender/animate.py sortie/ 2
-
-# ombre et icône d'un assembleur
-.venv/bin/python cartoon/blender/assembler_extras.py sortie/ 2
-
-# convoyeurs : planches (20 rangées) et icônes ; "tous" ou un nom, puis un nombre d'images max pour tester
-.venv/bin/python cartoon/blender/belt.py sortie/ tous
-
-# bras robotisés : plateformes, mains, ombres, icônes (burner, de base, longue portée, rapide, en vrac)
-.venv/bin/python cartoon/blender/inserter.py sortie/ tous
-
-# souterrains et répartiteurs (trois niveaux chacun)
-.venv/bin/python cartoon/blender/underground.py sortie/ tous
-.venv/bin/python cartoon/blender/splitter.py sortie/ tous
-
-# pylônes électriques (4 modèles) et câbles ; le convoyeur turbo (Space Age) est dans belt.py, underground.py et splitter.py
-.venv/bin/python cartoon/blender/pole.py sortie/ tous
-
-# contrôle : tailles (sinon Factorio ne démarre pas), alpha, ombres vides, manifeste ;
-# --jeu : charge aussi le mod dans une instance isolée de Factorio (peut tourner jeu ouvert)
-.venv/bin/python tools/check_mod.py cartoon --jeu
-
-# banc d'essai en jeu : captures de scènes de test (catalogue des bâtiments, convoyeurs, usine, minerais, nature,
-# sols, objets...) avec et sans le mod, comparaisons côte à côte dans .cache/vitrine/comparaison/
-# (ouvre une fenêtre Factorio isolée ~40 s par passe ; --sans-origine réutilise les captures d'origine)
-.venv/bin/python tools/bench.py cartoon --sans-origine
-
-# inventaire des images du jeu : couverture (docs/cartoon/couverture.md) et liste de travail d'un lot
-.venv/bin/python tools/inventory.py cartoon
-.venv/bin/python tools/inventory.py cartoon liste entity/stone-furnace
+uv venv --python 3.11 .venv
+uv pip install --python .venv/bin/python -r cartoon/blender/requirements.txt
 ```
 
-Ensuite, copier les fichiers produits dans `mod/graphics/overrides/base/...` (entité, ombre, `icons/`), puis
-`tools/install_mod.sh cartoon`.
+## Cycle de travail (depuis la racine du repo)
+
+Un **lot** est une famille de sprites produite par un ou plusieurs générateurs ; la liste est dans [lots.py](lots.py).
+La méthode complète (cadrage, prototype, production, contrôle, vérification en jeu) est dans
+[docs/cartoon/plan.md](../docs/cartoon/plan.md).
+
+```bash
+# 1. cadrage : fichiers du jeu à refaire pour un lot, avec tailles, découpage et prototypes qui les utilisent
+.venv/bin/python tools/inventory.py cartoon liste entity/stone-furnace
+
+# 2. production : génère dans .cache/build/, contrôle les tailles, installe dans mod/graphics/overrides/,
+#    régénère le manifeste et contrôle le mod ; affiche les fichiers nouveaux et modifiés
+.venv/bin/python tools/build.py cartoon --liste
+.venv/bin/python tools/build.py cartoon convoyeurs
+
+# 3. contrôle complet, dont le chargement du mod dans une instance isolée de Factorio (peut tourner jeu ouvert)
+.venv/bin/python tools/check_mod.py cartoon --jeu
+
+# 4. vérification en jeu : captures de scènes de test (catalogue des bâtiments, convoyeurs, usine, minerais,
+#    nature, sols, objets...) avec et sans le mod ; comparaisons côte à côte dans .cache/vitrine/comparaison/
+#    (ouvre une fenêtre Factorio isolée ~40 s par passe ; --sans-origine réutilise les captures d'origine)
+.venv/bin/python tools/bench.py cartoon --sans-origine
+
+# 5. couverture (docs/cartoon/couverture.md), à régénérer avant de commiter un lot
+.venv/bin/python tools/inventory.py cartoon
+
+# installer le mod dans le Factorio du joueur
+tools/install_mod.sh cartoon
+
+# reproductibilité : relance des générateurs de zéro et comparaison avec le mod, sans rien installer
+.venv/bin/python tools/build.py cartoon tous --verifier
+```
+
+Chaque générateur peut aussi se lancer seul : `<script> <sortie> [arguments]` écrit dans `<sortie>` l'arborescence de
+`graphics/overrides` (`base/entity/<nom>/...`, `base/icons/...`, `core/...`), plus des aperçus dans `<sortie>/_apercu/`.
+Exemple : `.venv/bin/python cartoon/blender/belt.py sortie/ transport-belt 4` (4 images par rangée, pour tester).
+`blender/assembler.py sortie/ 0 1 2` rend une seule image d'assembleur (phase, facteur de taille, niveau).
 
 ## État
+
+Le suivi détaillé est dans [docs/cartoon/plan.md](../docs/cartoon/plan.md) et [couverture.md](../docs/cartoon/couverture.md).
+
 
 - [x] Assembleurs 1, 2 et 3 : planches animées de 32 images, ombres et icônes (à vérifier en jeu)
 - [ ] Tuyaux des assembleurs 2 et 3 (`-pipe-N/E/S/W.png`, encore ceux d'origine)
@@ -63,5 +69,7 @@ Ensuite, copier les fichiers produits dans `mod/graphics/overrides/base/...` (en
 - [x] Convoyeur turbo (Space Age) : convoyeur, souterrain, répartiteur (le patch « gelé » d'Aquilo reste d'origine)
 - [x] Pylônes (poteau, poteau moyen, pylône, sous-station) et câbles ; les points d'attache des câbles tombent sur ceux de l'original
 - [ ] Chargeurs (loaders), lecteur de convoyeur, paratonnerre
-- [ ] Fours, personnage, minerais
+- [x] Minerais : fer, cuivre, charbon, pierre, uranium (gisements et icônes)
+- [x] Sols de Nauvis (herbe, terre, sable, désert rouge)
+- [ ] Fours, personnage
 - [ ] Icônes et interface (GUI)

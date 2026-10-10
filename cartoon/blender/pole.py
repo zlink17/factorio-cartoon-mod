@@ -2,11 +2,11 @@
 
 Usage : python cartoon/blender/pole.py <dossier_sortie> [pylône|tous]
 
-Pour chaque pylône, écrit les fichiers du prototype d'origine :
+Pour chaque pylône, écrit les fichiers du prototype d'origine (base/entity/<nom>/ et base/icons/) :
   <nom>.png          4 variantes côte à côte (le moteur choisit celle qui évite le chevauchement des câbles)
   <nom>-shadow.png   les 4 ombres
   <nom>-icon.png     icône 64 px + mipmaps
-et, pour les câbles (jeu « core »), copper-wire.png, red-wire.png, green-wire.png, wire-shadow.png, wire-highlight.png.
+et, pour les câbles (jeu « core », core/<nom>.png), copper-wire.png, red-wire.png, green-wire.png, wire-shadow.png, wire-highlight.png.
 
 Les câbles s'accrochent aux points définis par le prototype (« connection_points », en pixels par rapport au
 centre de l'entité), donc les isolateurs de chaque variante sont placés exactement là. Un point d'attache est
@@ -14,13 +14,13 @@ une position à l'écran : on retrouve sa position dans le monde en supposant qu
 constante sur sa variante 0 (bras dans le plan de l'image), puis en déduisant la profondeur dans les autres.
 """
 import math, os, sys
-import bpy
 import cv2
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import box, cyl, flatten_to_shadow, mat, mip_strip, render_icon, render_scene, reset
+from lib import (FACTORIO_DATA, box, crop_centered, cyl, entity_path, icon_path, load, mat, mip_strip, render_icon,
+                 render_scene, render_shadow, reset, rod as lib_rod, target)
 
 P = S.PALETTE
 PX_PER_TILE = 64
@@ -89,15 +89,8 @@ def tips(cfg):
     return out
 
 
-def rod(p0, p1, r, m, verts=8):
-    from mathutils import Vector
-    a, b = Vector(p0), Vector(p1)
-    d = b - a
-    bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=d.length, location=(a + b) / 2)
-    o = bpy.context.object
-    o.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
-    o.data.materials.append(m)
-    return o
+def rod(p0, p1, r, m, verts=8):          # tiges à 8 faces : pièces fines, le contour reste propre
+    return lib_rod(p0, p1, r, m, verts)
 
 
 def build_pole(name, variant):
@@ -152,13 +145,6 @@ def camera_for(cfg):
     return w / PX_PER_TILE if w >= hh else hh / PX_PER_TILE, sx / big, -sy / big
 
 
-def over(top, bottom):
-    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
-    oa = ta + ba * (1 - ta)
-    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
-    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
-
-
 def render_variant(name, variant, out):
     cfg = POLES[name]
     scale, shift_x, shift_y = camera_for(cfg)
@@ -166,18 +152,10 @@ def render_variant(name, variant, out):
     build_pole(name, variant)
     render_scene(path, size=cfg["cell"], scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, shift_x=shift_x, shift_y=shift_y,
                  outline_units=OUTLINE)
-    sprite = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    sprite = load(path)
     # ombre : grand canevas centré sur l'entité, découpé à la fenêtre de l'ombre de l'original
-    build_pole(name, variant)
-    flatten_to_shadow(SHADOW[0], SHADOW[1])
-    render_scene(path, size=CANVAS, scale=CANVAS / PX_PER_TILE, pitch_deg=S.PITCH_BUILDING_DEG, outline=False)
-    big = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    (sw, sh), (ox, oy) = cfg["shadow"]
-    x0, y0 = int(round(CANVAS / 2 + ox - sw / 2)), int(round(CANVAS / 2 + oy - sh / 2))
-    shadow = big[y0:y0 + sh, x0:x0 + sw].copy()
-    shadow[:, :, :3] = 0
-    return sprite, shadow
+    big = render_shadow(lambda: build_pole(name, variant), path, CANVAS, CANVAS / PX_PER_TILE, SHADOW[:2])
+    return sprite, crop_centered(big, *cfg["shadow"])
 
 
 def build_icon(name, out):
@@ -186,9 +164,9 @@ def build_icon(name, out):
 
 def build_poles(name, out):
     sprites, shadows = zip(*[render_variant(name, v, out) for v in range(4)])
-    cv2.imwrite(os.path.join(out, f"{name}.png"), np.hstack(sprites))
-    cv2.imwrite(os.path.join(out, f"{name}-shadow.png"), np.hstack(shadows))
-    cv2.imwrite(os.path.join(out, f"{name}-icon.png"), build_icon(name, out))
+    cv2.imwrite(entity_path(out, name), np.hstack(sprites))
+    cv2.imwrite(entity_path(out, name, f"{name}-shadow.png"), np.hstack(shadows))
+    cv2.imwrite(icon_path(out, name), build_icon(name, out))
 
 
 # --- câbles --------------------------------------------------------------------------------------------------
@@ -225,7 +203,7 @@ def build_wires(out, core_dir):
         small = cv2.resize(pre, (w, h), interpolation=cv2.INTER_AREA)
         al = np.clip(small[:, :, 3:4] / 255.0, 1e-6, 1)
         res = np.dstack([np.clip(small[:, :, :3] / al, 0, 255), small[:, :, 3:4]]).astype(np.uint8)
-        cv2.imwrite(os.path.join(out, f"{name}.png"), res)
+        cv2.imwrite(target(out, f"core/{name}.png"), res)
 
 
 if __name__ == "__main__":
@@ -237,5 +215,5 @@ if __name__ == "__main__":
             build_poles(name, out)
             print("OK", name, flush=True)
     if which in ("tous", "wires"):
-        build_wires(out, "/mnt/c/Program Files (x86)/Steam/steamapps/common/Factorio/data/core/graphics")
+        build_wires(out, os.path.join(FACTORIO_DATA, "core", "graphics"))
         print("OK câbles")

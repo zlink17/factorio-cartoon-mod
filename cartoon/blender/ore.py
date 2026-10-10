@@ -2,10 +2,10 @@
 
 Usage : python cartoon/blender/ore.py <dossier_sortie> [minerai|tous]
 
-Pour chaque minerai, écrit :
-  <nom>-entity.png   planche 1024 x 1024 des gisements : 8 x 8 cellules de 128 px (2 cases). Une rangée = une étape de
+Pour chaque minerai, écrit (sous base/entity/<nom>/ et base/icons/) :
+  <nom>.png        planche 1024 x 1024 des gisements : 8 x 8 cellules de 128 px (2 cases). Une rangée = une étape de
                      richesse (rangée 0 = le plus gros tas, rangée 7 = quelques cailloux), une colonne = une variante.
-  <nom>-glow.png     (uranium seulement) calque lumineux, même disposition
+  <nom>-glow.png   (uranium seulement) calque lumineux, même disposition
   <nom>.png, <nom>-1.png, -2, -3  les quatre icônes de l'objet (tas d'importance croissante), 64 px + mipmaps (120 x 64) ;
                      ce sont aussi les objets posés sur les convoyeurs.
 Un tas est un amas de blocs taillés à facettes (trois tons), au sol avec une ombre à plat.
@@ -17,7 +17,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import flatten_to_shadow, mat, mip_strip, render_icon, render_scene, reset
+from lib import entity_path, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset
 
 P = S.PALETTE
 CELL = 128
@@ -32,7 +32,6 @@ ORES = {                                   # nom : (couleur, couleur du dessus p
     "stone": "ore_stone",
     "uranium-ore": "ore_uranium",
 }
-GAME = {"iron-ore": "base", "copper-ore": "base", "coal": "base", "stone": "base", "uranium-ore": "base"}
 
 # par étape : nombre de blocs, rayon min et max d'un bloc (en cases)
 STAGES = [(16, 0.15, 0.23), (14, 0.14, 0.21), (12, 0.14, 0.2), (10, 0.13, 0.19), (8, 0.12, 0.18),
@@ -80,29 +79,11 @@ def build_pile(name, count, lo, hi, seed, spread=None):
         chunk(x, y, r, m, rng, lift)
 
 
-def over(top, bottom):
-    ta, ba = top[:, :, 3:4] / 255.0, bottom[:, :, 3:4] / 255.0
-    oa = ta + ba * (1 - ta)
-    rgb = (top[:, :, :3] * ta + bottom[:, :, :3] * ba * (1 - ta)) / np.maximum(oa, 1e-6)
-    return np.dstack([np.clip(rgb, 0, 255), np.clip(oa * 255, 0, 255)]).astype(np.uint8)
-
-
 def render_cell(name, stage, variation, out):
-    path = os.path.join(out, "_ore.png")
     count, lo, hi = STAGES[stage]
     seed = stage * 8 + variation + 100 * list(ORES).index(name)
-    scale = CELL / PX_PER_TILE
-    build_pile(name, count, lo, hi, seed)
-    render_scene(path, size=CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline_units=OUTLINE)
-    sprite = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    build_pile(name, count, lo, hi, seed)
-    flatten_to_shadow(SHADOW[0], SHADOW[1])
-    render_scene(path, size=CELL, scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline=False)
-    shadow = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    os.remove(path)
-    shadow[:, :, :3] = 0
-    shadow[:, :, 3] = (shadow[:, :, 3].astype(np.float32) * SHADOW[2]).astype(np.uint8)
-    return over(sprite, shadow)
+    return render_with_shadow(lambda: build_pile(name, count, lo, hi, seed), os.path.join(out, "_ore.png"), CELL,
+                              CELL / PX_PER_TILE, SHADOW, OUTLINE)[1]
 
 
 def build_icons(name, out):
@@ -111,7 +92,7 @@ def build_icons(name, out):
         suffix = "" if k == 0 else f"-{k}"
         icon = render_icon(lambda: build_pile(name, count, 0.15, 0.22, 7 + k, spread=0.3 + 0.04 * k),
                            os.path.join(out, "_icon.png"), 64, 58, outline_px=0.45)
-        cv2.imwrite(os.path.join(out, f"{name}{suffix}.png"), mip_strip(icon, 64))
+        cv2.imwrite(icon_path(out, f"{name}{suffix}"), mip_strip(icon, 64))
 
 
 def build_ore(name, out):
@@ -119,12 +100,12 @@ def build_ore(name, out):
     for stage in range(8):
         for var in range(8):
             sheet[stage * CELL:(stage + 1) * CELL, var * CELL:(var + 1) * CELL] = render_cell(name, stage, var, out)
-    cv2.imwrite(os.path.join(out, f"{name}-entity.png"), sheet)
+    cv2.imwrite(entity_path(out, name), sheet)
     if name == "uranium-ore":                                       # calque lumineux : les blocs, éclaircis
         glow = sheet.copy()
         glow[:, :, :3] = (200, 255, 160)
         glow[:, :, 3] = (sheet[:, :, 3].astype(np.float32) * 0.55).astype(np.uint8)
-        cv2.imwrite(os.path.join(out, f"{name}-glow.png"), glow)
+        cv2.imwrite(entity_path(out, name, f"{name}-glow.png"), glow)
     build_icons(name, out)
 
 
