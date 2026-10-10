@@ -460,6 +460,27 @@ local function detail_ores()
   end
 end
 
+-- Vue rapprochée : les objets intermédiaires sur les convoyeurs, un convoyeur par objet (3 colonnes de 10).
+local LOT_ITEMS = { "iron-plate", "copper-plate", "steel-plate", "iron-gear-wheel", "copper-cable", "iron-stick",
+  "electronic-circuit", "advanced-circuit", "processing-unit", "stone-brick", "wood", "plastic-bar", "sulfur",
+  "battery", "engine-unit", "electric-engine-unit", "flying-robot-frame", "low-density-structure", "rocket-fuel",
+  "solid-fuel", "explosives", "uranium-235", "uranium-238", "automation-science-pack", "logistic-science-pack",
+  "military-science-pack", "chemical-science-pack", "production-science-pack", "utility-science-pack",
+  "space-science-pack" }
+
+local function detail_items()
+  local s = scene("detail-objets", 1, GROUND, 2)
+  for i, name in ipairs(LOT_ITEMS) do
+    local col, row = math.floor((i - 1) / 10), (i - 1) % 10
+    local x, y = 1 + col * 10.5, s.y + 0.5 + row * 1.7
+    for k = 0, 5 do
+      local e = create { name = "transport-belt", position = { x + k + 0.5, y + 0.5 }, direction = defines.direction.east }
+      if e then load_belt(e, { name }) end
+    end
+    label(name, x + 8, y + 0.2, 0.45)
+  end
+end
+
 -- Vue rapprochée : les sols de Nauvis côte à côte (on y voit les transitions).
 local function detail_grounds()
   local names = { "grass-1", "grass-2", "grass-3", "grass-4", "dry-dirt", "dirt-1", "dirt-2", "dirt-3", "dirt-4",
@@ -483,7 +504,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

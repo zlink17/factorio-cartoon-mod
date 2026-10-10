@@ -1,16 +1,16 @@
 # Mod Cartoon : synthèse du travail
 
-État au 10 octobre 2026 (fin de l'étape 1 du plan). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 10 octobre 2026 (étape 2 commencée : lot 2.1 fait). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
 ## 0. Reprendre le travail (nouvelle session)
 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
-   étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées.**
-2. **Prochaine action : étape 2, lot 2.1 « Objets sur les convoyeurs »** (plaques, engrenage, câble, circuits, acier,
-   briques, bois, plastique, soufre, batterie, packs de science... ~40 icônes), avec `lib.save_icon`. Ensuite le
-   **lot 2.8 « Décorations »**, avancé : les touffes d'herbe d'origine jurent sur nos sols en aplats.
+   étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lot 2.1
+   « Objets sur les convoyeurs » fait.**
+2. **Prochaine action : lot 2.8 « Décorations »**, avancé : les touffes d'herbe d'origine jurent sur nos sols en
+   aplats. Ensuite reprendre l'ordre du plan (2.2 production de base...).
 3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
 4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
@@ -79,7 +79,7 @@ pour l'ordre de chargement).
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (156 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (186 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -90,6 +90,7 @@ pour l'ordre de chargement).
 | Bras robotisés | À charbon, de base, à longue portée, rapide, en vrac : plateformes (4 orientations), mains, ombres, icônes. | `inserter.py` |
 | Pylônes et câbles | Poteau, poteau moyen, pylône, sous-station (4 variantes chacun, ombres, icônes) ; câbles cuivre, rouge, vert, ombre, surbrillance. | `pole.py` |
 | Minerais | Fer, cuivre, charbon, pierre, uranium : gisements (8 étapes × 8 variantes, tas larges qui se chevauchent : gisement continu), calque lumineux de l'uranium, 20 icônes (aussi les objets sur les convoyeurs). | `ore.py` |
+| Objets intermédiaires | 30 icônes (aussi les objets sur les convoyeurs) : plaques, poutre, engrenage, câble, tige, 3 circuits, brique, bois, plastique, soufre, batterie, moteurs, cadre de robot, structure légère, combustibles, explosifs, uranium 235 et 238, 7 packs de science. Vue à 45° et rotation libre (plaques de fer et de cuivre en miroir, comme l'original). | `items.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -128,6 +129,13 @@ pour l'ordre de chargement).
   `bin/x64`) et les variables `SteamAppId`/`SteamGameId` (passées à Windows par `WSLENV`) : `tools/factorio.py`.
 - **Surface de test sous Space Age** : `game.create_surface` sans réglages mélange toutes les planètes (on obtient
   Gleba) ; copier `game.surfaces.nauvis.map_gen_settings`.
+- **Icônes d'objets : vue des bâtiments (30°) illisible** pour les objets plats ou hauts (plaques sans épaisseur,
+  flacon en abat-jour) : ils sont vus à 45° (`PITCH_ITEM_DEG`). Les plaques de fer et de cuivre de l'original sont
+  tournées en sens inverse (coin du haut à gauche pour le fer, à droite pour le cuivre) : voulu par les concepteurs
+  pour les distinguer, à conserver (rotation calée par mesure des coins : ±35°).
+- **Couleur d'une face = son orientation** (`lib.mat`) : un bout de rondin tourné de côté prend le ton « côté » (×0,62)
+  et se confond avec l'écorce ; orienter l'objet pour que les faces à montrer soient vers l'avant ou le haut.
+- **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
@@ -143,8 +151,8 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 156 fichiers remplacés sur 8 246 à couvrir (2 %) : 75 d'entités, 41 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 186 fichiers remplacés sur 8 246 à couvrir (2 %) : 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
 - ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
-- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 261 captures en ~40 s par passe.
+- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 262 captures en ~40 s par passe.
 - Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon`.

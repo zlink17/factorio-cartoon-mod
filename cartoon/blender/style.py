@@ -7,6 +7,7 @@ Les couleurs sont en RGB linéaire (valeurs Blender).
 # --- Projection ---------------------------------------------------------
 PITCH_BUILDING_DEG = 30   # calé sur l'assembleur 1 original (voir cartoon/STYLE.md)
 GROUND_STRETCH = False    # False : le sol est raccourci par cos(pitch), comme dans les sprites originaux
+PITCH_ITEM_DEG = 45       # icônes d'objets (plaques, circuits, flacons) : plus inclinées pour montrer leur volume
 PITCH_TOPDOWN_DEG = 0     # convoyeurs, tuyaux au sol, rails : vue de dessus
 YAW_DEG = 0               # jamais de rotation : alignement sur la grille
 
@@ -54,6 +55,30 @@ PALETTE_HEX = {
     "navy":       "#3d5a78",
     "olive":      "#97a03f",  # assembleur 3 : vert-jaune
     "olive_dark": "#6c7430",
+    # objets (icônes) : teintes de l'original, vives pour être reconnues sur les convoyeurs
+    "glass":     "#b4bfc4",   # verre des flacons
+    "iron":      "#80868c",   # fer brut (engrenage, carters)
+    "steel":     "#9aa5ad",   # acier (poutre)
+    "dark_grey": "#4e5257",   # boîtiers, combustible solide
+    "brass":     "#e0b84a",   # pistes des circuits, laiton vif
+    "brick":     "#9a978c",   # brique de pierre
+    "bark":      "#7a4e2c",   # écorce
+    "wood_cut":  "#d9a35f",   # bois coupé
+    "plastic":   "#e2e4e6",   # barre de plastique
+    "sulfur":    "#e3cf3a",   # soufre
+    "fuel":      "#f0b030",   # carburant de fusée
+    "u235":      "#62d63f",   # uranium 235 (vif)
+    "u238":      "#3e8a3a",   # uranium 238 (sombre)
+    "pcb_green": "#3fa535",   # circuits : vert, rouge, bleu de l'original
+    "pcb_red":   "#c8352c",
+    "pcb_blue":  "#2f6cc8",
+    "sci_red":    "#cf3530",  # packs de science, couleurs de l'original
+    "sci_green":  "#4cbf3a",
+    "sci_grey":   "#6f757b",
+    "sci_blue":   "#3ab0e0",
+    "sci_purple": "#9a48d4",
+    "sci_yellow": "#e3b83a",
+    "sci_white":  "#eeeeee",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

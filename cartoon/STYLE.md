@@ -69,6 +69,9 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 | tan | #dcb878 | petit poteau électrique (clair pour ressortir sur le sol) |
 | coral | #e5835a | poteau électrique moyen |
 | steel_light | #c3ced2 | grand pylône électrique |
+| glass, iron, steel, dark_grey, brass, brick, bark, wood_cut, plastic, sulfur, fuel, u235, u238 | voir `style.py` | objets (icônes) |
+| pcb_green, pcb_red, pcb_blue | #3fa535, #c8352c, #2f6cc8 | circuits électronique, avancé, processeur |
+| sci_red, sci_green, sci_grey, sci_blue, sci_purple, sci_yellow, sci_white | voir `style.py` | packs de science |
 
 À définir : fluides. **[PROVISOIRE]**
 
@@ -90,6 +93,11 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   plus grande dimension fasse 60 px sur 64 (58 pour un objet compact : bras, tas de minerai), contour d'icône
   (`outline_px` 0,5, environ 1,2 px), suivi de ses réductions à 32, 16 et 8 px (fichier de 120 x 64, comme l'original).
   Générées par `lib.save_icon`. **[CALÉ]**
+- **Icônes d'objets** (plaques, circuits, flacons... : tout ce qui n'est pas un bâtiment) : vue plus inclinée, à 45°
+  (`PITCH_ITEM_DEG`), pour montrer le volume, et **rotation libre** comme dans les icônes d'origine. Les plaques de fer
+  et de cuivre sont tournées en sens inverse (−35° et +35°), comme dans l'original, pour les distinguer d'un coup
+  d'œil. Teintes vives de l'original (circuits vert, rouge, bleu ; packs de science à leurs couleurs), ajoutées à la
+  palette. Cadrage 58 px, contour 0,45. Générées par `blender/items.py`. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
