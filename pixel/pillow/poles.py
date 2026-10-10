@@ -25,10 +25,10 @@ BLUE = (P["blue_out"], P["blue_dark"], P["blue"], P["blue_light"])
 SPECS = {
     "small-electric-pole": dict(size=(24, 52), tile=1, kind="wood", H=42, base=1.4, top=1.4, trunk=1.6,
                                 arms=[(40, 6.5)], tip=(0, 43), ramp=WOOD, braces=0, canvas_pad=6),
-    "medium-electric-pole": dict(size=(30, 64), tile=1, kind="lattice", H=52, base=5.0, top=1.6,
-                                 arms=[(46, 7.0), (36, 5.0)], tip=(0, 53), ramp=RUST, braces=7),
+    "medium-electric-pole": dict(size=(30, 64), tile=1, kind="lattice", H=52, base=6.0, top=1.6,
+                                 arms=[(46, 7.0)], tip=(0, 53), ramp=RUST, braces=3),
     "big-electric-pole": dict(size=(52, 80), tile=2, kind="lattice", H=66, base=12.0, top=2.6,
-                              arms=[(58, 16.0), (40, 16.0)], tip=(0, 67), ramp=STEEL, braces=9),
+                              arms=[(58, 16.0), (40, 16.0)], tip=(0, 67), ramp=STEEL, braces=4),
     "substation": dict(size=(46, 76), tile=2, kind="substation", H=60, base=10.0, top=2.2,
                        arms=[(54, 12.0)], tip=(0, 61), ramp=STEEL, braces=5, box=(12, 22)),
 }
@@ -106,7 +106,8 @@ def render(name, k):
                 a0 = P3(f[0][0] * w0, f[0][1] * w0, z0)[0]; a1 = P3(f[0][0] * w1, f[0][1] * w1, z1)[0]
                 c0 = P3(f[1][0] * w0, f[1][1] * w0, z0)[0]; c1 = P3(f[1][0] * w1, f[1][1] * w1, z1)[0]
                 line(d, a0, c1, col); line(d, c0, a1, col)          # croisillons en X
-                line(d, a1, c1, col)                                  # traverse
+                if i % 2 == 1:
+                    line(d, a1, c1, col)                              # traverse, un niveau sur deux
             # montants de la face
             for (sx_, sy_) in f:
                 line(d, P3(sx_ * b, sy_ * b, 0)[0], P3(sx_ * t, sy_ * t, h)[0], light if fi >= 2 else mid)
@@ -157,7 +158,7 @@ def render(name, k):
             for sy_ in (-1, 1):
                 line(sd, S3(sx_ * b, sy_ * b, 0), S3(sx_ * t, sy_ * t, h), (0, 0, 0, 255))
         n = spec["braces"]
-        for i in range(n + 1):
+        for i in (0, n // 2, n):
             z = i * h / n
             w = b + (t - b) * z / h
             pts = [S3(sx_ * w, sy_ * w, z) for sx_, sy_ in ((-1, -1), (1, -1), (1, 1), (-1, 1), (-1, -1))]
