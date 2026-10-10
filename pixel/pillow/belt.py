@@ -111,8 +111,13 @@ CAP_BAND = 3          # largeur de la bande de tapis, dans la case
 CAP_ROLLER = 2        # largeur du rouleau, hors de la case
 
 
+END_CAPS = False      # décidé avec Bastien : pas de bout de ligne visible (les rangées 12 à 19 restent transparentes)
+
+
 def cap_piece(row, frame, tier):
     """Image de 20 x 20 : la case plus 2 px de marge ; (i, j) correspond au pixel (i - 2, j - 2) de la case."""
+    if not END_CAPS:
+        return Image.new("RGBA", (T + 2 * CAP_PAD, T + 2 * CAP_PAD), (0, 0, 0, 0))
     flow = CAP_FLOW[row - 12]
     off = (frame // 2) if row % 2 == 0 else 0
     img = Image.new("RGBA", (T + 2 * CAP_PAD, T + 2 * CAP_PAD), (0, 0, 0, 0))
