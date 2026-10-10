@@ -98,27 +98,28 @@ def piece(row, frame, tier):
             if c:
                 img.putpixel((x, y), c)
     if row >= 12:
-        side, variant = divmod(row - 12, 2)       # 0 haut, 1 droite, 2 bas, 3 gauche
-        cap = Image.new("RGBA", (T, T), (0, 0, 0, 0))
-        for y in range(4):
-            for x in range(T):
-                if y == 0:
-                    c = P["steel_dark"]
-                elif y == 1:
-                    c = P["steel_light"]
-                elif y == 2:
-                    c = P["steel_mid"]
-                else:
-                    c = P["steel"]
-                if y == 0 and x in (0, T - 1):
-                    continue
-                cap.putpixel((x, y), c)
-        if variant == 0:                          # chevron du début, pointe vers l'extérieur
-            light, dark = BELT[tier]
-            for x, y in ((7, 2), (8, 2), (6, 3), (9, 3)):
-                cap.putpixel((x, y), light)
-        # le capuchon est dessiné côté haut puis tourné : droite = 90° horaire, bas = 180°, gauche = 270°
-        img = cap.rotate(-90 * side, expand=False)
+        return cap_piece(row, frame, tier)
+    return img
+
+
+# Capuchons (rangées 12 à 19) : la partie du tapis qui dépasse du capot d'un souterrain, au bord arrière de la case,
+# avec le chevron qui avance (animé comme le tapis). Deux rangées par bord (début / fin), même dessin.
+CAP_FLOW = [(0, 1), (0, 1), (-1, 0), (-1, 0), (0, -1), (0, -1), (1, 0), (1, 0)]     # sud, ouest, nord, est
+CAP_EDGE = [(0, -2), (0, -2), (14, 0), (14, 0), (0, 14), (0, 14), (-2, 0), (-2, 0)]  # début du bandeau (x, y) dans la case
+CAP_PAD = 2
+
+
+def cap_piece(row, frame, tier):
+    """Image de 20 x 20 : la case plus 2 px de marge ; (i, j) correspond au pixel (i - 2, j - 2) de la case."""
+    flow = CAP_FLOW[row - 12]
+    ex, ey = CAP_EDGE[row - 12]
+    img = Image.new("RGBA", (T + 2 * CAP_PAD, T + 2 * CAP_PAD), (0, 0, 0, 0))
+    horizontal = flow[0] == 0               # flux vertical : le bandeau est horizontal
+    for j in range(4):
+        for i in range(T):
+            x, y = (ex + i, ey + j) if horizontal else (ex + j, ey + i)
+            c = straight_pixel(x, y, flow, frame // 2, tier)
+            img.putpixel((x + CAP_PAD, y + CAP_PAD), c)
     return img
 
 
@@ -126,7 +127,8 @@ def sheet(tier, frames):
     out = Image.new("RGBA", (CELL * frames, CELL * 20), (0, 0, 0, 0))
     for row in range(20):
         for f in range(frames):
-            out.alpha_composite(piece(row, f, tier), (CELL * f + 8, CELL * row + 8))
+            pad = CAP_PAD if row >= 12 else 0
+            out.alpha_composite(piece(row, f, tier), (CELL * f + 8 - pad, CELL * row + 8 - pad))
     return out
 
 

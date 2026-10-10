@@ -76,11 +76,14 @@ def add_face(img, mask):
 
 
 # ---------------------------------------------------------------- souterrain
-# Capot en voûte (demi-cylindre couché dans le sens du flux) : plaque bombée de la teinte vive du convoyeur du même niveau (chevrons de sa teinte foncée),
-# chevrons qui suivent le flux, anneau d'acier à rivets à chaque bout, face avant sombre (hauteur) et ombre portée.
-UG_LEN = 13        # longueur du capot dans le sens du flux : bout fermé 3, voûte 5, bouche 5 (px)
-UG_WIDTH = 14      # largeur en travers (px)
+# Comme dans Factorio, le capot couvre toute la case : une voûte (demi-cylindre couché dans le sens du flux) dont la
+# plaque porte des chevrons, avec un anneau d'acier à rivets à chaque bout. Le bout enterré est fermé ; du côté du
+# tapis, une porte sombre laisse voir le chevron du tapis qui entre ou qui sort (entrée et sortie sont des miroirs).
+# La plaque a la teinte vive du convoyeur du même niveau, les chevrons sa teinte foncée.
+UG_LEN = 16        # longueur du capot dans le sens du flux : bout fermé 3, voûte 9, porte 4 (px)
+UG_WIDTH = 16      # largeur en travers (px)
 FACE = 3           # hauteur de la face avant (px)
+DOOR_HALF = (0, 6.5, 5.5, 4.5)       # demi-largeur de la porte selon la profondeur depuis le bord (px)
 
 
 def tile_coords(direction, x, y):
@@ -94,49 +97,46 @@ def darken(c, f):
 
 
 def underground_cell(direction, entering, tier):
-    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[. Le capot est collé du côté enterré."""
+    """Cellule de 48 x 48 px d'art ; la case occupe [16, 32[."""
     light, dark = BELT[tier]
     base = belt.BASE[tier]
     horiz = direction in "EW"
     img = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
     hood = Image.new("L", (48, 48), 0)
-    s0 = (belt.T - UG_LEN) if entering else 0
-    out_n = FLOW[direction] if entering else (-FLOW[direction][0], -FLOW[direction][1])   # normale du bout enterré
-    in_n = (-out_n[0], -out_n[1])                                                          # normale du bout côté tapis
+    fl = FLOW[direction]
+    out_n = fl if entering else (-fl[0], -fl[1])        # normale du bout enterré
+    in_n = (-out_n[0], -out_n[1])                       # normale du bout côté tapis
     for ty in range(belt.T):
         for tx in range(belt.T):
-            s, lat = tile_coords(direction, tx, ty)
-            if not (s0 <= s < s0 + UG_LEN and abs(lat) < UG_WIDTH / 2):
-                continue
-            u = s - s0                                   # 0 à UG_LEN, dans le sens du flux
-            d_ug = (UG_LEN - u) if entering else u       # distance au bout enterré
+            u, lat = tile_coords(direction, tx, ty)
+            d_ug = (UG_LEN - u) if entering else u        # distance au bout enterré (0 = au bord)
             d_belt = UG_LEN - d_ug
-            lat_abs = (ty + 0.5 - 8) if horiz else (tx + 0.5 - 8)    # axe transversal absolu : la lumière vient du haut gauche
+            lat_abs = (ty + 0.5 - 8) if horiz else (tx + 0.5 - 8)    # axe transversal absolu : lumière en haut à gauche
             x, y = tx + 16, ty + 16
             hood.putpixel((x, y), 255)
-            if abs(lat) > UG_WIDTH / 2 - 1:
-                c = P["steel_dark"]                                    # flancs : contour
-            elif d_ug < 3:                                             # bout fermé (côté enterré) : mur plein à rivets
+            if abs(lat) > 7:
+                c = P["steel_dark"]                                   # contour des flancs
+            elif d_ug < 3:                                            # bout fermé : anneau plein à rivets
                 c = belt.shade(d_ug, out_n)
-                if d_ug >= 2 and abs(lat) in (1.5, 4.5):
+                if d_ug >= 1 and abs(lat) in (1.5, 3.5, 5.5):
                     c = P["steel_light"]
-            elif d_belt < 5:                                           # bouche ouverte côté tapis
-                if d_belt < 1:
-                    c = belt.shade(d_belt, in_n)                       # lèvre de l'ouverture
-                elif abs(lat) >= 4.5:
-                    c = belt.shade(1 + (abs(lat) - 4.5), (0, 0)) if abs(lat) < 5.5 else P["steel"]   # piédroits
+            elif d_belt < 4:                                          # côté tapis : lèvre puis porte
+                k = int(d_belt)
+                if k == 0:
+                    c = belt.shade(0, in_n)
+                elif abs(lat) >= DOOR_HALF[k]:
+                    c = belt.shade(k, in_n) if abs(lat) < DOOR_HALF[k] + 1 else P["steel"]   # piédroits
                 else:
-                    # intérieur du tunnel : de plus en plus sombre vers le bout fermé, avec le chevron du tapis
-                    k = d_belt - 1                                     # 0 (près de la lèvre) à 3 (au fond)
-                    f_ = (0.85, 0.6, 0.38, 0.22)[min(3, int(k))]
-                    u_tip = (3 if entering else UG_LEN - 2) + 1.5      # pointe du chevron, dans le sens du flux
-                    chev = abs(lat) < 2.6 and int(u) == int(u_tip - abs(lat) + 0.5)
-                    c = darken(light if chev else belt.BASE[tier], f_ if not chev else max(f_, 0.55))
+                    f_ = (0.85, 0.6, 0.35)[k - 1]                     # de plus en plus sombre vers l'intérieur
+                    u_tip = 3.5 if entering else UG_LEN - 3.5          # pointe du chevron, dans le sens du flux
+                    chev = abs(lat) < 3.2 and int(u) == int(u_tip - abs(lat) * 0.7)
+                    c = darken(light, max(f_, 0.6)) if chev else darken(base, f_)
+            elif abs(lat) > 6:                                        # bords de la voûte : arêtes éclairées / ombrées
+                c = P["steel_light"] if lat_abs < 0 else P["steel"]
             else:
-                # voûte : plaque de la teinte vive du niveau, chevrons de la teinte foncée ; plus sombre sur le flanc
-                # opposé à la lumière
-                shade = 1.0 if lat_abs < -3 else 0.88 if lat_abs < 3 else 0.7
-                ph = (u + abs(lat) * 0.55) % 6
+                # voûte : lumineuse du côté de la lumière, plus sombre du côté opposé
+                shade = 1.0 if lat_abs < -3 else 0.9 if lat_abs < 2 else 0.78 if lat_abs < 5 else 0.62
+                ph = (u + abs(lat) * 0.5) % 5
                 c = darken(dark, shade) if ph < 2 else darken(light, shade)
             img.putpixel((x, y), c)
     # hauteur : face avant sur FACE px sous le bord sud du capot
