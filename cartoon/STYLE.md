@@ -56,7 +56,11 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 | yellow | #c9a24a | laiton (engrenages, finitions) |
 | white | #d9d0bc | métal clair, reflets |
 | red | #a8462f | rouge brique, braises |
-| ore_iron | #5f7f9a | minerai de fer |
+| ore_iron | #6a8fae | minerai de fer |
+| ore_copper | #d9753f | minerai de cuivre |
+| ore_coal | #5b5b6b | charbon |
+| ore_stone | #cdb078 | pierre |
+| ore_uranium | #78c44a | uranium |
 | steel_blue | #55789b | corps de l'assembleur 2 |
 | navy | #3d5a78 | panneaux avant de l'assembleur 2 |
 | olive | #97a03f | corps de l'assembleur 3 |
@@ -66,7 +70,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 | coral | #e5835a | poteau électrique moyen |
 | steel_light | #c3ced2 | grand pylône électrique |
 
-À définir : cuivre (minerai), charbon, pierre, uranium, fluides. **[PROVISOIRE]**
+À définir : fluides. **[PROVISOIRE]**
 
 ## 6. Format technique
 

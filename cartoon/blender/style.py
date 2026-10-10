@@ -39,7 +39,11 @@ PALETTE_HEX = {
     "yellow": "#c9a24a",   # laiton (engrenages, finitions)
     "white":  "#d9d0bc",   # métal clair, reflets
     "red":    "#a8462f",   # rouge brique, braises
-    "ore_iron": "#5f7f9a",
+    "ore_iron": "#6a8fae",
+    "ore_copper": "#d9753f",
+    "ore_coal": "#5b5b6b",
+    "ore_stone": "#cdb078",
+    "ore_uranium": "#78c44a",
     "green":  "#6f9a3c",   # bras en vrac
     "tan":    "#dcb878",   # bois clair du petit poteau (ressort sur le sol brun)
     "coral":  "#e5835a",   # poteau moyen : teinte distincte du petit poteau
