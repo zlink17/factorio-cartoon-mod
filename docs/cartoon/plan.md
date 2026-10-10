@@ -83,9 +83,9 @@ Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'
 - [x] **Factoriser les générateurs Blender** (`lib.py` : chemins de sortie, sprite + ombre portée, fenêtre de découpe, planches, tiges) : `lib.py` porte déjà le style ; y regrouper ce qui est dupliqué entre
       `belt.py`, `splitter.py`, `underground.py`, `inserter.py`, `pole.py` (caméra calée sur un original, planches,
       ombres, icônes à mipmaps). Chaque nouveau lot doit coûter un modèle, pas un pipeline.
-- [ ] **Générateur d'icônes commun** : un rendu Blender à angle fixe pour les icônes (objets et entités), avec mipmaps.
+- [x] **Générateur d'icônes commun** (`lib.save_icon`, utilisé par tous les générateurs sauf les convoyeurs, vus de dessus) : un rendu Blender à angle fixe pour les icônes (objets et entités), avec mipmaps.
       Sera utilisé par presque tous les lots.
-- [ ] **Reproductibilité** : dépendances figées (`requirements.txt`, version de Blender/`bpy`), commande unique pour tout
+- [x] **Reproductibilité** (`tools/build.py cartoon tous --verifier`, 10 min, 153 fichiers sur 153) : dépendances figées (`requirements.txt`, version de Blender/`bpy`), commande unique pour tout
       régénérer, test rapide qui vérifie qu'un générateur produit des fichiers aux bonnes tailles.
 
 ## 4. Étape 1 : valider l'existant en jeu

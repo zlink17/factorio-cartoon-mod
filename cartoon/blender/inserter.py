@@ -22,8 +22,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import (box, cyl, entity_path, icon_path, load, mat, mip_strip, render_icon, render_scene, render_with_shadow,
-                 reset, rod)
+from lib import box, cyl, entity_path, load, mat, render_scene, render_with_shadow, reset, rod, save_icon
 
 P = S.PALETTE
 
@@ -44,7 +43,6 @@ HAND_BASE_SIZE = (32, 136)
 HAND_SIZE = (72, 164)
 SHADOW_ALPHA = 130             # opacité maximale des ombres de la main, comme l'original
 PLATFORM_SHADOW = (0.5, 0.02, 0.4)   # décalage au sol par unité de hauteur (x, y) et opacité
-ICON = 64
 HAND_OUTLINE = 0.011           # contour plus fin que le style de base : ces pièces font 5 px de large en jeu
 PLATFORM_OUTLINE = 0.016
 
@@ -167,8 +165,7 @@ def build_inserter(name, out):
     }
     for part, im in parts.items():
         cv2.imwrite(entity_path(out, name, f"{name}-{part}.png"), im)
-    icon = render_icon(lambda: build_icon_model(color), os.path.join(out, "_icon.png"), ICON, 58)
-    cv2.imwrite(icon_path(out, name), mip_strip(icon, ICON))
+    save_icon(out, name, lambda: build_icon_model(color), fill=58)
     return parts
 
 

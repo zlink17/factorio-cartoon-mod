@@ -289,6 +289,19 @@ def mip_strip(im, size=64):
     return strip
 
 
+def save_icon(out, name, build, fill=60, outline_px=0.5, pitch_deg=S.PITCH_BUILDING_DEG, size=64):
+    """Icône d'objet ou d'entité, au format du jeu : modèle (`build()` crée la scène) vu comme les bâtiments, cadré
+    pour que sa plus grande dimension fasse `fill` px sur `size`, contour d'icône, suivi de ses réductions (bande
+    120 x 64 pour 64 px). Écrite en <jeu>/icons/<name>.png ; renvoie le chemin.
+    Réglages en usage : fill 60 pour une machine, 58 pour un objet plus compact (bras, tas de minerai) ;
+    outline_px 0,5 (0,45 pour les petites pièces)."""
+    import cv2
+    im = render_icon(build, os.path.join(out, "_icon.png"), size, fill, outline_px, pitch_deg)
+    path = icon_path(out, name)
+    cv2.imwrite(path, mip_strip(im, size))
+    return path
+
+
 def render_icon(build, path, size=64, fill=60, outline_px=0.5, pitch_deg=S.PITCH_BUILDING_DEG):
     """Rend l'icône d'un modèle (`build()` crée la scène) : cadrage automatique pour que sa plus grande
     dimension fasse `fill` px, centré. Contour plus épais qu'en jeu (`outline_px` : réglage empirique

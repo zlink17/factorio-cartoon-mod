@@ -19,7 +19,7 @@ import cv2
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
 from belt import BELTS, prism
-from lib import crop_centered, entity_path, gear, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset, sheet
+from lib import crop_centered, entity_path, gear, mat, render_with_shadow, reset, save_icon, sheet
 
 P = S.PALETTE
 PX_PER_TILE = 64
@@ -128,11 +128,11 @@ def crop_patch(sprite, shadowed, patch, window):
     return out
 
 
-def build_icon(belt, out):
+def build_icon(name, belt, out):
     def model():
         reset()
         build_head("north", 0.0, belt)
-    return mip_strip(render_icon(model, os.path.join(out, "_icon.png"), 64, 60), 64)
+    save_icon(out, name, model)
 
 
 def build_splitter(name, out):
@@ -148,7 +148,7 @@ def build_splitter(name, out):
         cv2.imwrite(entity_path(out, name, f"{name}-{direction}.png"), sheet(main, COLUMNS))
         if patch:
             cv2.imwrite(entity_path(out, name, f"{name}-{direction}-top_patch.png"), sheet(top, COLUMNS))
-    cv2.imwrite(icon_path(out, name), build_icon(belt, out))
+    build_icon(name, belt, out)
 
 
 if __name__ == "__main__":

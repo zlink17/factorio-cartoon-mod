@@ -24,7 +24,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
 from belt import BELTS, build_belt
-from lib import entity_path, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset
+from lib import entity_path, mat, render_with_shadow, reset, save_icon
 
 P = S.PALETTE
 CELL = 192
@@ -147,12 +147,11 @@ def render_cell(direction, entering, belt, out):
                               CELL / PX_PER_TILE, SHADOW, OUTLINE)[1]
 
 
-def build_icon(belt, out):
+def build_icon(name, belt, out):
     def model():
         build_belt(0, 0, BELTS[belt])                 # un tronçon de convoyeur (réinitialise la scène)
         build_hood("E", True, belt)                   # et le capot par-dessus
-    icon = render_icon(model, os.path.join(out, "_icon.png"), 64, 60)
-    return mip_strip(icon, 64)
+    save_icon(out, name, model)
 
 
 def build_underground(name, out):
@@ -171,7 +170,7 @@ def build_underground(name, out):
     empty = np.zeros((CELL, 4 * CELL, 4), np.uint8)
     cv2.imwrite(entity_path(out, name, f"{name}-structure-back-patch.png"), empty)
     cv2.imwrite(entity_path(out, name, f"{name}-structure-front-patch.png"), empty)
-    cv2.imwrite(icon_path(out, name), build_icon(belt, out))
+    build_icon(name, belt, out)
 
 
 if __name__ == "__main__":

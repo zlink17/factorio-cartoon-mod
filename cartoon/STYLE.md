@@ -86,6 +86,10 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 - **Taille des détails** : à la taille du jeu, tout détail de moins de 6 px est avalé par les contours, et les bandes étroites (parois latérales : ~14 px) ne supportent ni nervures ni rivets. Peu de gros éléments, vérifiés **au format final** et pas seulement en grand.
 - **Convoyeurs** : bande sombre, chevrons clairs régulièrement espacés, bords colorés.
 - **Minerais** : tas bas et étalé, une teinte par ressource. **[PROVISOIRE]** (le premier test est trop « cristal »)
+- **Icônes** : le modèle 3D de l'objet, vu comme les bâtiments (30°, convoyeurs vus de dessus), cadré pour que sa
+  plus grande dimension fasse 60 px sur 64 (58 pour un objet compact : bras, tas de minerai), contour d'icône
+  (`outline_px` 0,5, environ 1,2 px), suivi de ses réductions à 32, 16 et 8 px (fichier de 120 x 64, comme l'original).
+  Générées par `lib.save_icon`. **[CALÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

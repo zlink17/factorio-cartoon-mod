@@ -19,8 +19,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import (FACTORIO_DATA, box, crop_centered, cyl, entity_path, icon_path, load, mat, mip_strip, render_icon,
-                 render_scene, render_shadow, reset, rod as lib_rod, target)
+from lib import (FACTORIO_DATA, box, crop_centered, cyl, entity_path, load, mat, render_scene, render_shadow, reset,
+                 rod as lib_rod, save_icon, target)
 
 P = S.PALETTE
 PX_PER_TILE = 64
@@ -158,15 +158,11 @@ def render_variant(name, variant, out):
     return sprite, crop_centered(big, *cfg["shadow"])
 
 
-def build_icon(name, out):
-    return mip_strip(render_icon(lambda: build_pole(name, 0), os.path.join(out, "_icon.png"), 64, 60, pitch_deg=S.PITCH_BUILDING_DEG), 64)
-
-
 def build_poles(name, out):
     sprites, shadows = zip(*[render_variant(name, v, out) for v in range(4)])
     cv2.imwrite(entity_path(out, name), np.hstack(sprites))
     cv2.imwrite(entity_path(out, name, f"{name}-shadow.png"), np.hstack(shadows))
-    cv2.imwrite(icon_path(out, name), build_icon(name, out))
+    save_icon(out, name, lambda: build_pole(name, 0))
 
 
 # --- câbles --------------------------------------------------------------------------------------------------

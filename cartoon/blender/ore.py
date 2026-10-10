@@ -17,7 +17,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import entity_path, icon_path, mat, mip_strip, render_icon, render_with_shadow, reset
+from lib import entity_path, mat, render_with_shadow, reset, save_icon
 
 P = S.PALETTE
 CELL = 128
@@ -90,9 +90,8 @@ def build_icons(name, out):
     # quatre icônes : tas de plus en plus gros
     for k, count in enumerate((3, 5, 7, 10)):
         suffix = "" if k == 0 else f"-{k}"
-        icon = render_icon(lambda: build_pile(name, count, 0.15, 0.22, 7 + k, spread=0.3 + 0.04 * k),
-                           os.path.join(out, "_icon.png"), 64, 58, outline_px=0.45)
-        cv2.imwrite(icon_path(out, f"{name}{suffix}"), mip_strip(icon, 64))
+        save_icon(out, f"{name}{suffix}", lambda: build_pile(name, count, 0.15, 0.22, 7 + k, spread=0.3 + 0.04 * k),
+                  fill=58, outline_px=0.45)
 
 
 def build_ore(name, out):

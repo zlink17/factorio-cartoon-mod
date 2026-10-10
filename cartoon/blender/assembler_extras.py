@@ -15,13 +15,11 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from assembler import N_FRAMES, TIERS, build, fit_camera
-from lib import (crop_centered, entity_path, icon_path, mip_strip, render_icon as render_icon_model, sheet,
-                 render_shadow as flat_shadow)
+from lib import crop_centered, entity_path, render_shadow as flat_shadow, save_icon, sheet
 
 SHADOW_GRID = (8, 4)               # colonnes, lignes du fichier d'ombre original
 SUN_SHEAR = (0.3, 0.02)             # décalage au sol par unité de hauteur (droite, vers le bas)
 CANVAS = 400                       # grand canevas carré pour rendre l'ombre avant découpe
-ICON = 64
 ICON_FILL = 60                     # plus grande dimension de la machine dans l'icône (px)
 ICON_OUTLINE_PX = 0.5   # réglage empirique : rend environ 1,2 px de contour
 
@@ -61,11 +59,7 @@ def render_shadow(out, tier, scale, shift):
 
 
 def render_icon(out, tier):
-    path = os.path.join(out, "_icon.png")
-    im = render_icon_model(lambda: build(0.0, tier), path, ICON, ICON_FILL, ICON_OUTLINE_PX)
-    strip = mip_strip(im, ICON)
-    cv2.imwrite(icon_path(out, TIERS[tier]["name"]), strip)
-    print("icône :", strip.shape)
+    print("icône :", save_icon(out, TIERS[tier]["name"], lambda: build(0.0, tier), ICON_FILL, ICON_OUTLINE_PX))
 
 
 if __name__ == "__main__":
