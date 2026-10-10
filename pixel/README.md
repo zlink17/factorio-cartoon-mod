@@ -8,7 +8,7 @@ Palette partagée dans `pillow/palette.py` : jamais de noir pur, ombres vers le 
 | Dossier | Rôle |
 |---|---|
 | `mod/` | Le mod Factorio (`info.json`, `data-final-fixes.lua`, `manifest.lua`, `graphics/overrides/`). Assembleurs 1 à 3 installés (planches, ombres, icônes), régénérés par `pillow/export_mod.py`. |
-| `pillow/` | Sprites dessinés en code. `assembler.py` : assembleur 3×3 à 16 px par case, agrandi ×4, avec animation. `belt.py` : convoyeurs basique, rapide et express (droites, virages, capuchons). `belt_structures.py` : souterrains et répartiteurs ; `inserter.py` : inserters, y compris en vrac (tige, mains, plateforme, ombres) ; `ore.py` : minerais (fer, cuivre, charbon, pierre, uranium) ; `pixutil.py` : ombrage automatique. `export_mod.py` écrit tout dans `mod/`. |
+| `pillow/` | Sprites dessinés en code. `assembler.py` : assembleur 3×3 à 16 px par case, agrandi ×4, avec animation. `belt.py` : convoyeurs basique, rapide et express (droites, virages, capuchons). `belt_structures.py` : souterrains et répartiteurs ; `inserter.py` : inserters, y compris en vrac (tige, mains, plateforme, ombres) ; `ore.py` : minerais (fer, cuivre, charbon, pierre, uranium) ; `poles.py` : poteaux électriques (petit, moyen, grand, sous-station) ; `wire.py` : câbles cuivre, vert et rouge ; `pixutil.py` : ombrage automatique. `export_mod.py` écrit tout dans `mod/`. |
 
 ## Génération
 

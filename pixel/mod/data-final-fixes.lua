@@ -102,3 +102,27 @@ for _, entry in ipairs({ { "splitter", "splitter" }, { "splitter", "fast-splitte
                               south = util.empty_sprite(), west = util.empty_sprite() }
   end
 end
+
+-- Poteaux électriques : 4 rotations par image, ombre séparée ; les points d'attache des câbles (cuivre, rouge, vert)
+-- sont recalculés pour chaque variante d'après la position des isolateurs dessinés (poles_data.lua, généré).
+local poles = require("poles_data")
+for name, spec in pairs(poles) do
+  local proto = data.raw["electric-pole"][name]
+  local layers = proto and proto.pictures and proto.pictures.layers
+  if layers then
+    for i, layer in ipairs(layers) do
+      local g = (i == 1) and spec.picture or spec.shadow
+      layer.width, layer.height, layer.scale = g.width, g.height, 0.5
+      layer.shift = util.by_pixel(g.shift[1], g.shift[2])
+      layer.direction_count = 4
+    end
+    local function p(v) return util.by_pixel(v[1], v[2]) end
+    proto.connection_points = {}
+    for _, w in ipairs(spec.wires) do
+      local c = { wire = {}, shadow = {} }
+      for color, v in pairs(w.wire) do c.wire[color] = p(v) end
+      for color, v in pairs(w.shadow) do c.shadow[color] = p(v) end
+      table.insert(proto.connection_points, c)
+    end
+  end
+end

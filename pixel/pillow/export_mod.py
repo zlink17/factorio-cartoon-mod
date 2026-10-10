@@ -11,7 +11,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-import belt, belt_structures as bs, inserter, ore
+import belt, belt_structures as bs, inserter, ore, poles, wire
 from assembler import draw_assembler, shadow_of, N_FRAMES, W, H, SCALE
 
 OVR = ROOT / "pixel" / "mod" / "graphics" / "overrides" / "base"
@@ -97,6 +97,37 @@ up(bs.underground_sheet("green")).save(SA / "turbo-underground-belt" / "turbo-un
 for direction in ("north", "east", "south", "west"):
     up(bs.splitter_sheet(direction[0].upper(), "green")).save(SA / "turbo-splitter" / f"turbo-splitter-{direction}.png")
 print("turbo ok")
+
+# câbles électriques (textures du dossier core) et poteaux : planche de 4 rotations + ombre, données de cadrage en Lua
+CORE = OVR.parent / "core"
+CORE.mkdir(parents=True, exist_ok=True)
+for name, img in wire.build().items():
+    img.save(CORE / f"{name}.png")
+lua = ["-- Fichier généré par pixel/pillow/export_mod.py (ne pas éditer à la main).",
+       "-- Cadrage des poteaux (px de jeu, relatifs au centre de l'entité) et points d'attache des câbles.",
+       "return {"]
+def pt(p):
+    return "{ %.1f, %.1f }" % (p[0], p[1])
+for name in poles.SPECS:
+    sheet, ssheet, info = poles.sheets(name)
+    d = GAME / name
+    d.mkdir(parents=True, exist_ok=True)
+    up(sheet).save(d / f"{name}.png")
+    shadow = up(ssheet)
+    shadow.putalpha(shadow.getchannel("A").point(lambda v: 110 if v else 0))
+    shadow.save(d / f"{name}-shadow.png")
+    lua.append(f'  ["{name}"] = {{')
+    lua.append(f'    picture = {{ width = {info["picture"]["width"]}, height = {info["picture"]["height"]}, shift = {pt(info["picture"]["shift"])} }},')
+    lua.append(f'    shadow = {{ width = {info["shadow"]["width"]}, height = {info["shadow"]["height"]}, shift = {pt(info["shadow"]["shift"])} }},')
+    lua.append("    wires = {")
+    for r, rs in zip(info["rel"], info["rel_shadow"]):
+        lua.append("      { wire = { " + ", ".join(f"{k} = {pt(v)}" for k, v in r.items()) + " },")
+        lua.append("        shadow = { " + ", ".join(f"{k} = {pt(v)}" for k, v in rs.items()) + " } },")
+    lua.append("    },")
+    lua.append("  },")
+    print(name, "ok")
+lua.append("}")
+(ROOT / "pixel" / "mod" / "poles_data.lua").write_text("\n".join(lua) + "\n", encoding="utf-8")
 
 # minerais : planche 8 x 8 (étapes x variantes), 128 px par cellule
 for kind in ore.RAMPS:
