@@ -138,7 +138,8 @@ prototype, production, contrôle, vérification en jeu, commit.
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
 Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode
 de la section 3.3 (image cible, puis modèle) :
-- [ ] **Assembleur 1** (machine, surfaces dures) : nouveau modèle.
+- [ ] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; nouveau modèle
+      `blender/assembler.py` (planche, ombre, icône), à voir en jeu. Assembleurs 2 et 3 (modèles cartoon) retirés.
 - [ ] **Arbre** (organique) : boules de feuillage.
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.

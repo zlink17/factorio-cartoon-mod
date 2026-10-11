@@ -8,7 +8,8 @@ restent dans `.cache/concept/<objet>/` (non versionné).
 
 ## Recette (11 octobre, assembleur 1 : image `e-11` jugée réussie par Bastien, cible provisoire)
 
-Vérifiée avec `tools/concept/concept.py --recette` : variantes `e-13` à `e-16`, cohérentes avec `e-11`.
+Vérifiée avec `tools/concept/concept.py --recette` : variantes `e-13` à `e-16`, cohérentes avec `e-11`. Bastien a
+retenu **e-11 et e-15** (`cibles/assembleur-1.png`, `cibles/assembleur-1-b.png`) : modèle `blender/assembler.py`.
 
 DreamShaper XL Turbo (modèle par défaut), 768 x 768, 8 étapes, cfg 3,5, ControlNet profondeur 0,4 et contours
 0,25, **IP-Adapter « style transfer » 0,6 sur trois de nos rendus cel-shading** (assembleurs 1 et 2, formes
@@ -21,10 +22,11 @@ G=.cache/concept/assembleur-1
 # 1. guides tirés du sprite original (environnement de ComfyUI, pour Depth Anything V2)
 ~/workspace/comfyui/.venv/bin/python -I tools/concept/prepare.py $G/guides \
     base/graphics/entity/assembling-machine-1/assembling-machine-1.png 214 226 --toile 1024 1024
-# 2. références de style : nos rendus cel-shading (moteur du mod)
+# 2. références de style : nos rendus cel-shading (moteur du mod). Pour l'assembleur 1, c'étaient les modèles
+#    cartoon rendus en cel-shading (assembleurs 1 et 2, retirés depuis) et les formes d'essai (blender/essai.py) ;
+#    pour les objets suivants : les sprites déjà refaits du mod, par exemple
 .venv/bin/python tools/concept/styles.py $G/guides \
     celshading/mod/graphics/overrides/base/entity/assembling-machine-1/assembling-machine-1.png:214:226 \
-    celshading/mod/graphics/overrides/base/entity/assembling-machine-2/assembling-machine-2.png:214:226 \
     .cache/celshading/essai/essai.png
 # 3. génération, une image par graine
 .venv/bin/python -I tools/concept/concept.py $G/guides $G/gen 11,12,13 --tag e --recette celshading/concept/recette.json \

@@ -60,9 +60,10 @@ def line_color(rgb):
     return tuple(_to_linear(min(1.0, c)) for c in (r, g, min(1.0, b * C.OUTLINE_BLUE)))
 
 
-def mat(name, rgb):
-    """Aplat de la couleur avivée, en émission ; le ton (ombre, éclairé, clair) est posé par render_scene."""
-    base = vivid(rgb)
+def mat(name, rgb, avive=True):
+    """Aplat de la couleur (RGB linéaire), en émission ; le ton (ombre, éclairé, clair) est posé par render_scene.
+    `avive` : couleur de la palette cartoon, avivée (modèles du mod cartoon) ; False : couleur prise telle quelle."""
+    base = vivid(rgb) if avive else tuple(rgb)
     m = bpy.data.materials.new(name)
     m["cel"] = 1
     m.line_color = (*line_color(base), 1)
@@ -74,6 +75,11 @@ def mat(name, rgb):
     out = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(em.outputs[0], out.inputs[0])
     return m
+
+
+def couleur(name, hex_):
+    """Matière d'une couleur #rrggbb (sRGB) prise telle quelle : ton « éclairé » de l'objet (modèles du mod)."""
+    return mat(name, S._lin(hex_), avive=False)
 
 
 def _flat(name, shader, value):
