@@ -116,6 +116,7 @@ touffes ton sur ton dans la texture.
 | Arbres de Nauvis | 9 espèces (troncs, feuillage en 3 états, normales, souches) et 5 arbres morts ou secs : 448 fichiers. Feuillage en gros lobes ronds (sapin : étages pointus) en tons neutres, teinté par le jeu ; troncs en aplat à trois tons tirés de l'original ; ombres d'origine. | `terrain/trees.py` |
 | Gros rochers et poissons | `big-rock` (20), `huge-rock` (16), `big-sand-rock` (16) : blocs prismatiques posés sur la silhouette de l'original (colonnes hexagonales ; grès en gros blocs olive), teintes sombres proches de l'original. Poissons : silhouette nette sous l'eau. | `terrain/rocks.py` |
 | Four en pierre | Pyramide tronquée de briques ocre, cheminée et bouche en pierre grise, ombre, icône ; flammes en aplats (48 images). | `blender/furnace.py` |
+| Foreuse à charbon | 4 directions × 32 images (engrenages, vrille, piston), ombres, icône ; pieds arqués ajustés sur l'original. | `blender/burner_drill.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -200,6 +201,11 @@ touffes ton sur ton dans la texture.
   recouvrement de silhouette avec l'original (descente de coordonnées, quelques dizaines de rendus sans contour).
 - **Petits motifs (briques, rivets) : pas en relief.** Chaque arête vive reçoit un contour Freestyle, qui noie les
   petites pièces ; peindre le motif par une texture procédurale (nœud « Brick Texture ») sur une face plate.
+- **Tourner un modèle par direction** : appliquer la rotation à `matrix_world` **après**
+  `bpy.context.view_layer.update()`, sinon le dernier objet créé (matrice pas encore calculée) perd son échelle.
+  Les engrenages de `lib.gear` sont horizontaux : les créer à l'origine puis régler `location`/`rotation_euler`.
+- **Pièces fines (pieds, vrilles)** : un maillage continu (poutre balayée le long d'une courbe, ruban
+  hélicoïdal) plutôt qu'une suite de cylindres, sinon chaque raccord reçoit un contour.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.

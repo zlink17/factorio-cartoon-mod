@@ -85,6 +85,9 @@ PALETTE_HEX = {
     "furnace_stone":      "#b8b2a3",
     "furnace_mortar":     "#6e5a3a",
     "furnace_soot":       "#2a211b",
+    # foreuse à charbon : fer sombre légèrement violacé des pieds (original)
+    "drill_iron":         "#6e6a7c",
+    "drill_auger":        "#4a4c58",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

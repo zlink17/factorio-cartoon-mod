@@ -592,6 +592,20 @@ local function detail_production()
   end
   label("stone-furnace", 7, s.y + 6.2, 0.6)
   animate("anim-fours", 1, s.y + 2, 12, 4, 16, 2)
+  -- foreuses à charbon dans les 4 directions, sur du fer, avec du charbon
+  for x = 0, 17 do
+    for y = 8, 13 do
+      create { name = "iron-ore", position = { x + 0.5, s.y + y + 0.5 }, amount = 5000 }
+    end
+  end
+  local dirs = { "north", "east", "south", "west" }
+  for k, d in ipairs(dirs) do
+    local e = create { name = "burner-mining-drill", position = { 2 + (k - 1) * 4.5, s.y + 10 },
+      direction = defines.direction[d] }
+    if e then e.insert { name = "coal", count = 50 } end
+    label(d, 2 + (k - 1) * 4.5, s.y + 12.3, 0.5)
+  end
+  animate("anim-foreuses-charbon", 0, s.y + 8, 18, 5, 16, 2)
 end
 
 -- Vue rapprochée : mélange d'entités (arbres, gros rochers) et de décorations tout autour (devant, derrière, côtés) :

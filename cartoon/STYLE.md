@@ -121,6 +121,10 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   joints sombres, sans relief), bandeau et cheminée en pierre grise, bouche encadrée de pierre. Flammes en aplats à
   trois tons (rouge, orange, jaune), langues en gouttes qui ondulent en boucle de 48 images, sans contour, limitées
   à l'ouverture de la bouche. Halos lumineux d'origine. **[VALIDÉ]**
+- **Foreuse à charbon** (`blender/burner_drill.py`) : quatre pieds arqués en fer sombre violacé (poutres d'un
+  seul maillage), plateau à ailes, carter sombre et engrenages de laiton, vrille hélicoïdale, foyer gris-bleu,
+  goulotte cuivre vers la sortie. Courbe des pieds ajustée sur la silhouette de l'original (4 directions).
+  Animation : engrenages, vrille, piston. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
