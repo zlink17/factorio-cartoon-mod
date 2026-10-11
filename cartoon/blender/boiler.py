@@ -23,7 +23,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import (box, crop_centered, cyl, entity_path, load, mat, render_scene, render_shadow, reset, rod,
+import pipe as PIPE
+from lib import (box, crop_centered, cyl, entity_path, load, mat, render_scene, render_shadow, reset,
                  save_icon)
 
 P = S.PALETTE
@@ -49,6 +50,7 @@ DIMS = dict(
     rt=0.5, yt=-0.425, zt=0.6,             # réservoirs latéraux (porteurs des raccords d'eau) : rayon, centre (y, z)
     down=0.33,                             # décalage de tout le dessin vers le bas de l'écran (comme les originaux)
     chim=2.625,                            # hauteur de la cheminée
+    tank_end=1.08,                         # bout des réservoirs (le tuyau du raccord en sort jusqu'au bord, à 1,5)
 )
 # bornes de l'ajustement : au-delà, tambour et réservoirs se fondent en un seul cylindre et la silhouette en
 # gradins (tambour haut au centre, réservoirs bas aux bouts) disparaît
@@ -186,10 +188,9 @@ def build(direction="N", d=None):
     for s in (-1, 1):
         cyl((s * (L / 2 - 0.1), yc, zc), R + 0.03, 0.08, copper, verts=40, rot=(0, 90, 0))   # cerclages
         # réservoir latéral, raccord d'eau sur la rangée avant (y = -0,5 dans Blender) et sa bride
-        cyl((s * (L / 2 + 1.32) / 2, yt, zt), rt, 1.32 - L / 2 + 0.1, body, verts=32, rot=(0, 90, 0))
-        cyl((s * 1.32, yt, zt), rt + 0.03, 0.06, copper, verts=32, rot=(0, 90, 0))
-        rod((s * 1.3, -0.5, 0.36), (s * 1.44, -0.5, 0.36), 0.19, body, verts=24)
-        cyl((s * 1.45, -0.5, 0.36), 0.26, 0.07, copper, verts=24, rot=(0, 90, 0))   # bride
+        te = d["tank_end"]
+        cyl((s * (L / 2 + te) / 2, yt, zt), rt, te - L / 2 + 0.1, body, verts=32, rot=(0, 90, 0))
+        cyl((s * te, yt, zt), rt + 0.03, 0.06, copper, verts=32, rot=(0, 90, 0))
     brass = mat("brass", P["yellow"])
     # trappe du foyer sur le tambour : cadre laiton, platine cuivre aux trois fentes peintes (dans le cadre des
     # flammes du jeu)
@@ -229,6 +230,29 @@ def build(direction="N", d=None):
     for o in bpy.context.scene.objects:
         if o.parent is None:
             o.matrix_world = rot @ o.matrix_world
+    connectors(direction, d)
+
+
+# raccords du prototype pour le nord (cases, y vers le sud comme dans le jeu) : position, direction vers l'extérieur
+CONNECTIONS = [((-1, 0.5), (-1, 0)), ((1, 0.5), (1, 0)), ((0, -0.5), (0, -1))]   # eau, eau, vapeur
+STUB = 0.75                                  # longueur de l'embout, du bord de la case vers l'intérieur
+
+
+def connectors(direction, d=None):
+    """Embouts des raccords : le tube et la bride du tuyau (pipe.py), au bord de la case, posés dans le repère du
+    monde après la rotation : à l'écran, ils tombent exactement sur ceux d'un tuyau voisin. Le tuyau est dessiné
+    `pipe.DIMS["yc"]` plus au sud que sa case, la chaudière `down` plus bas à l'écran : on décale l'embout d'autant."""
+    d = d or DIMS
+    pd, m = PIPE.DIMS, PIPE.mats()
+    k = {"N": 0, "E": 1, "S": 2, "W": 3}[direction]
+    dy = pd["yc"] + d["down"]                # le sol est étiré en y par render_scene : 1 case au sol = 1 case à l'écran
+    for (px, py), (vx, vy) in CONNECTIONS:
+        for _ in range(k):                   # quart de tour horaire dans le repère du jeu
+            px, py, vx, vy = -py, px, -vy, vx
+        out = np.array((vx, -vy, 0.0))       # repère de Blender : y vers le nord
+        edge = np.array((px, -py + dy, pd["r"])) + out * 0.5
+        PIPE.tube_path([tuple(edge), tuple(edge - out * STUB)], pd["r"], m["tube"])
+        PIPE.flange(tuple(edge), (-vx, vy), pd, m)
 
 
 def camera_shift(d=None):

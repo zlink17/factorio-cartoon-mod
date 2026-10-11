@@ -15,6 +15,8 @@ local GROUND = "grass-1"
 local ROW_WIDTH = 130          -- largeur maximale d'une ligne de zones (cases)
 local GAP_X, GAP_Y = 10, 12    -- espaces entre zones (la place des titres au-dessus)
 local REFILL_TICKS = 120       -- réapprovisionnement des machines
+local PIPE_DRAIN = 2           -- débit du réseau de tuyaux (par tick : 120/s, une vingtaine de chaudières)
+local PUMP_DRAIN = 5           -- eau retirée à la sortie de chaque pompe côtière (par tick : 300/s)
 
 local BENCH = script.active_mods["cartoon-bench"] ~= nil
 local CARTOON = script.active_mods["factorio-cartoon-mod"] ~= nil
@@ -343,17 +345,30 @@ local function build_storage(x0, y0)
   end
 end
 
--- Lot 2.4 : chaudières dans les 4 directions (allumées, puis éteintes), eau fournie et vapeur évacuée par des
--- tuyaux infinis ; à droite, une vraie chaîne : pompe côtière, chaudière, deux machines à vapeur qui débitent.
+-- Lot 2.4 : chaudières dans les 4 directions (allumées, puis éteintes), eau fournie et vapeur évacuée par de
+-- vrais tuyaux tenus par le script (fluid_end) ; à droite, une vraie chaîne : pompe côtière, chaudière, deux
+-- machines à vapeur qui débitent.
 local function turn(d, dx, dy)   -- décalage donné pour le nord, tourné vers la direction d
   if d == E then return -dy, dx elseif d == S then return -dx, -dy elseif d == W then return dy, -dx end
   return dx, dy
 end
 
-local function infinity(x, y, fluid, remove)
-  local p = create { name = "infinity-pipe", position = { x, y } }
-  if p then pcall(function() p.set_infinity_pipe_filter { name = fluid, percentage = remove and 0 or 1,
-    mode = remove and "exactly" or "at-least" } end) end
+-- Source ou puits de fluide : un vrai tuyau que le script remplit ou vide à chaque tick (pas de tuyau infini :
+-- celui de l'éditeur est le sprite du tuyau teinté en bleu, et il vide sans limite, ce qui fait défiler le flux
+-- des fenêtres au débit maximal). rate : quantité retirée par tick (puits), nil pour une source.
+local function fluid_end(x, y, fluid, rate)
+  local p = create { name = "pipe", position = { x, y } }
+  if p then storage.flows[#storage.flows + 1] = { entity = p, fluid = fluid, rate = rate } end
+end
+
+local function flows()
+  for _, f in ipairs(storage.flows or {}) do
+    local e = f.entity
+    if e.valid then
+      if f.rate then pcall(e.remove_fluid, { name = f.fluid, amount = f.rate })
+      else pcall(e.insert_fluid, { name = f.fluid, amount = 100 }) end
+    end
+  end
 end
 
 local function build_steam(x0, y0)
@@ -364,12 +379,16 @@ local function build_steam(x0, y0)
       local y = cy + row * 8
       local b = create { name = "boiler", position = { cx, y }, direction = d[2] }
       if b and row == 0 then keep(b, { fuel = true }) end
-      for _, side in ipairs({ -1, 1 }) do
+      for _, side in ipairs({ -1, 1 }) do      -- deux tuyaux par raccord : on voit la jonction avec la chaudière
         local dx, dy = turn(d[2], side * 2, 0.5)
-        infinity(cx + dx, y + dy, "water")
+        create { name = "pipe", position = { cx + dx, y + dy } }
+        dx, dy = turn(d[2], side * 3, 0.5)
+        fluid_end(cx + dx, y + dy, "water")
       end
       local dx, dy = turn(d[2], 0, -1.5)
-      infinity(cx + dx, y + dy, "steam", true)
+      create { name = "pipe", position = { cx + dx, y + dy } }
+      dx, dy = turn(d[2], 0, -2.5)
+      fluid_end(cx + dx, y + dy, "steam", 100)
     end
     label(d[1], cx, cy + 2.8, 0.5)
   end
@@ -399,7 +418,7 @@ local function build_steam(x0, y0)
   local eei = create { name = "electric-energy-interface", position = { bx + 3.5, by - 7 } }
   if eei then pcall(function() eei.power_production = 0; eei.power_usage = 1.8e6; eei.electric_buffer_size = 1e7 end) end
   label("pompe côtière, chaudière, machines à vapeur", bx, y0 + 22.3, 0.6)
-  -- pompes côtières dans les 4 directions autour d'un étang, l'eau évacuée par un tuyau infini (elles tournent)
+  -- pompes côtières dans les 4 directions autour d'un étang, l'eau retirée par le script (elles tournent)
   local ex1, ey1, ex2, ey2 = x0 + 12, y0 + 21, x0 + 22, y0 + 26
   tiles("water", ex1, ey1, ex2, ey2)
   local shores = { [N] = { (ex1 + ex2) / 2, ey2 + 0.5 }, [S] = { (ex1 + ex2) / 2, ey1 - 0.5 },
@@ -417,7 +436,7 @@ local function build_steam(x0, y0)
     end
     if placed then
       local dx, dy = turn(d[2], 0, 1)
-      infinity(placed.position.x + dx, placed.position.y + dy, "water", true)
+      fluid_end(placed.position.x + dx, placed.position.y + dy, "water", PUMP_DRAIN)
       local lx, ly = turn(d[2], 0, 2.2)
       label(d[1], placed.position.x + lx, placed.position.y + ly - 0.3, 0.5)
     else
@@ -429,17 +448,18 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 
--- Lot 2.5 : tuyaux. Un réseau où l'eau circule (source et puits infinis : les fenêtres montrent le fluide),
--- coudes, T, croix, bouts, tuyau isolé ; tuyaux souterrains dans les 4 directions ; assembleurs 2 et 3 à recette
--- avec fluide dans les 4 directions (raccords), alimentés en lubrifiant ou laissés libres (couvercles).
+-- Lot 2.5 : tuyaux. Un réseau où l'eau circule (source et puits tenus par le script, débit PIPE_DRAIN : les
+-- fenêtres montrent le fluide), coudes, T, croix, bouts, tuyau isolé ; tuyaux souterrains dans les 4 directions ;
+-- assembleurs 2 et 3 à recette avec fluide dans les 4 directions (raccords), alimentés en lubrifiant ou laissés
+-- libres (couvercles).
 local function build_pipes(x0, y0)
   local function pipe(x, y) create { name = "pipe", position = { x0 + x + 0.5, y0 + y + 0.5 } } end
-  infinity(x0 + 1.5, y0 + 1.5, "water")
+  fluid_end(x0 + 1.5, y0 + 1.5, "water")
   for x = 2, 14 do pipe(x, 1) end
   for y = 2, 8 do pipe(14, y) end
   for x = 2, 13 do pipe(x, 8) end
   for y = 2, 7 do pipe(2, y) end
-  infinity(x0 + 15.5, y0 + 8.5, "water", true)
+  fluid_end(x0 + 15.5, y0 + 8.5, "water", PIPE_DRAIN)
   for x = 5, 10 do pipe(x, 4) end                     -- croix et T au milieu
   for y = 3, 6 do pipe(7, y) end
   pipe(11, 6)                                         -- tuyau isolé
@@ -465,7 +485,7 @@ local function build_pipes(x0, y0)
         pcall(function() a.direction = d[2] end)
         if k % 2 == 0 then
           local dx, dy = turn(d[2], 0, -2)
-          infinity(x + dx, y + dy, "lubricant")
+          fluid_end(x + dx, y + dy, "lubricant")
         end
       end
       label("assembling-machine-" .. tier .. " " .. d[1], x, y + 2.3, 0.5)
@@ -706,6 +726,7 @@ local function build()
   label(CARTOON and "Mod cartoon actif" or "Mod cartoon inactif : graphismes d'origine", width / 2, -6, 1)
   label("Fenêtre « Galerie » en haut à gauche pour aller à une zone", width / 2, -4, 0.7)
   storage.keep = {}
+  storage.flows = {}
   storage.zones = {}
   for _, z in ipairs(ZONES) do
     label(z.titre, z.x + z.w / 2, z.y - 5, 1.3)
@@ -809,6 +830,7 @@ local function shoot(name, x, y, w, h, zoom)
 end
 
 script.on_event(defines.events.on_tick, function(event)
+  flows()
   if storage.tags_pending and event.tick % 60 == 30 then
     local s = game.surfaces.nauvis
     local done = true
@@ -824,6 +846,9 @@ script.on_event(defines.events.on_tick, function(event)
   if not BENCH then return end
   if event.tick == SHOT_TICK then
     for _, z in ipairs(storage.zones) do shoot(z.id, z.x - 2, z.y - 6, z.w + 4, z.h + 8, 1) end
+    for _, z in ipairs(storage.zones) do      -- gros plans : raccords des tuyaux
+      if z.id == "energie" or z.id == "tuyaux" then shoot(z.id .. "-x2", z.x - 2, z.y - 6, z.w + 4, z.h + 8, 2) end
+    end
     local width, height = 0, 0
     for _, z in ipairs(storage.zones) do width, height = math.max(width, z.x + z.w), math.max(height, z.y + z.h) end
     shoot("ensemble", -8, -12, width + 16, height + 20, 0.25)

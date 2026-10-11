@@ -9,8 +9,8 @@ Usage : python cartoon/blender/offshore_pump.py <dossier_sortie> [direction[,dir
   offshore-pump_<D>-shadow.png      32 ombres, noires unies
   offshore-pump_<D>-legs.png        pieds posés sur la berge (calque du sol, dessiné sous la pompe)
   offshore-pump_<D>-underwater.png  bas du réservoir sous l'eau (dessiné sous la surface de l'eau)
-  offshore-pump_<D>-fluid.png       eau dans les fenêtres des cylindres : forme de l'original, en aplats (le jeu
-                                    la teinte de la couleur du fluide)
+  offshore-pump_<D>-fluid.png       eau dans les fenêtres des cylindres, 32 images : nos fenêtres découpées autour
+                                    des pistons, en aplat gris (le jeu la teinte de la couleur du fluide)
   offshore-pump_<D>-glass.png       reflets des vitres, en aplats
   offshore-pump.png (icône)         64 px + mipmaps
 Le reflet dans l'eau (fichier technique) et les restes (lot 3.9) sont laissés d'origine.
@@ -114,12 +114,21 @@ def bezier(p0, p1, p2, n=10):
     return [tuple((1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t ** 2 * p2) for t in np.linspace(0, 1, n)]
 
 
-def mats():
+WINDOW = (0.24, 0.15)               # fenêtres : largeur, écart de leur centre à l'axe de la pompe (cases) ; les deux
+                                    # doivent tenir dans le cadre du calque de fluide (40 px = 0,625 case)
+PISTON = (0.19, 0.22)               # piston : largeur et longueur (cases)
+WINDOW_MASK, PISTON_MASK = (1.0, 0.0, 1.0), (0.0, 1.0, 0.0)    # couleurs repères de la passe « masque »
+FLUID_TONE = 170                    # gris de l'eau des fenêtres (le jeu la teinte de la couleur du fluide)
+
+
+def mats(mask=False):
+    """Matériaux ; `mask` : fenêtres et pistons en couleurs repères, pour découper le calque de fluide."""
     return dict(
+        window=mat("window", WINDOW_MASK if mask else P["dark"]),
         tank=mat("tank", P["pump_tank"]), rim=mat("rim", P["pump_yellow"]), dark=mat("dark", P["dark"]), iron=mat("iron", P["dark_grey"]),
         frame=mat("frame", P["iron"]), copper=mat("copper", P["brown"]), pipe=mat("pipe", P["engine_pipe"]),
         hose=mat("hose", P["pump_hose"]), hose_dark=mat("hose_dark", P["pump_hose_dark"]),
-        piston=mat("piston", P["white"]), brass=mat("brass", P["yellow"]), rust=mat("rust", P["engine_rust"]),
+        piston=mat("piston", PISTON_MASK if mask else P["yellow"]), brass=mat("brass", P["yellow"]), rust=mat("rust", P["engine_rust"]),
     )
 
 
@@ -186,16 +195,18 @@ def body(m, d, phase, direction):
         cyl((s * xt, yt, zt / 2), rt, zt, m["tank"], verts=32)
         cyl((s * xt, yt, zt - 0.11), rt + 0.03, 0.26, m["rim"], verts=32)
         cyl((s * xt, yt, zt - 0.02), rt * 0.72, 0.06, m["dark"], verts=32)
-    # cylindres couchés : corps sombre, cerclages, fenêtre sombre sur le dessus, piston clair qui va et vient
+    # cylindres couchés : corps sombre, cerclages, fenêtre sur le dessus (le jeu y dessine l'eau, calque de fluide),
+    # gros piston laiton qui va et vient dans la fenêtre, les deux cylindres en opposition
     for s, ph in ((-1, 0.0), (1, 0.5)):
         x = s * xk
         cyl((x, (yk0 + yk1) / 2, zk), rk, yk1 - yk0, m["iron"], verts=24, rot=(90, 0, 0))
         for y in (yk0 + 0.04, yk1 - 0.04):
             cyl((x, y, zk), rk + 0.025, 0.07, m["frame"], verts=24, rot=(90, 0, 0))
         w0, w1 = window_span(direction, d)
-        box((x, (w0 + w1) / 2, zk + rk - 0.02), (rk * 0.9, w1 - w0, 0.06), m["dark"])
-        travel = (w1 - w0 - 0.12) / 2 * math.sin(2 * math.pi * (phase + ph))
-        box((x, (w0 + w1) / 2 + travel, zk + rk), (rk * 0.7, 0.1, 0.06), m["piston"])
+        xw = s * WINDOW[1]
+        box((xw, (w0 + w1) / 2, zk + rk - 0.02), (WINDOW[0], w1 - w0, 0.06), m["window"])
+        travel = (w1 - w0 - PISTON[1] - 0.04) / 2 * math.sin(2 * math.pi * (phase + ph))
+        box((xw, (w0 + w1) / 2 + travel, zk + rk + 0.01), (PISTON[0], PISTON[1], 0.08), m["piston"])
     # flasques à engrenages sur les côtés
     a = phase * 360
     for s in (-1, 1):
@@ -219,13 +230,13 @@ def body(m, d, phase, direction):
     cyl((0, yf - 0.005, rf), rf * 0.82, 0.02, m["pipe"], verts=32, rot=(90, 0, 0))  # face claire
 
 
-def build(direction="N", phase=0.0, part="sprite", d=None):
+def build(direction="N", phase=0.0, part="sprite", d=None, mask=False):
     """Scène d'une direction : `part` = sprite (la pompe), legs, underwater, ou all (icône, ombre)."""
     import bpy
     from mathutils import Matrix
     reset()
     d = d or DIMS
-    m = mats()
+    m = mats(mask)
     if part in ("sprite", "all"):
         body(m, d, phase, direction)
     if part in ("legs", "all"):
@@ -243,10 +254,22 @@ def camera_shift(d=None):
     return (d or DIMS)["down"] * PX_PER_TILE / CANVAS
 
 
-def render(direction, phase, part, path):
-    build(direction, phase, part)
+def render(direction, phase, part, path, mask=False):
+    build(direction, phase, part, mask=mask)
     render_scene(path, size=CANVAS, scale=CANVAS / PX_PER_TILE, outline_units=OUTLINE, shift_y=camera_shift())
     return load(path)
+
+
+def fluid_frame(direction, phase, path, cell):
+    """Eau des fenêtres pour une image : les pixels de fenêtre visibles (passe « masque »), autour des pistons, en
+    aplat gris. Le jeu dessine ce calque par-dessus la pompe : il doit épouser nos fenêtres et laisser voir les
+    pistons."""
+    im = crop_centered(render(direction, phase, "sprite", path, mask=True), *cell).astype(np.int32)
+    b, g, r, a = im[..., 0], im[..., 1], im[..., 2], im[..., 3]
+    win = (a > 200) & (r > 60) & (b > 60) & (g < 0.35 * np.minimum(r, b))
+    out = np.zeros(im.shape[:2] + (4,), np.uint8)
+    out[win] = (FLUID_TONE, FLUID_TONE, FLUID_TONE, 255)
+    return out
 
 
 def flat(im, levels=2):
@@ -285,7 +308,8 @@ def render_direction(direction, out, cells, preview=False):
     for part in ("legs", "underwater"):
         cv2.imwrite(entity_path(out, NAME, f"{pre}-{part}.png"), crop_centered(render(direction, 0, part, path),
                                                                                 *c[part]))
-    cv2.imwrite(entity_path(out, NAME, f"{pre}-fluid.png"), flat(original(f"{pre}-fluid.png")))
+    fluid = [fluid_frame(direction, i / N_FRAMES, path, c["fluid"]) for i in range(n)]
+    cv2.imwrite(entity_path(out, NAME, f"{pre}-fluid.png"), sheet(fluid * (N_FRAMES if preview else 1), COLUMNS))
     glass = flat(original(f"{pre}-glass.png"), 1)
     glass[:, :, 3] = (glass[:, :, 3] * 0.6).astype(np.uint8)
     cv2.imwrite(entity_path(out, NAME, f"{pre}-glass.png"), glass)
