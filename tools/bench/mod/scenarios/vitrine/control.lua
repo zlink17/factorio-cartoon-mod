@@ -747,6 +747,54 @@ local function detail_offshore_pumps()
   animate("anim-pompes-cotieres", 4, s.y + 2, 18, 12, 16, 2)
 end
 
+-- Vue rapprochée : tuyaux. Un réseau (droits avec fenêtres, coudes, T, croix, bouts, tuyau isolé), des tuyaux
+-- souterrains dans les 4 directions, et des assembleurs 2 et 3 à recette avec fluide (raccords et couvercles).
+local function detail_pipes()
+  local s = scene("detail-tuyaux", 1, GROUND, 2)
+  local function pipe(x, y) create { name = "pipe", position = { x + 0.5, s.y + y + 0.5 } } end
+  for x = 2, 11 do pipe(x, 2) end                     -- long droit horizontal (fenêtres)
+  for y = 3, 9 do pipe(2, y) end                      -- long droit vertical, coudes aux coins
+  for x = 3, 11 do pipe(x, 9) end
+  for y = 3, 8 do pipe(11, y) end
+  for x = 5, 8 do pipe(x, 5) end                      -- croix et T au milieu
+  for y = 4, 7 do pipe(6, y) end
+  pipe(9, 7)                                          -- tuyau isolé
+  pipe(14, 3); pipe(14, 4)                            -- deux bouts
+  pipe(16, 3); pipe(17, 3)
+  local infinity = create { name = "infinity-pipe", position = { 12.5, s.y + 2.5 } }
+  if infinity then pcall(function() infinity.set_infinity_pipe_filter { name = "water", percentage = 1 } end) end
+  local ug = { { "north", 20, 2, 0, 1 }, { "south", 22, 6, 0, -1 }, { "east", 24, 2, -1, 0 }, { "west", 24, 7, 1, 0 } }
+  for _, u in ipairs(ug) do
+    local d, x, y, dx, dy = u[1], u[2], u[3], u[4], u[5]
+    create { name = "pipe-to-ground", position = { x + 0.5, s.y + y + 0.5 }, direction = defines.direction[d] }
+    pipe(x - dx, y - dy)
+  end
+  power(0, s.y + 10, s.w, s.y + s.h)
+  local k = 0
+  for _, tier in ipairs({ 2, 3 }) do
+    for _, d in ipairs({ "north", "east" }) do
+      local x, y = 3 + k * 7, s.y + 14.5
+      local a = create { name = "assembling-machine-" .. tier, position = { x + 0.5, y }, direction = defines.direction[d] }
+      if a then
+        for _, r in ipairs({ "electric-engine-unit", "processing-unit" }) do
+          pcall(function() a.force.recipes[r].enabled = true end)
+          local ok, err = pcall(function() a.set_recipe(r) end)
+          if ok and a.get_recipe() then break end
+          note("recette " .. r .. " : " .. tostring(err))
+        end
+        if d == "east" then a.direction = defines.direction.east end   -- orientable seulement avec un fluide
+        local dx, dy = 0, -2                          -- entrée de fluide : au nord, tournée avec la machine
+        if d == "east" then dx, dy = 2, 0 end
+        local p = create { name = "pipe", position = { x + 0.5 + dx, y + dy } }
+        if p and k % 2 == 1 then p.destroy() end      -- une machine sur deux : raccord libre (couvercle)
+      end
+      label("assembling-machine-" .. tier .. " " .. d, x + 0.5, y + 2.4, 0.45)
+      k = k + 1
+    end
+  end
+  animate("anim-tuyaux", 1, s.y + 1, 26, 10, 4, 4)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -815,7 +863,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_pipes, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

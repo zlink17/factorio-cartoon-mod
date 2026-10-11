@@ -153,6 +153,12 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   peints sur un seul maillage) en arceaux du réservoir aux cylindres et des cylindres au collecteur ; bride claire
   face au tuyau ; pieds rouille sur la berge (calque du sol). Fenêtres placées direction par direction sous les
   fenêtres de fluide de l'original (eau teintée par le jeu, gardée à sa forme, en aplats). **[VALIDÉ]**
+- **Tuyaux** (`blender/pipe.py`) : tube en tôle claire couché au sol, brides cuivre **dans** la case, contre ses
+  bords (deux brides accolées à chaque raccord, comme l'original), bouchons à anneaux concentriques aux bouts ;
+  ombre portée incluse dans l'image (opacité 0,55, comme l'original). Fenêtre : cadre cuivre et verre clair
+  translucide à la forme du trou de l'original (le jeu dessine le fluide dessous). Souterrain : le tuyau plonge
+  dans le sol par un coude, collerette au sol. Raccords des assembleurs 2 et 3 : cadre à la couleur du niveau sur
+  la paroi, tube court et bride. **[PROVISOIRE]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

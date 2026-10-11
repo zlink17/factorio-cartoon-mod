@@ -429,6 +429,57 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 
+-- Lot 2.5 : tuyaux. Un réseau où l'eau circule (source et puits infinis : les fenêtres montrent le fluide),
+-- coudes, T, croix, bouts, tuyau isolé ; tuyaux souterrains dans les 4 directions ; assembleurs 2 et 3 à recette
+-- avec fluide dans les 4 directions (raccords), alimentés en lubrifiant ou laissés libres (couvercles).
+local function build_pipes(x0, y0)
+  local function pipe(x, y) create { name = "pipe", position = { x0 + x + 0.5, y0 + y + 0.5 } } end
+  infinity(x0 + 1.5, y0 + 1.5, "water")
+  for x = 2, 14 do pipe(x, 1) end
+  for y = 2, 8 do pipe(14, y) end
+  for x = 2, 13 do pipe(x, 8) end
+  for y = 2, 7 do pipe(2, y) end
+  infinity(x0 + 15.5, y0 + 8.5, "water", true)
+  for x = 5, 10 do pipe(x, 4) end                     -- croix et T au milieu
+  for y = 3, 6 do pipe(7, y) end
+  pipe(11, 6)                                         -- tuyau isolé
+  pipe(17, 2); pipe(17, 3); pipe(19, 2); pipe(20, 2)  -- bouts
+  label("pipe", x0 + 9, y0 + 9.8, 0.6)
+  -- tuyaux souterrains : paires dans les 4 directions
+  local ug = { { N, 24, 7, 24, 2 }, { E, 27, 2, 33, 2 }, { S, 36, 2, 36, 7 }, { W, 33, 7, 27, 7 } }
+  for _, u in ipairs(ug) do
+    local d, xa, ya, xb, yb = u[1], u[2], u[3], u[4], u[5]
+    create { name = "pipe-to-ground", position = { x0 + xa + 0.5, y0 + ya + 0.5 }, direction = d }
+    create { name = "pipe-to-ground", position = { x0 + xb + 0.5, y0 + yb + 0.5 }, direction = (d + 8) % 16 }
+  end
+  label("pipe-to-ground", x0 + 30, y0 + 9.8, 0.6)
+  -- assembleurs à fluide (lubrifiant fourni à un sur deux), 4 directions par niveau
+  local k = 0
+  for _, tier in ipairs({ 2, 3 }) do
+    for i, d in ipairs(DIRS) do
+      local x, y = x0 + 3.5 + (i - 1) * 10, y0 + 14.5 + (tier - 2) * 8
+      local a = create { name = "assembling-machine-" .. tier, position = { x, y }, direction = d[2] }
+      if a then
+        pcall(function() a.force.recipes["electric-engine-unit"].enabled = true end)
+        pcall(function() a.set_recipe("electric-engine-unit") end)
+        pcall(function() a.direction = d[2] end)
+        if k % 2 == 0 then
+          local dx, dy = turn(d[2], 0, -2)
+          infinity(x + dx, y + dy, "lubricant")
+        end
+      end
+      label("assembling-machine-" .. tier .. " " .. d[1], x, y + 2.3, 0.5)
+      k = k + 1
+    end
+  end
+  create { name = "substation", position = { x0 + 8.5, y0 + 18.5 } }
+  create { name = "substation", position = { x0 + 28.5, y0 + 18.5 } }
+  local eei = create { name = "electric-energy-interface", position = { x0 + 40.5, y0 + 18.5 } }
+  if eei then pcall(function() eei.power_production = 1e9; eei.electric_buffer_size = 1e10 end) end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+
 -- Lot 2.7 : arbres de Nauvis (deux de chaque), gros rochers, étang à poissons.
 local function build_nature(x0, y0)
   local names = {}
@@ -532,6 +583,7 @@ local ZONES = {
   { id = "production", titre = "Lot 2.2 · Production de base", w = 42, h = 28, build = build_production },
   { id = "stockage", titre = "Lot 2.3 · Stockage", w = 36, h = 13, build = build_storage },
   { id = "energie", titre = "Lot 2.4 · Énergie vapeur", w = 56, h = 32, build = build_steam },
+  { id = "tuyaux", titre = "Lot 2.5 · Tuyaux", w = 42, h = 26, build = build_pipes },
   { id = "nature", titre = "Lot 2.7 · Nature", w = 44, h = 38, build = build_nature },
   { id = "decorations", titre = "Lot 2.8 · Décorations", w = 34, h = 32, build = build_decoratives },
   { id = "superpositions", titre = "Lot 2.8 · Superpositions (tri par profondeur)", w = 34, h = 30,

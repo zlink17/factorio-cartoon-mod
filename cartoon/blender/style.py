@@ -115,6 +115,9 @@ PALETTE_HEX = {
     "pump_tank":          "#5e4030",
     "pump_hose":          "#d8875a",
     "pump_hose_dark":     "#8e4e30",
+    # tuyaux : tôle claire (comme les conduites de la machine à vapeur), bouchons gris
+    "pipe":               "#a9aba2",
+    "pipe_cap":           "#8a8e88",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 
