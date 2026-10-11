@@ -61,6 +61,7 @@ cartoon/
   lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
+cartoon-epure/mod/   sous-mod facultatif « terrain épuré » (voir plus bas)
 tools/
   factorio.py       pilote une instance isolée de Factorio depuis WSL (dump des prototypes, lancement, arrêt)
   inventory.py      inventaire des 8 246 images du jeu, rôle et prototypes ; couverture (docs/cartoon/couverture.md)
@@ -77,6 +78,15 @@ Principe commun : un générateur écrit l'arborescence de `graphics/overrides` 
 prototypes toute chaîne listée dans le manifeste. Ce qui n'est pas refait reste d'origine.
 Le mod déclare `! factorio-pixel-mod` (incompatible avec le mod pixel du même repo) et `? space-age` (dépendance optionnelle,
 pour l'ordre de chargement).
+
+**Sous-mod « terrain épuré »** (`cartoon-epure/mod/`, `factorio-cartoon-epure`, essai du 11 octobre) : à activer à côté
+du mod cartoon pour comparer le terrain avec ou sans décorations. Il multiplie la probabilité de génération des
+décorations de Nauvis par une densité réglable par famille (paramètres de démarrage, en %) : herbes, plantes et
+cailloux à 0 %, taches au sol à 30 %. Arbres, gros rochers et poissons ne changent pas. Seules les nouvelles zones de
+carte sont concernées ; `/cartoon-epure` refait les décorations d'une partie existante (supprime puis régénère :
+`regenerate_decorative` seul ajoute sans retirer). Installation : `tools/install_mod.sh cartoon-epure`. Pas de
+décision de style prise : on garde les deux pour comparer. Les sols cartoon (`ground.py`) dessinent aussi de petites
+touffes ton sur ton dans la texture.
 
 ## 4. Le style, tel que calé
 

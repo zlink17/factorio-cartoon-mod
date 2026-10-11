@@ -1,0 +1,12 @@
+{
+  "name": "factorio-cartoon-epure",
+  "version": "0.0.1",
+  "title": "Factorio Cartoon : terrain épuré (essai)",
+  "author": "zlink17",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.0",
+    "factorio-cartoon-mod"
+  ],
+  "description": "Expérience : beaucoup moins de décorations sur Nauvis (herbes, plantes, cailloux, taches au sol). Ne change que la génération de la carte ; à activer ou désactiver à côté du mod cartoon."
+}
