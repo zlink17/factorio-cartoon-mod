@@ -12,7 +12,8 @@ local SHOT_TICK = 180          -- laisse tourner machines et convoyeurs avant de
 local GROUND = "grass-1"
 
 local variant = (script.active_mods["factorio-cartoon-mod"] and "cartoon")
-  or (script.active_mods["factorio-pixel-mod"] and "pixel") or "origine"
+  or (script.active_mods["factorio-pixel-mod"] and "pixel")
+  or (script.active_mods["factorio-celshading-mod"] and "celshading") or "origine"
 local OUT = "vitrine/" .. variant .. "/"
 
 local surface
