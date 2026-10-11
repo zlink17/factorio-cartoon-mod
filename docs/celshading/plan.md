@@ -1,8 +1,8 @@
 # Mod Cel-shading : approche et plan
 
 Rédigé le 11 octobre 2026. **État (12 octobre) : étape 0 presque finie (moteur, recette d'images cibles, galerie) ; étape 1 en cours : assembleur 1
-modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbre : images cibles
-en cours. Plan d'implémentation par lots : sections 5 à 10.**
+modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbre : prototype
+Blender (espèce 02) en cours. Méthode révisée le 12 octobre : prototype Blender d'abord, l'IA si besoin. Plan d'implémentation par lots : sections 5 à 10.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -75,12 +75,14 @@ d'ombre sur le flanc droit. Bastien veut **repartir de zéro pour les modèles**
 rendu, l'esprit industriel et steampunk de Factorio pour le fond, un peu comme Metal Slug** (machines trapues,
 exagérées, rivets, boulons, tuyaux). Machines réinterprétées mais reconnaissables, peu de grosses formes.
 
-Méthode par objet :
+Méthode par objet (révisée le 12 octobre : **prototype Blender d'abord**, l'IA seulement s'il ne colle pas, voir
+[methode-images-cibles.md](../methode-images-cibles.md)) :
 0. **Garder, alléger ou retirer ?** (12 octobre, demande de Bastien) : le Factorio d'origine, très détaillé, a
    besoin d'énormément de sprites ; le cel-shading, fait de grandes formes, risque d'être surchargé si on garde
    tout. Avant de redessiner une famille, on décide si on la garde entière, en quantité réduite (décorations :
    réglages de démarrage du mod, comme `cartoon-epure`), avec moins de variantes, ou pas du tout. Voir STYLE.md §8.
-1. **Guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
+1. **Prototype Blender** rapide, à l'emprise de l'original ; s'il convient, on itère dessus (Bastien peut donner une
+   image de référence). Sinon : **guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
    ([docs/methode-images-cibles.md](../methode-images-cibles.md), `tools/concept/`), recette du mod dans
    [`celshading/concept/`](../../celshading/concept/README.md) (SDXL Turbo guidé par ControlNet et par nos propres
    rendus cel-shading en référence de style), plusieurs graines.
@@ -126,9 +128,9 @@ Même organisation que le mod cartoon ([docs/cartoon/plan.md](../cartoon/plan.md
 découpé en **lots**, avec **les mêmes numéros que le mod cartoon** (galerie commune, comparaison des mods), mais
 dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-shading :
 
-- **Chaque modèle est refait de zéro** d'après une image cible : un lot coûte beaucoup plus cher qu'au cartoon. Deux
-  leviers pour tenir le coût : une **image cible par famille** plutôt que par objet (les trois coffres, le trio de la
-  vapeur), et une **boîte de pièces communes** (`blender/kit.py`, étape 0) pour que chaque machine coûte un assemblage,
+- **Chaque modèle est refait de zéro** (prototype Blender d'abord, image cible si besoin) : un lot coûte plus cher
+  qu'au cartoon. Deux leviers pour tenir le coût : une **direction par famille** plutôt que par objet (les trois
+  coffres, le trio de la vapeur), et une **boîte de pièces communes** (`blender/kit.py`, étape 0) pour que chaque machine coûte un assemblage,
   pas un modèle entier.
 - **Moins de sprites que l'original** (STYLE.md §8) : chaque lot commence par « garder, alléger ou retirer ? ».
 - **Le jeu teinte certains sprites** (feuillage, masques d'équipe, décorations, fluides) : ils sont rendus en tons
@@ -141,9 +143,10 @@ dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-s
    `shift`, images, directions, teinte par le jeu), technique (section 7). **D'abord : garder, alléger ou retirer ?**
    Pour chaque famille : quantité (décorations), nombre de modèles distincts (variantes), ou retrait. Le choix est
    proposé à Bastien avec une recommandation.
-2. **Image cible** (modèles Blender) : recette `celshading/concept/recette.json`, deux séries de 4 graines (proche de
-   l'original / plus libre), planche avec identifiants, vue en grand et à la taille du jeu. Une série par famille.
-   Bastien choisit ; l'image va dans `celshading/concept/cibles/`. Pas d'image cible pour le procédural 2D.
+2. **Prototype Blender** (12 octobre) : quelques grosses formes, à l'emprise de l'original, vues en grand et à la
+   taille du jeu ; Bastien juge. S'il ne colle pas : **image cible** (recette `celshading/concept/recette.json`, deux
+   séries de 4 graines, planche avec identifiants ; Bastien choisit ; l'image va dans `celshading/concept/cibles/`).
+   Pas de prototype ni d'image cible pour le procédural 2D.
 3. **Prototype** : un objet représentatif, comparé original / cible / rendu (`tools/concept/compare.py`).
 4. **Production** : générateur dans `celshading/blender/` (ou `celshading/terrain/` pour le 2D), déclaré dans
    `celshading/lots.py`, lancé par `tools/build.py celshading <lot>` (écrit dans les overrides, manifeste, contrôle).
@@ -191,8 +194,8 @@ piège rencontré), `changelog.txt` à la première publication.
 
 | Code | Technique | Pour |
 |---|---|---|
-| **B** | Blender cel-shading, modèle propre au mod d'après une image cible | machines, bâtiments, véhicules, personnage, ennemis, icônes |
-| **B3** | Blender cel-shading sans image cible dédiée (formes simples, ou cible de la famille réutilisée) | arbres en boules, rochers, fumées en boules, objets sur convoyeurs |
+| **B** | Blender cel-shading, modèle propre au mod (prototype d'abord, image cible si besoin) | machines, bâtiments, véhicules, personnage, ennemis, icônes |
+| **B3** | Blender cel-shading, formes simples (direction de la famille réutilisée) | arbres, rochers, fumées en boules, objets sur convoyeurs |
 | **P** | Procédural 2D (OpenCV, palette du mod), motifs peints en aplats | sols, transitions, eau, taches, volutes |
 | **A** | Allégé ou retiré (quantité réduite, variantes regroupées, famille retirée) | décorations, particules, petits effets d'ambiance |
 | **L** | Laissé d'origine (fichier technique : masques, cartes d'effets, bruits de shader, reflets) | — |
@@ -205,10 +208,12 @@ eau, fumées), qui fixe la lumière et la palette, **puis les machines** du déb
 
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
 Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode
-de la section 3.3 (image cible, puis modèle) :
+de la section 3.3 :
 - [ ] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; nouveau modèle
       `blender/assembler.py` (planche, ombre, icône), vu en jeu le 12 octobre, avis de Bastien attendu.
-- [ ] **Arbre** (organique) : boules de feuillage. En cours : images cibles (espèce 02).
+- [ ] **Arbre** (organique) : images cibles écartées, prototype Blender retenu (12 octobre), inspiré de l'image de
+      Bastien (`concept/cibles/arbre-bastien.jpg`) : touffes en chou-fleur cernées, tronc visible, teinte grise du jeu
+      remplacée par un orange d'automne (`mod/data-updates.lua`). `blender/tree.py`, espèce 02 : à voir en jeu.
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.
 - [ ] Vue de nuit des trois objets (ombres bleues de nuit acceptables ?).

@@ -3,7 +3,19 @@
 Méthode commune aux mods du repo (cartoon, cel-shading), validée par Bastien le 11 octobre 2026 après l'essai du
 propulseur (mod cartoon) et de l'assembleur 1 (mod cel-shading).
 
-## Principe
+## Changement du 12 octobre : le prototype Blender d'abord, l'IA si besoin
+
+Décision de Bastien, après l'arbre du mod cel-shading : un premier prototype Blender, fait vite, a donné la direction
+mieux que les images générées. L'image cible n'est donc **plus systématique** :
+
+1. **Prototype Blender** d'abord : quelques grosses formes, aux couleurs et aux règles du guide de style du mod, à
+   l'emprise de l'original. Montré en grand et à la taille du jeu (puis en jeu), Bastien juge.
+2. S'il convient, on **itère dessus** ; Bastien peut donner une image de référence pour s'en inspirer (ex.
+   `celshading/concept/cibles/arbre-bastien.jpg`).
+3. S'il **ne colle pas** (pas de direction, rendu trop pauvre), on passe par l'IA pour trouver une bonne première
+   source : les étapes ci-dessous, puis le modèle Blender s'approche de l'image retenue.
+
+## Principe (quand on passe par l'IA)
 
 **L'IA donne la direction, Blender produit.** Pour chaque objet à refaire, ComfyUI génère des variantes guidées par
 le sprite original (silhouette, volumes) et par le style du mod ; Bastien choisit ; le modèle Blender reproduit
@@ -15,7 +27,7 @@ Avant cette méthode, on dessinait les machines directement en code (formes simp
 résultat qu'après coup, et les choix de style arrivaient tard. Des croquis 2D en aplats n'ont pas aidé Bastien ;
 une image riche, si.
 
-## Étapes pour un objet
+## Étapes pour un objet (passage par l'IA)
 
 1. **Guides** tirés du sprite original : `tools/concept/prepare.py` (contours, profondeur, masque, cadrage, shift).
 2. **Références de style** du mod : `tools/concept/styles.py` (nos propres sprites, recadrés sur fond gris).
