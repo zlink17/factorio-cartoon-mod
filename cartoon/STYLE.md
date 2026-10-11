@@ -152,7 +152,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   piston clair qui va et vient (32 images, les deux en opposition) ; grosses gaines orange annelées (anneaux
   peints sur un seul maillage) en arceaux du réservoir aux cylindres et des cylindres au collecteur ; bride claire
   face au tuyau ; pieds rouille sur la berge (calque du sol). Fenêtres placées direction par direction sous les
-  fenêtres de fluide de l'original (eau teintée par le jeu, gardée à sa forme, en aplats). **[PROVISOIRE]**
+  fenêtres de fluide de l'original (eau teintée par le jeu, gardée à sa forme, en aplats). **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
