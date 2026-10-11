@@ -344,6 +344,24 @@ touffes ton sur ton dans la texture.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
+- **Personnage en calques** (`character-animations.lua`, lu avec `lupa`) : corps, masque gris que le jeu multiplie
+  par la couleur du joueur (`apply_runtime_tint`), ombre ; les armures 2 et 3 sont des calques **ajoutés** par-dessus
+  le corps de niveau 1, avec leur masque et leur ombre. Un seul modèle articulé (pièces accrochées à des objets
+  vides) est construit une fois ; chaque image règle la pose et rend ses calques en jouant sur la visibilité des
+  groupes de pièces, le matériau de masque et la **réserve** (`is_holdout` : une pièce cache ce qui est derrière
+  sans se dessiner ; ainsi l'armure est coupée par un bras posé devant). ~0,13 s par rendu, ~12 000 rendus.
+- **Personnage : caméra à 50° de la verticale**, pas 30° comme les bâtiments. Couché, le corps de l'original est
+  aussi long (≈ 100 px) qu'il est haut debout : il est vu bien plus de côté. À 30°, notre corps couché faisait
+  145 px et la foulée de profil était démesurée.
+- **`running_gun` : 18 directions du nord au sud par l'est** ; le jeu retourne l'image pour l'ouest et prend alors
+  `running_gun_shadow_flipped`, qui est l'ombre **du personnage retourné**, non retournée (toujours portée à
+  droite). Planches coupées en deux (`stripes`, -1 et -2) : les images 0 à n/2 - 1 de toutes les directions, puis
+  les suivantes.
+- **Freestyle, sélection par collection** : seuls les objets **directement** dans la collection comptent (pas ceux
+  de ses sous-collections), sinon aucun trait et un simple « strokes set empty » dans le journal.
+- **Épaisseur Freestyle** : le style de ligne a une épaisseur de 3 par défaut, qui multiplie
+  `render.line_thickness` ; tous nos réglages de contour l'incluent. Pour un petit sujet (personnage, ~45 px), on
+  la ramène à 1 (`character.OUTLINE_PX` = largeur réelle).
 - **Sous WSL** : le dossier Factorio est lisible depuis `/mnt/c/...` ; ComfyUI Desktop n'est joignable que si WSL est en mode réseau
   « mirrored » (`.wslconfig`). `bpy` demande Python 3.11 (environnement `.venv` créé avec `uv`).
 

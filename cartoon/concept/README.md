@@ -40,6 +40,7 @@ le dessin, 0,7 prend mieux les couleurs.
 | Objet | Image | Choix de Bastien | Modèle |
 |---|---|---|---|
 | Propulseur (Space Age) | `propulseur-m70-42.png` | dessin de a-13, couleurs de b-22 (mélange à 0,7) | `cartoon/blender/thruster.py` (essai, image fixe) |
+| Personnage (lot 2.10) | `personnage-b-24.png` | b-24 (12 octobre) ; visage visible ; pièces à la couleur du joueur comme l'original (casque, veste, manches, genouillères) | `cartoon/blender/character.py` |
 
 Ce que l'essai a appris : le modèle Blender reprend les grandes masses, les couleurs et la silhouette ; la densité
 de la tuyauterie passe avec des tubes lissés et un reflet sur les métaux (exception au guide, `STYLE.md` §4).

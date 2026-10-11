@@ -3,7 +3,8 @@
 Lancé avec l'environnement de ComfyUI (transformers, pour Depth Anything V2) :
   ~/workspace/comfyui/.venv/bin/python -I tools/concept/prepare.py <sortie> <sprite> [l h] [--toile L H]
                                                                     [--shift X Y]
-<sprite> : chemin sous data/ de Factorio (ex. base/graphics/entity/assembling-machine-1/assembling-machine-1.png) ;
+<sprite> : chemin sous data/ de Factorio (ex. base/graphics/entity/assembling-machine-1/assembling-machine-1.png),
+           ou chemin absolu (image composée à part : calques d'un personnage, masque teinté) ;
 l h : taille d'une image de la planche (découpe en haut à gauche ; sinon le fichier entier) ;
 --toile : taille de génération ; par défaut, ~1 Mpx aux proportions du sprite (côtés multiples de 64, ce que
           SDXL attend) : un sprite haut (propulseur) n'est pas écrasé dans un carré ;
@@ -31,7 +32,7 @@ ap.add_argument("--shift", nargs=2, type=float, default=(0.0, 0.0))
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 
-fr = Image.open(DATA + a.sprite).convert("RGBA")
+fr = Image.open(a.sprite if os.path.isabs(a.sprite) else DATA + a.sprite).convert("RGBA")
 if a.cell:
     fr = fr.crop((0, 0, a.cell[0], a.cell[1]))
 frame = fr.size

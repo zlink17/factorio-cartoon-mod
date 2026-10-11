@@ -34,5 +34,7 @@ LOTS = {
     "rochers": [("terrain/rocks.py", ["toutes"])],              # gros rochers en blocs à facettes, poissons (2D)
     "eau": [("terrain/water.py", ["toutes"])],                # eaux, rives (berges et masques nets), bords
     "falaises": [("blender/cliffs_3d.py", ["toutes"])],     # relief à facettes, tons de l'original, ombres (~2 min)
+    "personnage": [("blender/character.py", [])],   # corps, masques, armures 2 et 3, ombres : 6 animations,
+                                                     # 62 planches et l'icône (~30 min)
     "sols": [("terrain/ground.py", ["toutes"]), ("terrain/masks.py", [])],   # planches et masques de transition
 }
