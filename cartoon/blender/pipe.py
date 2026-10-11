@@ -276,10 +276,12 @@ def write_covers(out):
 
 # --- raccords des assembleurs 2 et 3 : tube qui sort de la paroi, cadre à la couleur du niveau, bride -----------
 # Dessinés par le jeu au raccord (pipe_picture) ; pour chaque direction : vers l'extérieur, position de la paroi et
-# du bout du tube le long de cet axe (cases, depuis l'origine de l'image), ajustées sur l'original.
+# du bout du tube le long de cet axe (cases, depuis l'origine de l'image), ajustées sur l'original. Au nord, le
+# raccord sort de la paroi arrière, cachée par la machine : pas de cadre, et le tube s'enfonce vers la machine
+# (le cadre de l'image le coupe) : on n'en voit que la bride et le dessus, comme l'original.
 TIERS = {2: ("assembling-machine-2", "steel_blue"), 3: ("assembling-machine-3", "olive")}
 OUTWARD = {"N": (0, 1), "E": (1, 0), "S": (0, -1), "W": (-1, 0)}
-MACHINE_PIPE = {"N": (-0.6, -0.5), "E": (-0.9, -0.5), "S": (-1.2, -0.7), "W": (-0.8, -0.5)}
+MACHINE_PIPE = {"N": (-1.0, -0.5), "E": (-0.9, -0.5), "S": (-1.2, -0.7), "W": (-0.8, -0.5)}
 
 
 @functools.lru_cache(None)
@@ -304,6 +306,8 @@ def build_machine_pipe(direction, tier, d=None, place=None):
     tube_path([tuple(c + u * (wall - 0.1)), tuple(c + u * end)], d["r"], m["tube"])
     flange(tuple(c + u * end), tuple(-u[:2]), d, m)
     axis = "x" if u[0] else "y"
+    if direction == "N":           # paroi arrière : le cadre est tourné vers le nord, caché par la machine
+        return
     size = (0.08, 0.8, 0.8) if axis == "x" else (0.8, 0.08, 0.8)
     box(tuple(c + u * wall + np.array((0, 0, 0.05))), size, frame)                    # cadre sur la paroi
     disc(tuple(c + u * (wall + 0.05)), axis, d["rf"] * 1.05, 0.06, m["flange"])       # collerette

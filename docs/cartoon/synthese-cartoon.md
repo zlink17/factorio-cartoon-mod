@@ -274,7 +274,9 @@ touffes ton sur ton dans la texture.
   travers du verre translucide). Les **couvercles** se dessinent sur la case voisine d'un raccord libre ; ils ne
   montrent que le bouchon, contre le bord partagé. Les **raccords des assembleurs** (`pipe_picture`) n'existent
   qu'avec une recette à fluide (`fluid_boxes_off_when_no_fluid_recipe`) ; une machine ne s'oriente qu'avec une
-  telle recette : `set_recipe` d'abord (recette débloquée : `force.recipes[r].enabled`), puis `direction`.
+  telle recette : `set_recipe` d'abord (recette débloquée : `force.recipes[r].enabled`), puis `direction`. Le
+  raccord nord sort de la paroi arrière, que la machine cache : sans cadre, le tube s'enfonce vers la machine et le
+  cadre de l'image le coupe (remarque de Bastien : un cadre et un bout de tube plat y faisaient un bloc posé devant).
 - **Souterrains** : l'image porte le nom du côté du raccord en surface (`up` = raccord au nord) ; la distance
   parcourue avant de plonger varie selon la direction dans l'original (`pipe.UNDERGROUND`).
 - **Banc** : une chaudière ne brûle en continu que si elle a de l'eau et peut évacuer sa vapeur : tuyaux infinis

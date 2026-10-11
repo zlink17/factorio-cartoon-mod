@@ -158,7 +158,8 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   ombre portée incluse dans l'image (opacité 0,55, comme l'original). Fenêtre : cadre cuivre et verre clair
   translucide à la forme du trou de l'original (le jeu dessine le fluide dessous). Souterrain : le tuyau plonge
   dans le sol par un coude, collerette au sol. Raccords des assembleurs 2 et 3 : cadre à la couleur du niveau sur
-  la paroi, tube court et bride. **[PROVISOIRE]**
+  la paroi, tube court et bride ; au nord (paroi arrière, cachée), seulement la bride et le tube qui s'enfonce
+  dans la machine. **[PROVISOIRE]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
