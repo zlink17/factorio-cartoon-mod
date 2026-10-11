@@ -1,7 +1,9 @@
 # Mod Cel-shading : approche et plan
 
 Rédigé le 11 octobre 2026. **État : dossier créé (`celshading/`), mod vide qui se charge ; questions de la section 4 tranchées (11 octobre :
-les quatre recommandations). Étape 0 en cours.**
+les quatre recommandations). Étape 0 faite : moteur cel-shading, assembleurs du mod cartoon vus en jeu (essai).
+Décision du 11 octobre au soir : modèles refaits de zéro, d'après des images cibles (section 3.3). Étape 1 en cours :
+images cibles de l'assembleur 1.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -59,7 +61,7 @@ prototype dira si les ombres portées valent la complexité (je pense que oui : 
 Pas de rendu EEVEE (le nœud « Shader to RGB » qui fait le toon dans les tutoriels) : il demande un contexte
 graphique, fragile en ligne de commande sous WSL.
 
-### 3.2 Réutiliser les modèles du mod cartoon, puis les arrondir
+### 3.2 Réutiliser les modèles du mod cartoon, puis les arrondir (abandonné le 11 octobre, voir 3.3)
 
 Les générateurs cartoon (`cartoon/blender/*.py`) importent leurs briques depuis `lib.py` (`mat`, `box`, `cyl`,
 `gear`, `render_scene`...). Si `celshading/blender/lib.py` offre **les mêmes fonctions** avec le rendu cel-shading,
@@ -67,7 +69,25 @@ on peut rendre un modèle cartoon existant en cel-shading sans le réécrire : u
 le prix d'une bibliothèque. Ensuite, objet par objet, on arrondit les formes (biseaux plus gros, cylindres au lieu
 de boîtes) dans des copies propres au mod, pour ne jamais casser le mod cartoon.
 
-### 3.3 Le reste
+### 3.3 Vision et méthode retenues (11 octobre, soir)
+
+Vu en jeu, le rendu des modèles cartoon en cel-shading est trop discret : boîtes à faces plates, une seule bande
+d'ombre sur le flanc droit. Bastien veut **repartir de zéro pour les modèles**, avec sa vision : **Wind Waker pour le
+rendu, l'esprit industriel et steampunk de Factorio pour le fond, un peu comme Metal Slug** (machines trapues,
+exagérées, rivets, boulons, tuyaux). Machines réinterprétées mais reconnaissables, peu de grosses formes.
+
+Méthode par objet :
+1. **Guides** tirés du sprite original : `celshading/concept/prepare.py` (contours, profondeur, cadrage).
+2. **Images cibles** : `celshading/concept/concept.py` (ComfyUI : SDXL Turbo guidé par ControlNet, sans référence
+   de style pour l'instant), plusieurs graines et deux dosages des guides (proche de l'original / plus libre).
+3. **Bastien choisit** (ou combine, ou commente), éventuellement une seconde passe en img2img sur l'image choisie.
+4. **Modèle Blender** propre au mod (`celshading/blender/`), qui s'approche de l'image cible ; rendu avec le moteur.
+5. Vérification en jeu (banc d'essai), comme pour tout lot.
+
+`run_cartoon.py` et le lot « assembleurs » actuel ne servent plus que d'essai du moteur : ils seront remplacés par
+les nouveaux modèles.
+
+### 3.4 Le reste
 
 - **Sols, décorations, eau** : procédural 2D (OpenCV, comme `cartoon/terrain/`), avec la palette du mod. Les sols
   plats n'ont pas d'ombrage : ce sont les motifs peints (touffes en virgules, taches) qui donnent le style.
@@ -77,7 +97,7 @@ de boîtes) dans des copies propres au mod, pour ne jamais casser le mod cartoon
   d'ambiance (« cel-shading, couleurs vives » guidé par le sprite original), comme cible à atteindre en Blender,
   **pas** comme production.
 
-### 3.4 Outils communs, déjà prêts
+### 3.5 Outils communs, déjà prêts
 
 Les outils de `tools/` prennent le nom du dossier du mod : `build.py celshading <lot>`, `inventory.py celshading`,
 `check_mod.py celshading --jeu`, `bench.py celshading`, `install_mod.sh celshading`. Seule la galerie est propre
@@ -115,8 +135,9 @@ prototype, production, contrôle, vérification en jeu, commit.
 - [ ] Galerie : rendre `tools/galerie.py` paramétrable (`--mod celshading`) et ajouter le mod en dépendance facultative.
 
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
-Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai :
-- [ ] **Assembleur 1** (machine, surfaces dures) : modèle cartoon rendu en cel-shading, puis arrondi.
+Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode
+de la section 3.3 (image cible, puis modèle) :
+- [ ] **Assembleur 1** (machine, surfaces dures) : nouveau modèle.
 - [ ] **Arbre** (organique) : boules de feuillage.
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.

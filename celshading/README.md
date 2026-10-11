@@ -14,6 +14,7 @@ cartoon rendus en cel-shading).
 | `mod/` | Le mod Factorio (`factorio-celshading-mod`) : `info.json`, `data-final-fixes.lua`, `manifest.lua`, `graphics/overrides/`. Incompatible avec les mods cartoon et pixel. |
 | `lots.py` | Lots de production, lus par `tools/build.py`. |
 | `blender/` | Rendus 3D cel-shading. `cel_style.py` : valeurs du style ; `lib.py` : mêmes fonctions que `cartoon/blender/lib.py`, rendu cel-shading ; `run_cartoon.py` : rend un générateur du mod cartoon en cel-shading ; `essai.py` : formes simples. |
+| `concept/` | Images cibles avec ComfyUI : `prepare.py` (guides tirés d'un sprite du jeu), `concept.py` (génération). Voir le plan, section 3.3. |
 | `terrain/` | (à venir) sols, décorations et eau en procédural 2D. |
 
 ## Commandes (depuis la racine du repo)

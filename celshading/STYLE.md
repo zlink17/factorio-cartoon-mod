@@ -7,9 +7,17 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer.
 
 ## 1. Direction artistique
 
-- Inspiration : Zelda Wind Waker. Cel-shading, couleurs vives et ensoleillées, formes rondes et trapues. **[VALIDÉ]**
-- On garde les formes, proportions et la lisibilité de l'original : chaque machine se reconnaît au premier coup
-  d'œil (même règle que le mod cartoon). **[PROVISOIRE]**
+- **Deux sources** (11 octobre) : **Zelda Wind Waker pour le rendu** (cel-shading, couleurs vives et ensoleillées,
+  ombres bleutées) et **l'esprit de Factorio pour le fond** : industriel, steampunk, mécanique. Un peu comme **Metal
+  Slug** : machines trapues, exagérées, pleines de caractère (tôles rivetées, gros boulons, tuyaux, engrenages),
+  l'aspect industriel qui n'existe pas dans Zelda. **[VALIDÉ]**
+- **Modèles propres au mod, refaits de zéro** (ceux du mod cartoon ne servent que d'essai du moteur). Machines
+  **réinterprétées mais reconnaissables** : même emprise et mêmes repères que l'original (moteur, engrenages, bras de
+  l'assembleur...), formes redessinées, arrondies, trapues, proportions un peu exagérées. **[VALIDÉ]**
+- **Peu de grosses formes** : quelques volumes ronds bien lisibles (le cel-shading se lit sur les courbes ; tout
+  détail de moins de 6 px disparaît à la taille du jeu). **[VALIDÉ]**
+- **Méthode** : pour chaque objet, des images cibles (ComfyUI, guidées par la silhouette de l'original) ; Bastien
+  choisit ou commente ; puis modèle Blender qui s'en approche. **[VALIDÉ]**
 - Pas de dégradé, de bruit ni de texture réaliste. Les motifs peints en aplats (planches, pierres, rivets) sont
   permis. **[PROVISOIRE]**
 
