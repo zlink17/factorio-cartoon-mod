@@ -14,7 +14,6 @@ Contrôles sur les fichiers (rapides) :
 --jeu : test de chargement dans une instance isolée de Factorio (tools/factorio.py) avec le mod activé : le mod
 doit se charger, et aucun prototype ne doit encore pointer vers un original que le mod remplace.
 
-Ne convient pas au mod pixel, dont les sprites sont agrandis et recadrés côté Lua.
 """
 import json
 import re

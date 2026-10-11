@@ -1,5 +1,10 @@
 # Mod pixel : synthèse de la situation
 
+> **11 octobre 2026 : table rase.** Bastien a décidé de tout refaire avec une nouvelle méthode
+> ([plan.md](plan.md)) : les générateurs Pillow et les 97 images décrits ci-dessous sont retirés du repo (dernier
+> commit qui les contient : `5e33219`). Ce document reste pour son savoir technique (section « Ce qu'on a appris »).
+> Les états, décisions de style et chemins ci-dessous décrivent l'ancien travail.
+
 État au 2026-10-10. Le guide de style est [STYLE.md](STYLE.md) ; ce fichier raconte où on en est, ce qui a été décidé et ce qui reste à faire.
 
 ## Objectif

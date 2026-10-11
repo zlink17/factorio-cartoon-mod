@@ -1,42 +1,21 @@
 # Guide de style pixel art
 
-Référence pour tout sprite du mod pixel. Les couleurs vivent dans `pillow/palette.py` (source de vérité).
-**[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer en jeu.
+**Brouillon, réécrit à partir du 11 octobre 2026** : la charte se fixe sur les premiers lots (étape 1 de
+[docs/pixel/plan.md](../docs/pixel/plan.md)). **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer en jeu.
+
+## Contrat technique (vérifié par outil)
+- **16 px d'art par case** pour le monde entier ; 1 px d'art = 4 × 4 px de fichier, `scale = 0.5` comme l'original. **[VALIDÉ]**
+- Pixels d'art alignés sur la grille du monde (1/16 de case). **[VALIDÉ]**
+- Images au cadre exact de l'original (taille, nombre d'images) : pas de correction de taille en Lua. **[VALIDÉ]**
+- Palette fermée, jamais de noir pur ; pas d'anticrénelage (alpha 0 ou 255) ; ombres au sol en aplat. **[VALIDÉ]**
+- Icônes : 32 px d'art (export × 2 dans le cadre de 64 px). **[VALIDÉ]**
+- Objets posés au sol et sur les convoyeurs : variante dessinée à 16 px par case (pas l'icône réduite). **[VALIDÉ]**
+
+## Ambiance
+- Ce qui a été imaginé pour le Factorio d'origine ne convient pas forcément : décorations à **10 %** de la quantité
+  du jeu au départ, une famille retirée si elle surcharge encore (réglages de démarrage du mod). **[PROVISOIRE, à juger en jeu]**
 
 ## Direction artistique
-- Pixel art net façon *Link's Awakening* / *Minish Cap* (image de référence : krank.love) : couleurs vives, formes franches, peu de détails fins. **[VALIDÉ]**
-- Les formes, proportions et couleurs par niveau restent celles de Factorio (assembleur 1 gris-vert, 2 bleu, 3 olive). **[VALIDÉ]**
-- On ajoute des éléments d'assemblage inspirés de Factorio sur le dessus : engrenages, pistons et vérins, moteur, bras articulés. **[VALIDÉ]**
-
-## Résolution
-- **16 px par case**, dessinés en code (Pillow, sans anti-aliasing), exportés **x4** (64 px par case) puis affichés avec `scale = 0.5` : 1 px d'art = 2 px de jeu. **[VALIDÉ]**
-- Un assembleur 3x3 fait environ 50 px de large en art (1 px de débord de chaque côté de l'emprise). **[PROVISOIRE]**
-
-## Projection
-- Vue ~30° : dessus du rebord clair, mur arrière intérieur visible, paroi avant évasée, **flancs gauche et droit visibles** qui s'évasent vers le bas (≈ 4 px de chaque côté). **[VALIDÉ]**
-- Chaque objet posé a un dessus clair, une face avant plus sombre et une ombre au sol en aplat. **[VALIDÉ]**
-
-## Couleurs et ombrage
-- **Jamais de noir pur** : contours = teinte très sombre de l'objet (contour coloré). **[VALIDÉ]**
-- Lumière en haut à gauche, ombre en bas à droite ; dessus = ton clair, face avant = ton moyen, côté droit = ton sombre. **[VALIDÉ]**
-- Ombres glissant vers le bleu/violet, lumières vers le jaune/cyan. Reflets blancs : 1 à 2 px par objet au maximum.
-- Tramage (damier 1 px) pour la rouille, les grilles et les reflets de vitre. **[VALIDÉ]**
-- Ombre portée au sol : sprite séparé, un par image d'animation. **[VALIDÉ]**
-
-## Animation
-- 32 images par boucle, planche 8 x 4 comme l'original. Tout mouvement doit se refermer : engrenages à nombre entier de dents par boucle (2), pistons et bras en sinus. **[VALIDÉ]**
-- Voyant du moteur qui clignote : indique visuellement que la machine travaille. **[PROVISOIRE]**
-
-## Structures de convoyeurs
-- Souterrain : mêmes conventions que le mod cartoon (vérifiées en jeu). Le capot couvre la moitié aval de la case pour une entrée et la moitié amont pour une sortie ; la cellule « sortie » d'une colonne contient le capot de la direction opposée ; rangées 2 et 3 = copies des rangées 0 et 1 pour l'est et l'ouest ; pièces « patch » inchangées. Voûte à plaque de la teinte vive du convoyeur du même niveau et chevrons foncés, bouche (linteau, ouverture sombre visible quand elle regarde le sud) côté tapis, bout enterré plus bas. **[PROVISOIRE, à juger en jeu]**
-- Bouts de ligne des convoyeurs (rangées 12 à 19 de la planche) : **volontairement vides** (décidé avec Bastien : ils paraissaient détachés et incohérents à côté des capots de souterrains). Le code qui les dessine reste dans `pillow/belt.py` (`END_CAPS`) : bande de tapis au bord aval, rouleau d'acier qui dépasse de 2 px, chevrons dans le sens du flux, rangées paires animées.
-- Répartiteur : poteaux d'extrémité, cloison avec nez diviseur côté entrée, rail à trois engrenages (acier, moyeu orange) qui tournent, capots à chevrons de la couleur du niveau côté sortie, deux voyants qui clignotent en alternance. **[PROVISOIRE]**
-
-## Poteaux et câbles électriques
-- Poteaux dessinés en 3D (pieds, croisillons, bras, isolateurs) puis projetés pour les 4 rotations du jeu ; les points d'attache des câbles sont recalculés d'après les isolateurs (cuivre = pointe, rouge = gauche, vert = droite) et écrits dans `mod/poles_data.lua`. Couleurs d'origine conservées : bois pour le petit, rouille pour le moyen, acier pour le grand, boîtier bleu pour la sous-station. **[PROVISOIRE, à juger en jeu]**
-- Câbles : même courbe (chaînette) que la texture du jeu, en paliers nets de 1 px d'art, deux tons (clair dessus, foncé dessous) : cuivre, vert, rouge. L'ombre garde la même courbe. **[PROVISOIRE]**
-
-## Terrain
-- Sols terrestres de Nauvis (herbe 1 à 4, terre sèche, terre 1 à 7, sable 1 à 3, désert rouge 0 à 3) : texture homogène à 16 px d'art par case, couleurs calmes pour que les machines restent lisibles. Herbe : touffes en V sombres, brins clairs, rares fleurs blanches à cœur jaune. Terre et désert : éclats sombres et clairs, petits cailloux. Sable : rides (trait clair au-dessus, ombre dessous). Les grandes variantes (2 x 2, 4 x 4, 8 x 8) ajoutent des plaques un peu plus claires ou plus sombres, jamais près des bords pour éviter les coutures. **[PROVISOIRE, à juger en jeu]**
-- Transitions entre sols : le jeu masque la texture voisine avec une image en dégradé ; on remplace les masques `transition-1`, `-3` et `-4` par des versions seuillées par blocs de 4 x 4 px (1 px d'art) pour avoir des bords nets sur la grille. Ces masques servent aussi à des tuiles de Space Age. **[PROVISOIRE]**
-- Pas encore faits : eau (peu profonde, profonde, boue), bord de mer, béton, chemin de pierre, falaises, arbres, herbes décoratives.
+- À fixer sur les images cibles des premiers lots. Idées de l'ancien travail, à reprendre ou non : esprit
+  *Link's Awakening* / *Minish Cap* (image de référence krank.love), contours teintés, lumière en haut à gauche,
+  ombres vers le bleu-violet, formes et couleurs par niveau de Factorio.

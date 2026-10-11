@@ -6,7 +6,7 @@ Chaque mod a son dossier, avec **le mod installable** (`mod/`) et **les outils q
 | Mod | Style | Dossier | Techniques | État |
 |---|---|---|---|---|
 | **Cartoon** | aplats, gros contours | [`cartoon/`](cartoon/) | rendus Blender ; IA (ComfyUI), mise de côté | assembleurs, convoyeurs, bras |
-| **Pixel** | pixel art | [`pixel/`](pixel/) | dessin en code avec Pillow | assembleurs, convoyeurs, bras, minerais |
+| **Pixel** | pixel art | [`pixel/`](pixel/) | images cibles par IA, puis Pillow (plat) ou Blender rendu en pixels (volume) | repart de zéro (11 octobre) : méthode dans [docs/pixel/plan.md](docs/pixel/plan.md) |
 | **Cel-shading** | style Wind Waker : ombre à bord franc, couleurs vives | [`celshading/`](celshading/) | rendus Blender cel-shading (prévu) | démarrage : approche dans [docs/celshading/plan.md](docs/celshading/plan.md) |
 
 ```
@@ -17,7 +17,7 @@ cartoon/                  mod cartoon
   STYLE.md                guide de style : référence pour tout sprite cartoon
 pixel/                    mod pixel
   mod/                    le mod
-  pillow/                 sprites dessinés en code (Pillow) + palette
+  lots.py                 lots de sprites (tools/build.py pixel)
 celshading/               mod cel-shading (démarrage)
   mod/                    le mod
   STYLE.md                guide de style (brouillon)
@@ -42,7 +42,7 @@ Les sprites originaux de Factorio ne sont pas dans le repo (ils sont dans le dos
 ```bash
 # environnement Python (un seul .venv à la racine ; bpy demande Python 3.11)
 uv venv --python 3.11 .venv
-uv pip install --python .venv/bin/python -r cartoon/blender/requirements.txt -r pixel/pillow/requirements.txt
+uv pip install --python .venv/bin/python -r cartoon/blender/requirements.txt
 
 # installer un mod dans Factorio (régénère le manifeste puis copie le mod)
 tools/install_mod.sh cartoon
