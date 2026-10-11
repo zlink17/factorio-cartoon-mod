@@ -21,6 +21,7 @@ LOTS = {
     "foreuse-electrique": [("blender/electric_drill.py", ["toutes"])],   # cadres, têtes animées, sorties, icône
     "coffres": [("blender/chests.py", ["tous"])],        # bois, fer, acier : sprite, ombre, icône
     "chaudiere": [("blender/boiler.py", ["toutes"])],    # 4 directions, ombres, flammes, patch de l'est, icône
+    "machine-vapeur": [("blender/steam_engine.py", ["toutes"])],   # planches H et V (32 images), ombres, icône
     "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
     "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)

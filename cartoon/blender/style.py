@@ -106,6 +106,10 @@ PALETTE_HEX = {
     "chest_steel_rim":    "#8a8090",
     # chaudière : acier gris-vert de l'original
     "boiler_body":        "#6e7a6c",
+    # machine à vapeur : cylindres en tôle claire, pieds rouille, conduites gris clair
+    "engine_tank":        "#b5ad98",
+    "engine_rust":        "#8a4a2c",
+    "engine_pipe":        "#a3a8a6",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

@@ -681,6 +681,29 @@ local function detail_steam()
   animate("anim-chaudieres", 2, s.y + 1, 32, 7, 16, 2)
 end
 
+-- Vue rapprochée : machines à vapeur horizontale et verticale en charge (vapeur par tuyau infini, consommateur
+-- électrique), et une à l'arrêt.
+local function detail_steam_engines()
+  local s = scene("detail-machines-vapeur", 1, GROUND, 2)
+  local function steam_in(x, y)
+    local p = create { name = "infinity-pipe", position = { x, y } }
+    if p then pcall(function() p.set_infinity_pipe_filter { name = "steam", percentage = 1, temperature = 165,
+      mode = "at-least" } end) end
+  end
+  local ey = s.y + 8.5
+  create { name = "steam-engine", position = { 6.5, ey }, direction = defines.direction.east }
+  steam_in(3.5, ey); steam_in(9.5, ey)
+  create { name = "steam-engine", position = { 16.5, ey }, direction = defines.direction.north }
+  steam_in(16.5, ey - 3); steam_in(16.5, ey + 3)
+  create { name = "steam-engine", position = { 24.5, ey } , direction = defines.direction.east }   -- à l'arrêt
+  create { name = "medium-electric-pole", position = { 11.5, ey - 2 } }
+  create { name = "medium-electric-pole", position = { 13.5, ey + 1 } }
+  local sink = create { name = "electric-energy-interface", position = { 12.5, ey + 3 } }
+  if sink then pcall(function() sink.power_production = 0; sink.power_usage = 2e6; sink.electric_buffer_size = 1e6 end) end
+  label("steam-engine", 12, ey + 4.5, 0.5)
+  animate("anim-machines-vapeur", 2, ey - 3.5, 20, 7, 16, 2)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -749,7 +772,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

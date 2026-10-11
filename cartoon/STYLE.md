@@ -141,6 +141,12 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   l'arrière gauche, gros tuyaux cuivre qui contournent le tambour par l'avant, trappe du foyer à cadre laiton et
   fentes peintes, porte du foyer, manomètre. Flammes : les fentes s'allument (rouge, orange, jaune), 64 images.
   Silhouette en gradins conservée (bornes de l'ajustement). Halos d'origine. **[VALIDÉ]**
+- **Machine à vapeur** (`blender/steam_engine.py`) : châssis sombre sur pieds en A rouille, trois cylindres en tôle
+  claire cerclés de cuivre (couvercle gris, soupape laiton) au fond, conduite gris clair devant, radiateur rouille à
+  gauche, volant et engrenages à droite avec glissière, crosse laiton et bielle. Animation : un tour de volant en 32
+  images. **Volant et engrenages inclinés face à la caméra** (plan à 30° de l'horizontale, dans les deux
+  orientations) : debout face à l'avant, la vue à 30° les écrase de moitié et ils se perdent dans le plateau.
+  **[PROVISOIRE]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
