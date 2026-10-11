@@ -403,24 +403,25 @@ def render(orig, kind, tones, seed, outline, density=0.18):
     return np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
 
 
-def render_clump(orig, tones, outline, seed=0):
-    """Buisson touffu : des lobes ronds posés sur le corps de l'original (sans son ombre), de l'arrière vers l'avant ;
-    chaque lobe a une tache claire en haut à gauche, les lobes du bas et de droite sont plus sombres. Contour sur la
-    silhouette, ombre à plat portée vers la droite."""
-    h, w = orig.shape[:2]
+def paint_lobes(body, r, cols, rng, step_k=1.1, density=0.3, shape="disc", dark_edge=None):
+    """Feuillage en lobes : des disques de rayon ~`r` (px du fichier) posés sur le masque `body`, de l'arrière vers
+    l'avant ; chaque lobe a une tache claire en haut à gauche, ceux du bas et de droite sont plus sombres.
+    `shape` = "fir" : étages pointus de conifère au lieu de disques. `dark_edge` : part de l'étendue du feuillage
+    au-delà de laquelle (vers le bas à droite) les lobes sont sombres (défaut : 1,2 rayon de lobe).
+    Renvoie (couleur, masque) à SS fois la taille."""
+    h, w = body.shape
     H, W = h * SS, w * SS
-    rng = Rng(seed)
-    body = cv2.erode(body_mask(orig), np.ones((2, 2), np.uint8))
+    color = np.zeros((H, W, 3), np.float32)
+    m = np.zeros((H, W), np.uint8)
     ys, xs = np.nonzero(body)
     if len(xs) == 0:
-        return np.zeros_like(orig)
-    r = float(np.clip(min(xs.max() - xs.min(), ys.max() - ys.min()) * 0.16, 3.0, 9.0))     # rayon d'un lobe (px)
+        return color, m
     lobes = []
-    step = r * 1.1
+    step = r * step_k
     for y in np.arange(ys.min(), ys.max() + 1, step):
         for x in np.arange(xs.min(), xs.max() + 1, step):
             cell = body[int(y):int(y + step), int(x):int(x + step)]
-            if cell.size and cell.mean() > 0.3:
+            if cell.size and cell.mean() > density:
                 lobes.append((x + step / 2 + rng.u(-0.25, 0.25) * r, y + step / 2 + rng.u(-0.25, 0.25) * r,
                               r * rng.u(0.85, 1.15)))
     if not lobes:
@@ -429,35 +430,65 @@ def render_clump(orig, tones, outline, seed=0):
     lobes = [(float(np.clip(x, rr + pad, w - rr - pad)), float(np.clip(y, rr + pad, h - rr - pad)), rr)
              for x, y, rr in ((x, y, min(rr, (min(w, h) - 2 * pad) / 2)) for x, y, rr in lobes)]
     cx0, cy0 = np.mean([l[0] for l in lobes]), np.mean([l[1] for l in lobes])
-    cols = [hx(t) for t in tones]
-    color = np.zeros((H, W, 3), np.float32)
-    m = np.zeros((H, W), np.uint8)
+    ext = max(xs.max() - xs.min(), ys.max() - ys.min()) / 2
+    limit = r * 1.2 if dark_edge is None else ext * dark_edge
     for x, y, rr in sorted(lobes, key=lambda l: l[1]):          # de l'arrière vers l'avant
         X, Y, R = x * SS, y * SS, rr * SS
         disc = np.zeros((H, W), np.uint8)
-        cv2.circle(disc, (int(X), int(Y)), int(R), 1, -1)
-        base = cols[0] if (x - cx0) + (y - cy0) > r * 1.2 else cols[1]   # côté bas-droit : plus sombre
-        color[disc > 0] = base
         spot = np.zeros((H, W), np.uint8)
-        cv2.circle(spot, (int(X - R * 0.3), int(Y - R * 0.3)), int(R * 0.55), 1, -1)
-        color[(spot > 0) & (disc > 0)] = cols[2] if base == cols[1] else cols[1]
+        if shape == "fir":                                      # étage de sapin : triangle pointu, base arrondie
+            pts = np.array([(X, Y - R * 1.1), (X + R * 1.2, Y + R * 0.6), (X, Y + R * 0.85), (X - R * 1.2, Y + R * 0.6)],
+                           np.int32)
+            cv2.fillPoly(disc, [pts], 1)
+            cv2.fillPoly(spot, [np.array([(X, Y - R * 1.1), (X, Y + R * 0.85), (X - R * 1.2, Y + R * 0.6)], np.int32)], 1)
+        else:
+            cv2.circle(disc, (int(X), int(Y)), int(R), 1, -1)
+            cv2.circle(spot, (int(X - R * 0.3), int(Y - R * 0.3)), int(R * 0.55), 1, -1)
+        dark = (x - cx0) + (y - cy0) > limit                    # côté bas-droit : plus sombre
+        color[disc > 0] = cols[0] if dark else cols[1]
+        color[(spot > 0) & (disc > 0)] = cols[1] if dark else cols[2]
         m |= disc
+    return color, m
+
+
+def outlined(color, m, out_col, w, h, shadow=None):
+    """Ajoute le contour de silhouette (et une ombre facultative, masque à SS fois la taille), puis réduit à
+    (w, h) en alpha prémultiplié. Renvoie l'image BGRA."""
     alpha = m.astype(np.float32)
     thick = max(1, int(round(OUTLINE_PX * SS)))
     disk = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * thick + 1, 2 * thick + 1))
     edge = (cv2.dilate(m, disk) > 0) & (m == 0)
-    color[edge] = OUTLINE_BGR if outline == "noir" else tuple(int(c * 0.55) for c in cols[0])
+    color = color.copy()
+    color[edge] = out_col
     alpha[edge] = 1
-    base_y = np.nonzero(m.any(1))[0].max()
-    sh = cv2.warpAffine(m, np.float32([[1, -SHADOW_SHEAR, SHADOW_SHEAR * base_y],
-                                       [0, SHADOW_FLAT, base_y * (1 - SHADOW_FLAT)]]), (W, H))
-    rgba = np.zeros((H, W, 4), np.float32)
+    rgba = np.zeros(color.shape[:2] + (4,), np.float32)
     rgba[..., :3] = color * alpha[..., None]
     rgba[..., 3] = alpha * 255
-    rgba[(sh > 0) & (alpha == 0), 3] = SHADOW_ALPHA * 255
+    if shadow is not None:
+        rgba[(shadow > 0) & (alpha == 0), 3] = SHADOW_ALPHA * 255
     small = cv2.resize(rgba, (w, h), interpolation=cv2.INTER_AREA)
     a = np.clip(small[..., 3:4] / 255.0, 1e-6, 1)
     return np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
+
+
+def render_clump(orig, tones, outline, seed=0):
+    """Buisson touffu : feuillage en lobes (`paint_lobes`) sur le corps de l'original (sans son ombre). Contour sur
+    la silhouette, ombre à plat portée vers la droite."""
+    h, w = orig.shape[:2]
+    H, W = h * SS, w * SS
+    rng = Rng(seed)
+    body = cv2.erode(body_mask(orig), np.ones((2, 2), np.uint8))
+    ys, xs = np.nonzero(body)
+    if len(xs) == 0:
+        return np.zeros_like(orig)
+    r = float(np.clip(min(xs.max() - xs.min(), ys.max() - ys.min()) * 0.16, 3.0, 9.0))     # rayon d'un lobe (px)
+    cols = [hx(t) for t in tones]
+    color, m = paint_lobes(body, r, cols, rng)
+    base_y = np.nonzero(m.any(1))[0].max()
+    sh = cv2.warpAffine(m, np.float32([[1, -SHADOW_SHEAR, SHADOW_SHEAR * base_y],
+                                       [0, SHADOW_FLAT, base_y * (1 - SHADOW_FLAT)]]), (W, H))
+    out_col = OUTLINE_BGR if outline == "noir" else tuple(int(c * 0.55) for c in cols[0])
+    return outlined(color, m, out_col, w, h, sh)
 
 
 def render_decal(orig):

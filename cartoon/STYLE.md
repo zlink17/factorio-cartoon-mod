@@ -104,6 +104,12 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   végétation reste en arrière-plan, les bâtiments ressortent. **Une touffe sur cinq** seulement (l'original en
   couvre la carte ; en aplats, toutes les garder fait un tapis). Ombre à plat portée vers la droite. Taches au sol en
   aplat de la teinte moyenne de l'original, bord plus sombre, **à 60 % d'opacité**, sans contour ni ombre. **[VALIDÉ]**
+- **Arbres** (procédural 2D, `terrain/trees.py`) : feuillage en **gros lobes ronds** (30 px dans le fichier ; sapin :
+  étages pointus de 25 px ; saule : aplat suivant ses filaments) posés sur le feuillage de l'original, état par état
+  (plein, abîmé, presque nu). Dessiné en tons neutres car **le jeu le teinte** (couleur tirée au hasard par arbre).
+  Seuls les lobes du bord bas-droit sont sombres. Troncs, souches et arbres morts en aplat brun, trois tons tirés de
+  la luminosité de l'original (on garde les troncs multiples, les racines). Normales plates sous le feuillage. Ombres
+  d'origine conservées (noires, unies, même silhouette). Contour teinté. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

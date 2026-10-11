@@ -18,5 +18,6 @@ LOTS = {
     "minerais": [("blender/ore.py", ["tous"])],
     "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
+    "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)
     "sols": [("terrain/ground.py", ["toutes"]), ("terrain/masks.py", [])],   # planches et masques de transition
 }
