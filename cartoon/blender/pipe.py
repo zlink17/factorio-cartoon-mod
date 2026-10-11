@@ -24,8 +24,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import (FACTORIO_DATA, blob, box, crop_centered, cyl, entity_path, load, mat, render_scene, render_shadow, render_with_shadow,
-                 reset, save_icon, target)
+from lib import (FACTORIO_DATA, blob, box, crop_centered, cyl, entity_path, load, mat, render_scene, render_shadow,
+                 render_with_shadow, reset, save_icon, target)
 
 P = S.PALETTE
 PX_PER_TILE = 64
@@ -325,7 +325,7 @@ def write_machine_pipes(out):
 
 
 def write_icons(out):
-    save_icon(out, "pipe", lambda: build_shape("straight-vertical-single"))     # tuyau court à bouchons, comme l'original
+    save_icon(out, "pipe", lambda: build_shape("straight-vertical-single"))   # tuyau court à bouchons (original)
     save_icon(out, "pipe-to-ground", lambda: build_underground("left"))
 
 

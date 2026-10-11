@@ -118,6 +118,19 @@ PALETTE_HEX = {
     # tuyaux : tôle claire (comme les conduites de la machine à vapeur), bouchons gris
     "pipe":               "#a9aba2",
     "pipe_cap":           "#8a8e88",
+    # petite lampe : socle en fer brun-gris, plateau clair, globe de verre dépoli
+    "lamp_body":          "#6a625a",
+    "lamp_plate":         "#8c857c",
+    "lamp_glass":         "#d8dcd8",
+    # laboratoire : socle sombre, vitres gris-bleu (bleu vif en marche), montants cuivre clair
+    "lab_base":           "#4a4a50",
+    "lab_glass":          "#5d6a78",
+    "lab_glow":           "#3d82e0",
+    "lab_frame":          "#c39463",
+    # radar : treillis laiton clair, plateforme sombre, antenne en tôle claire
+    "radar_truss":        "#b8955c",
+    "radar_deck":         "#4e4a46",
+    "radar_dish":         "#b4b8b2",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

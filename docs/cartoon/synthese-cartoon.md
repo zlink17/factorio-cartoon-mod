@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1 à 2.5, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1 à 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -9,8 +9,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
    « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.4 « Énergie vapeur », 2.5 « Tuyaux »,
-   2.7 « Nature » et 2.8 « Décorations » faits.**
-2. **Prochaine action : lot 2.6 Petits bâtiments** (laboratoire, radar, petite lampe), puis l'ordre du plan.
+   2.6 « Petits bâtiments », 2.7 « Nature » et 2.8 « Décorations » faits.**
+2. **Prochaine action : lot 2.9 Eau et falaises**, puis l'ordre du plan (2.10 Personnage, 2.11 Chargeurs).
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
@@ -109,7 +109,7 @@ touffes ton sur ton dans la texture.
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 523 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 534 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -132,6 +132,7 @@ touffes ton sur ton dans la texture.
 | Machine à vapeur | Planches horizontale et verticale (32 images : volant, engrenages, crosse et bielle), ombres, icône. | `blender/steam_engine.py` |
 | Pompe côtière | 4 directions × 32 images (pistons dans les fenêtres des cylindres), ombres, pieds, bas du réservoir sous l'eau, eau des fenêtres et vitres en aplats (forme de l'original), icône. | `blender/offshore_pump.py` |
 | Tuyaux | 18 formes (droits, coudes, T, croix, bouts, fenêtres) et tuyau isolé, ombre incluse ; fonds des fenêtres ; souterrains (4) ; couvercles et ombres ; raccords des assembleurs 2 et 3 ; icônes. | `blender/pipe.py` |
+| Petits bâtiments | Petite lampe (sprite, ombre) ; laboratoire (33 images, lueur bleue qui vacille, ombre, intégration) ; radar (64 orientations de l'antenne, ombres, intégration) ; 3 icônes. | `blender/lamp.py`, `lab.py`, `radar.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -279,6 +280,20 @@ touffes ton sur ton dans la texture.
   cadre de l'image le coupe (remarque de Bastien : un cadre et un bout de tube plat y faisaient un bloc posé devant).
 - **Souterrains** : l'image porte le nom du côté du raccord en surface (`up` = raccord au nord) ; la distance
   parcourue avant de plonger varie selon la direction dans l'original (`pipe.UNDERGROUND`).
+- **Motifs peints le long des arêtes** : le nœud « Wireframe » (taille en unités du monde) donne la distance aux
+  arêtes des triangles ; mélangé à la couleur de `lib.mat`, il dessine les montants du dôme du laboratoire sans
+  créer d'objets (donc sans contour par montant).
+- **Laboratoire** : l'image 0 sert aussi au laboratoire à l'arrêt (`off_animation`) : elle doit être éteinte. La
+  lueur de l'original vacille sans régularité : on reprend son intensité image par image (`lab.GLOW`).
+- **Radar : l'ajustement automatique échoue** sur un modèle à beaucoup de pièces (il grossit la plateforme et
+  rapetisse l'antenne). Mesurer à la main sur l'original (hauteur des pieds, de la tourelle, de l'antenne dans
+  deux orientations opposées : l'écart donne la distance à l'axe) a donné de meilleures proportions. L'antenne de
+  l'original est presque sur l'axe et très haut (centre vers 2,9 cases) ; image 0 au nord, sens horaire.
+- **Tailles des fichiers ≠ prototype** : l'ombre du laboratoire fait 243 px de large, le prototype en déclare 242 ;
+  `build.py` compare au fichier, il faut donc produire 243.
+- **Banc : laboratoires à l'arrêt** (toutes les recherches y sont faites) ; la galerie met une recherche infinie
+  en file (`research_queue`) et des packs dans un laboratoire. `take_screenshot{daytime=0.5}` sur une surface
+  `always_day` reste de jour.
 - **Banc** : une chaudière ne brûle en continu que si elle a de l'eau et peut évacuer sa vapeur : tuyaux infinis
   (`set_infinity_pipe_filter`, eau « at-least », vapeur « exactly » 0).
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
@@ -297,7 +312,7 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 523 fichiers remplacés sur 8 246 à couvrir (18 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 44 d'énergie vapeur (chaudière, machine à vapeur, pompe côtière), 42 de tuyaux, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 1 534 fichiers remplacés sur 8 246 à couvrir (19 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 44 d'énergie vapeur (chaudière, machine à vapeur, pompe côtière), 42 de tuyaux, 11 de petits bâtiments, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
 - ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 66 Mo d'images dans `cartoon/mod/graphics`.
 - Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.

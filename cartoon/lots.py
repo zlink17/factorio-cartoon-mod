@@ -26,6 +26,8 @@ LOTS = {
                                                                    # partie immergée, fluide, vitres, icône
     "tuyaux": [("blender/pipe.py", ["tous"])],          # tuyaux, souterrains, couvercles, raccords des assembleurs,
                                                          # icônes
+    "petits-batiments": [("blender/lamp.py", []), ("blender/lab.py", []), ("blender/radar.py", [])],   # lampe,
+                                                         # laboratoire (33 images), radar (64 orientations), icônes
     "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
     "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)

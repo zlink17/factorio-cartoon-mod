@@ -159,7 +159,16 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   translucide à la forme du trou de l'original (le jeu dessine le fluide dessous). Souterrain : le tuyau plonge
   dans le sol par un coude, collerette au sol. Raccords des assembleurs 2 et 3 : cadre à la couleur du niveau sur
   la paroi, tube court et bride ; au nord (paroi arrière, cachée), seulement la bride et le tube qui s'enfonce
-  dans la machine. **[PROVISOIRE]**
+  dans la machine. **[VALIDÉ]**
+- **Petite lampe** (`blender/lamp.py`) : socle carré en fer brun-gris à pattes devant, plateau à rivets cuivre,
+  globe de verre dépoli en demi-ellipsoïde, tige cuivre à l'arrière. Lampe allumée : halo d'origine. **[PROVISOIRE]**
+- **Laboratoire** (`blender/lab.py`) : dôme géodésique (icosphère) sur un socle octogonal sombre à trappes
+  colorées ; montants cuivre clair **peints** sur le verre (nœud Wireframe : pas de contour par montant) ; panneaux
+  de verre en trois teintes tirées au hasard (on lit les facettes) ; en marche, le verre passe au bleu en vacillant
+  comme l'original (intensité mesurée image par image). **[PROVISOIRE]**
+- **Radar** (`blender/radar.py`) : pieds en treillis laiton clair (ajours peints), plateforme octogonale et caissons
+  sombres, tourelle gris-vert, tambour arrière ; antenne courbe en tôle claire à bords cuivre, creux vers l'axe,
+  très haut sur son mât (mesuré sur l'original). 64 orientations. **[PROVISOIRE]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

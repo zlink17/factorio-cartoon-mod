@@ -795,6 +795,22 @@ local function detail_pipes()
   animate("anim-tuyaux", 1, s.y + 1, 26, 10, 4, 4)
 end
 
+-- Vue rapprochée : petits bâtiments. Laboratoires, radars (l'antenne tourne), petites lampes. (Les recherches
+-- du banc étant toutes faites, les laboratoires ne travaillent pas : leur lueur se voit dans la galerie.)
+local function detail_small_buildings()
+  local s = scene("detail-petits-batiments", 1, GROUND, 2)
+  power(0, s.y, s.w, s.y + s.h)
+  for k = 0, 1 do
+    local lab = create { name = "lab", position = { 5.5 + k * 5, s.y + 5.5 } }
+    if lab and k == 0 then lab.insert { name = "automation-science-pack", count = 200 } end
+  end
+  create { name = "radar", position = { 18, s.y + 6 } }
+  create { name = "radar", position = { 23, s.y + 6 } }
+  for i = 0, 5 do create { name = "small-lamp", position = { 4.5 + i * 2, s.y + 10.5 } } end
+  label("lab, radar, small-lamp", 14, s.y + 12, 0.5)
+  animate("anim-petits-batiments", 2, s.y + 2, 24, 10, 16, 4)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -863,7 +879,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_pipes, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_pipes, detail_small_buildings, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

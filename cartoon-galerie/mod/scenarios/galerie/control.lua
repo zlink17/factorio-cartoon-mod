@@ -480,6 +480,29 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 
+-- Lot 2.6 : petits bâtiments. Laboratoires (un en recherche : sa lueur vacille ; un à l'arrêt), radars (l'antenne
+-- tourne), petites lampes (allumées la nuit : bouton jour/nuit de la fenêtre « Galerie »).
+local LAB_PACKS = { "automation-science-pack", "logistic-science-pack", "chemical-science-pack",
+  "production-science-pack", "utility-science-pack" }
+
+local function build_small_buildings(x0, y0)
+  power({ x0 + 1.5, y0 + 13.5 }, { { x0 + 8.5, y0 + 9.5 }, { x0 + 22.5, y0 + 9.5 } })
+  local lab = create { name = "lab", position = { x0 + 4.5, y0 + 4.5 } }
+  if lab then
+    for _, p in ipairs(LAB_PACKS) do lab.insert { name = p, count = 200 } end
+    keep(lab, { input = { "automation-science-pack", 200 } })
+  end
+  create { name = "lab", position = { x0 + 9.5, y0 + 4.5 } }
+  label("lab : en recherche, à l'arrêt", x0 + 7, y0 + 6.6, 0.5)
+  create { name = "radar", position = { x0 + 17, y0 + 5 } }
+  create { name = "radar", position = { x0 + 22, y0 + 5 } }
+  label("radar", x0 + 19.5, y0 + 7.1, 0.5)
+  for i = 0, 9 do create { name = "small-lamp", position = { x0 + 3.5 + i * 2, y0 + 12.5 } } end
+  label("small-lamp (la nuit : bouton jour/nuit)", x0 + 12.5, y0 + 13.8, 0.5)
+end
+
+------------------------------------------------------------------------------------------------------------------------
+
 -- Lot 2.7 : arbres de Nauvis (deux de chaque), gros rochers, étang à poissons.
 local function build_nature(x0, y0)
   local names = {}
@@ -584,6 +607,7 @@ local ZONES = {
   { id = "stockage", titre = "Lot 2.3 · Stockage", w = 36, h = 13, build = build_storage },
   { id = "energie", titre = "Lot 2.4 · Énergie vapeur", w = 56, h = 32, build = build_steam },
   { id = "tuyaux", titre = "Lot 2.5 · Tuyaux", w = 42, h = 26, build = build_pipes },
+  { id = "petits-batiments", titre = "Lot 2.6 · Petits bâtiments", w = 26, h = 16, build = build_small_buildings },
   { id = "nature", titre = "Lot 2.7 · Nature", w = 44, h = 38, build = build_nature },
   { id = "decorations", titre = "Lot 2.8 · Décorations", w = 34, h = 32, build = build_decoratives },
   { id = "superpositions", titre = "Lot 2.8 · Superpositions (tri par profondeur)", w = 34, h = 30,
@@ -644,6 +668,8 @@ local function build()
   game.forces.player.set_spawn_position(storage.spawn, surface)
   game.forces.player.chart(surface, area)
   pcall(function() game.forces.player.research_all_technologies() end)
+  -- une recherche infinie en cours, pour que le laboratoire du lot 2.6 travaille
+  pcall(function() game.forces.player.research_queue = { "mining-productivity-3" } end)
   storage.tags_pending = true
   refill()
 end
