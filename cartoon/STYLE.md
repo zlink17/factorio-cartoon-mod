@@ -136,6 +136,11 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   nervurée claire dessus et sombre devant, cadre gris et rouille pour l'acier). Fer : caisse sombre sur socle à
   rivets peints, couvercle gris rosé à pans coupés, loquet. Coins de l'acier et poignée laiton en saillie.
   **[VALIDÉ]**
+- **Chaudière** (`blender/boiler.py`) : tambour gris-vert riveté (rivets peints) couché le long des 3 cases,
+  réservoirs plus bas aux deux bouts avec les raccords d'eau, dôme de vapeur à soupape laiton, cheminée haute à
+  l'arrière gauche, gros tuyaux cuivre qui contournent le tambour par l'avant, trappe du foyer à cadre laiton et
+  fentes peintes, porte du foyer, manomètre. Flammes : les fentes s'allument (rouge, orange, jaune), 64 images.
+  Silhouette en gradins conservée (bornes de l'ajustement). Halos d'origine. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

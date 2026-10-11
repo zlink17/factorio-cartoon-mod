@@ -122,6 +122,7 @@ touffes ton sur ton dans la texture.
 | Foreuse à charbon | 4 directions × 32 images (engrenages, vrille, piston), ombres, icône ; pieds arqués ajustés sur l'original. | `blender/burner_drill.py` |
 | Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône ; variante humide (réservoirs à hublot, tuyaux, fenêtres de fluide). | `blender/electric_drill.py` |
 | Coffres | Bois, fer, acier : sprite, ombre, icône. Caisse haute et peu profonde (silhouette de l'original) ; cadre, planches et nervures peints sur les faces ; couvercle à pans coupés et loquet (fer), coins et poignée (acier). | `blender/chests.py` |
+| Chaudière | 4 directions, ombres, flammes dans les fentes de la grille (64 images), patch de l'est, icône. | `blender/boiler.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -225,6 +226,16 @@ touffes ton sur ton dans la texture.
   coordonnées du monde (`chests.mat_face` : bandes, cadres emboîtés) : un seul contour, lisible.
 - **Coffres : la silhouette de l'original ne suit pas un cube** : face avant de 34 px et dessus de 35 px donnent
   une caisse de 1,06 case de haut sur 0,63 de profondeur, avancée de 0,24 case dans sa case (les trois coffres).
+- **Chaudière : l'original est dessiné plus bas que notre projection** (comme les coffres, avancés dans leur
+  case) : `down` décale la caméra (0,33 case vers le bas de l'écran), ajusté avec les dimensions. L'ajustement
+  par recouvrement doit **pénaliser ce qui sort du cadre** de l'original (coupé net en jeu) et être **borné** :
+  libre, il fond tambour et réservoirs en un seul cylindre qui recouvre mieux mais ne ressemble plus à rien.
+- **Flammes de la chaudière** : le jeu ne les dessine que dans un petit cadre fixe par direction, et la grille de
+  l'original n'est pas au même endroit du tambour d'une direction à l'autre. `boiler.grate_place` calcule, par
+  direction, où poser la grille pour qu'elle se projette au centre de ce cadre ; les flammes sont les pixels des
+  fentes repérés dans notre rendu. Une platine posée sur un cylindre : `rot_x = angle - 90` (face selon le rayon).
+- **Banc** : une chaudière ne brûle en continu que si elle a de l'eau et peut évacuer sa vapeur : tuyaux infinis
+  (`set_infinity_pipe_filter`, eau « at-least », vapeur « exactly » 0).
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.

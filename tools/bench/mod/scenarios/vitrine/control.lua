@@ -647,6 +647,40 @@ local function detail_storage()
   animate("anim-stockage", 2, s.y + 9, 28, 5, 16, 2)
 end
 
+-- Vue rapprochée : énergie vapeur. Chaudières allumées dans les 4 directions : eau fournie et vapeur évacuée par
+-- des tuyaux infinis, pour qu'elles brûlent en continu ; une chaudière éteinte (sans combustible) pour comparer.
+local function detail_steam()
+  local s = scene("detail-energie", 1, GROUND, 2)
+  -- décalage (dx, dy) donné pour le nord, tourné vers la direction d (sens horaire, y vers le bas)
+  local function turn(d, dx, dy)
+    if d == "east" then return -dy, dx elseif d == "south" then return -dx, -dy
+    elseif d == "west" then return dy, -dx end
+    return dx, dy
+  end
+  local function infinity(x, y, fluid, mode)
+    local p = create { name = "infinity-pipe", position = { x, y } }
+    if p then pcall(function() p.set_infinity_pipe_filter { name = fluid, percentage = mode == "remove" and 0 or 1,
+      mode = mode == "remove" and "exactly" or "at-least" } end) end
+  end
+  local spots = { { "north", 5.5, 4 }, { "east", 14, 4.5 }, { "south", 22.5, 4 }, { "west", 30, 4.5 } }
+  for _, sp in ipairs(spots) do
+    local d, cx, cy = sp[1], sp[2], s.y + sp[3]
+    for row = 0, 1 do
+      local y = cy + row * 7
+      local b = create { name = "boiler", position = { cx, y }, direction = defines.direction[d] }
+      if b and row == 0 then b.insert { name = "coal", count = 50 } end
+      for _, side in ipairs({ -1, 1 }) do
+        local dx, dy = turn(d, side * 2, 0.5)
+        infinity(cx + dx, y + dy, "water", "add")
+      end
+      local dx, dy = turn(d, 0, -1.5)
+      infinity(cx + dx, y + dy, "steam", "remove")
+    end
+    label(d, cx, cy + 2.6, 0.5)
+  end
+  animate("anim-chaudieres", 2, s.y + 1, 32, 7, 16, 2)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -715,7 +749,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

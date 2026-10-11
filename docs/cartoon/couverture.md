@@ -8,20 +8,20 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1419 | 4143 | 34 % |
+| `base` | 1433 | 4143 | 35 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **1437** | **8246** | **17 %** |
+| **Total** | **1451** | **8246** | **18 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 1326 | 5483 |
-| icone | 80 | 1525 |
-| ombre | 31 | 822 |
+| sprite | 1335 | 5483 |
+| icone | 81 | 1525 |
+| ombre | 35 | 822 |
 | lumiere | 0 | 135 |
 | masque | 0 | 281 |
 
@@ -81,7 +81,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ✅ white-desert-bush | 20 | 20 | 0 |
 | ✅ worms-decal | 16 | 16 | 0 |
 
-### entity : 599 / 2289
+### entity : 612 / 2289
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -103,7 +103,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | bigass-explosion | 0 | 3 | 0 |
 | biter | 0 | 62 | 43 |
 | blue-laser | 0 | 1 | 0 |
-| boiler | 0 | 18 | 8 |
+| ◐ boiler | 13 | 18 | 8 |
 | ◐ bulk-inserter | 6 | 7 | 2 |
 | bullet | 0 | 1 | 0 |
 | ◐ burner-inserter | 7 | 8 | 3 |
@@ -241,9 +241,9 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 |---|---:|---:|---:|
 | equipment | 0 | 13 | 0 |
 
-### icons : 77 / 572
+### icons : 78 / 572
 
-Faites : `advanced-circuit`, `assembling-machine`, `automation-science-pack`, `battery`, `big-electric-pole`, `bulk-inserter`, `burner-inserter`, `burner-mining-drill`, `chemical-science-pack`, `coal`, `copper-cable`, `copper-ore`, `copper-plate`, `electric-engine-unit`, `electric-mining-drill`, `electronic-circuit`, `engine-unit`, `explosives`, `express-splitter`, `express-transport-belt`, `express-underground-belt`, `fast-inserter`, `fast-splitter`, `fast-transport-belt`, `fast-underground-belt`, `flying-robot-frame`, `inserter`, `iron-chest`, `iron-gear-wheel`, `iron-ore`, `iron-plate`, `iron-stick`, `logistic-science-pack`, `long-handed-inserter`, `low-density-structure`, `medium-electric-pole`, `military-science-pack`, `plastic-bar`, `processing-unit`, `production-science-pack`, `rocket-fuel`, `small-electric-pole`, `solid-fuel`, `space-science-pack`, `splitter`, `steel-chest`, `steel-plate`, `stone`, `stone-brick`, `stone-furnace`, `substation`, `sulfur`, `transport-belt`, `underground-belt`, `uranium`, `uranium-ore`, `utility-science-pack`, `wood`, `wooden-chest`.
+Faites : `advanced-circuit`, `assembling-machine`, `automation-science-pack`, `battery`, `big-electric-pole`, `boiler`, `bulk-inserter`, `burner-inserter`, `burner-mining-drill`, `chemical-science-pack`, `coal`, `copper-cable`, `copper-ore`, `copper-plate`, `electric-engine-unit`, `electric-mining-drill`, `electronic-circuit`, `engine-unit`, `explosives`, `express-splitter`, `express-transport-belt`, `express-underground-belt`, `fast-inserter`, `fast-splitter`, `fast-transport-belt`, `fast-underground-belt`, `flying-robot-frame`, `inserter`, `iron-chest`, `iron-gear-wheel`, `iron-ore`, `iron-plate`, `iron-stick`, `logistic-science-pack`, `long-handed-inserter`, `low-density-structure`, `medium-electric-pole`, `military-science-pack`, `plastic-bar`, `processing-unit`, `production-science-pack`, `rocket-fuel`, `small-electric-pole`, `solid-fuel`, `space-science-pack`, `splitter`, `steel-chest`, `steel-plate`, `stone`, `stone-brick`, `stone-furnace`, `substation`, `sulfur`, `transport-belt`, `underground-belt`, `uranium`, `uranium-ore`, `utility-science-pack`, `wood`, `wooden-chest`.
 
 ### item-group : 0 / 7
 

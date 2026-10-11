@@ -104,6 +104,8 @@ PALETTE_HEX = {
     "chest_steel_front":  "#5e534c",
     "chest_steel_frame":  "#9a6a4a",
     "chest_steel_rim":    "#8a8090",
+    # chaudière : acier gris-vert de l'original
+    "boiler_body":        "#6e7a6c",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 
