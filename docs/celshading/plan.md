@@ -77,9 +77,10 @@ rendu, l'esprit industriel et steampunk de Factorio pour le fond, un peu comme M
 exagérées, rivets, boulons, tuyaux). Machines réinterprétées mais reconnaissables, peu de grosses formes.
 
 Méthode par objet :
-1. **Guides** tirés du sprite original : `celshading/concept/prepare.py` (contours, profondeur, cadrage).
-2. **Images cibles** : `celshading/concept/concept.py` (ComfyUI : SDXL Turbo guidé par ControlNet, sans référence
-   de style pour l'instant), plusieurs graines et deux dosages des guides (proche de l'original / plus libre).
+1. **Guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
+   ([docs/methode-images-cibles.md](../methode-images-cibles.md), `tools/concept/`), recette du mod dans
+   [`celshading/concept/`](../../celshading/concept/README.md) (SDXL Turbo guidé par ControlNet et par nos propres
+   rendus cel-shading en référence de style), plusieurs graines.
 3. **Bastien choisit** (ou combine, ou commente), éventuellement une seconde passe en img2img sur l'image choisie.
 4. **Modèle Blender** propre au mod (`celshading/blender/`), qui s'approche de l'image cible ; rendu avec le moteur.
 5. Vérification en jeu (banc d'essai), comme pour tout lot.

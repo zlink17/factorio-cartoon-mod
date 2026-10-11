@@ -78,7 +78,9 @@ Exemple (propulseur) :
 | `checkpoints/DreamShaperXL_Turbo_v2_1.safetensors` | SDXL, 8 étapes | CreativeML OpenRAIL++ |
 | `controlnet/controlnet-union-sdxl-promax.safetensors` (xinsir) | profondeur et contours | Apache 2.0 |
 | `ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors` + `clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` | style par l'image | Apache 2.0 |
-| `loras/WindWaker_IL.safetensors` (ajouté par Bastien, cel-shading) | style Wind Waker pour Illustrious | voir sa source |
+| `loras/WindWaker_IL.safetensors` (ajouté par Bastien, cel-shading) | style Wind Waker pour Illustrious | Civitai [170319](https://civitai.com/models/170319), version IL_v1.0 : gratuit, dérivés permis, vente des images non permise ; téléchargement réservé aux comptes connectés |
+| `loras/pixel-art-xl.safetensors` (pixel, installé le 11 octobre) | pixel art pour SDXL (avec DreamShaperXL Turbo) : pas de mot-clé, sortie à réduire × 8 au plus proche voisin | Hugging Face [nerijs/pixel-art-xl](https://huggingface.co/nerijs/pixel-art-xl), CreativeML OpenRAIL-M |
+| `loras/PixelArt_Icon_IL_M_V2.1_00002.safetensors.safetensors` (ajouté par Bastien, pixel) | icônes pixel art pour Illustrious, mot-clé `pixelarticon` | Civitai [2443581](https://civitai.com/models/2443581), licence Illustrious ; téléchargement réservé aux comptes connectés |
 
 Ancien essai, non retenu : ComfyUI Desktop sous Windows avec SD 1.5 + ControlNet canny, en filtre sur des rendus
 (`cartoon/ai/`) ; l'IA y faisait le sprite final, ce qui ne marche pas.
