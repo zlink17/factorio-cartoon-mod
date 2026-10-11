@@ -53,3 +53,12 @@ en sprites séparés, même cadre et même emprise que l'original au pixel près
 
 - Fumées et vapeur en boules cel-shadées qui finissent en volute ; explosions en nuages ronds ; flammes en
   langues à trois tons. **[PROVISOIRE]**
+
+## 8. Ambiance : moins de sprites que l'original
+
+- Factorio a été pensé pour des sprites très détaillés, et il lui en faut énormément (décorations, taches, petites
+  plantes, variantes). Le cel-shading vit de **grandes formes lisibles** : tout reprendre surchargerait l'image.
+  Pour chaque famille, on se demande d'abord **garder, alléger ou retirer ?** Les décorations ne seront
+  probablement pas toutes gardées, ou en quantité réduite (réglages de démarrage du mod, comme le sous-mod
+  `cartoon-epure`) ; même question pour le nombre de variantes (espèces d'arbres, variantes par espèce, rochers).
+  **[VALIDÉ]** (12 octobre ; les quantités se jugent en jeu, famille par famille : **[PROVISOIRE]**)

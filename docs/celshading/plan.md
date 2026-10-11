@@ -77,6 +77,10 @@ rendu, l'esprit industriel et steampunk de Factorio pour le fond, un peu comme M
 exagérées, rivets, boulons, tuyaux). Machines réinterprétées mais reconnaissables, peu de grosses formes.
 
 Méthode par objet :
+0. **Garder, alléger ou retirer ?** (12 octobre, demande de Bastien) : le Factorio d'origine, très détaillé, a
+   besoin d'énormément de sprites ; le cel-shading, fait de grandes formes, risque d'être surchargé si on garde
+   tout. Avant de redessiner une famille, on décide si on la garde entière, en quantité réduite (décorations :
+   réglages de démarrage du mod, comme `cartoon-epure`), avec moins de variantes, ou pas du tout. Voir STYLE.md §8.
 1. **Guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
    ([docs/methode-images-cibles.md](../methode-images-cibles.md), `tools/concept/`), recette du mod dans
    [`celshading/concept/`](../../celshading/concept/README.md) (SDXL Turbo guidé par ControlNet et par nos propres
@@ -147,6 +151,6 @@ de la section 3.3 (image cible, puis modèle) :
 Fin d'étape : `STYLE.md` passe de « brouillon » à des règles **[VALIDÉ]**, avec leurs valeurs dans `style.py`.
 
 ### Étape 2 : production, ce qui donne l'ambiance d'abord
-Ordre proposé : sols et décorations de Nauvis, eau, arbres, fumées et feu (ce qu'on voit sur tout l'écran),
+Ordre proposé (chaque famille commence par « garder, alléger ou retirer ? », section 3.3) : sols et décorations de Nauvis, eau, arbres, fumées et feu (ce qu'on voit sur tout l'écran),
 puis les lots du début de partie dans l'ordre du mod cartoon (convoyeurs, bras, assembleurs, fours, foreuses,
 coffres, énergie vapeur, tuyaux, petits bâtiments, objets), puis personnage.
