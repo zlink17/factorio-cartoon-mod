@@ -418,6 +418,13 @@ local function build_steam(x0, y0)
   local eei = create { name = "electric-energy-interface", position = { bx + 3.5, by - 7 } }
   if eei then pcall(function() eei.power_production = 0; eei.power_usage = 1.8e6; eei.electric_buffer_size = 1e7 end) end
   label("pompe côtière, chaudière, machines à vapeur", bx, y0 + 22.3, 0.6)
+  -- deux machines à vapeur en file est-ouest, un tuyau à chaque bout : les joints se voient
+  local hy = y0 + 27.5
+  create { name = "pipe", position = { x0 + 38.5, hy } }
+  create { name = "steam-engine", position = { x0 + 41.5, hy }, direction = E }
+  create { name = "steam-engine", position = { x0 + 46.5, hy }, direction = E }
+  create { name = "pipe", position = { x0 + 49.5, hy } }
+  label("machines à vapeur en file", x0 + 44, hy + 2.3, 0.6)
   -- pompes côtières dans les 4 directions autour d'un étang, l'eau retirée par le script (elles tournent)
   local ex1, ey1, ex2, ey2 = x0 + 12, y0 + 21, x0 + 22, y0 + 26
   tiles("water", ex1, ey1, ex2, ey2)

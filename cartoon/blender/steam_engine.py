@@ -12,10 +12,13 @@ Usage : python cartoon/blender/steam_engine.py <dossier_sortie> [H|V|toutes] [--
 Les restes sont laissés d'origine (lot 3.9).
 
 La machine (5 x 3 cases) : châssis sombre sur pieds en A rouille, trois cylindres à vapeur verticaux en rangée
-(tôle claire, couvercle à soupape), raccords de fluide aux deux bouts, longue conduite claire devant les
-cylindres, volant et engrenages sur la face avant à droite, entraînés par une bielle depuis une crosse qui coulisse.
+(tôle claire, couvercle à soupape), longue conduite claire devant les cylindres, volant et engrenages sur la face
+avant à droite, entraînés par une bielle depuis une crosse qui coulisse. Aux deux bouts, les raccords sont le tube
+et la bride du tuyau (pipe.py), au bord de la case comme ceux de la chaudière : entre deux machines en file, les
+deux brides forment le joint, dégagé par un châssis plus court que la machine (comme l'original).
 Modèle construit à l'horizontale (axe x) puis tourné pour la planche verticale : les engrenages passent alors sur
-le côté gauche, comme dans l'original. L'animation (32 images, en boucle) fait un tour de volant.
+le côté gauche, comme dans l'original. La planche verticale est allongée nord-sud de KY (le sol est raccourci
+de cos 30° à l'écran) pour couvrir ses 5 cases, sinon un vide sépare deux machines en file. L'animation (32 images, en boucle) fait un tour de volant.
 """
 import math, os, sys
 import cv2
@@ -23,6 +26,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
+import pipe as PIPE
 from lib import box, crop_centered, cyl, entity_path, gear, load, mat, render_scene, render_shadow, reset, rod, save_icon, sheet
 
 P = S.PALETTE
@@ -32,6 +36,7 @@ CANVAS = 768                                    # l'ombre horizontale (508 px, d
 N_FRAMES, COLUMNS = 32, 8
 SUN_SHEAR = (0.45, 0.02)
 OUTLINE = 0.022
+KY = 1 / math.cos(math.radians(S.PITCH_BUILDING_DEG))   # le sol nord-sud est raccourci de cos 30° à l'écran
 YAW = {"H": 0, "V": -90}                       # verticale : l'avant (engrenages) passe à gauche
 # cadres de l'original (taille, décalage en px = shift x 64) : sprite, puis ombre
 FRAMES = {
@@ -41,7 +46,7 @@ FRAMES = {
 
 # dimensions (cases), ajustées sur la silhouette de l'original (deux planches, image 0)
 DIMS = dict(
-    L=4.8, D=2.6,                  # châssis : longueur (x), profondeur (y)
+    L=4.4, D=2.6,                  # châssis : longueur (x), profondeur (y) ; raccourci pour dégager les raccords
     zc=0.5,                        # dessus du châssis
     rk=0.7, hk=1.6, yk=0.4,        # cylindres : rayon, hauteur au-dessus du châssis, position y
     down=0.24,                     # décalage de tout le dessin vers le bas de l'écran (comme les originaux)
@@ -93,10 +98,7 @@ def build(view="H", phase=0.0, d=None):
         for s in (-1, 1):
             rod((x - 0.28, s * D * 0.55, 0.02), (x, s * D * 0.38, zc - 0.2), 0.07, rust, verts=8)
             rod((x + 0.28, s * D * 0.55, 0.02), (x, s * D * 0.38, zc - 0.2), 0.07, rust, verts=8)
-    # raccords de fluide aux deux bouts (y = 0), brides
-    for s in (-1, 1):
-        rod((s * (L / 2 - 0.1), 0, 0.4), (s * 2.42, 0, 0.4), 0.18, pipe, verts=20)
-        cyl((s * 2.42, 0, 0.4), 0.25, 0.07, copper, verts=20, rot=(0, 90, 0))
+    # raccords de fluide aux deux bouts : posés après la rotation (connectors)
     # trois cylindres à vapeur au fond du plateau, couvercle et soupape laiton
     rk, hk, yk = d["rk"], d["hk"], d["yk"]
     for x in TANK_X:
@@ -110,7 +112,7 @@ def build(view="H", phase=0.0, d=None):
     # conduite claire devant les cylindres, de bout en bout, qui descend vers le raccord gauche
     yp = yk - rk - 0.08
     rod((-2.1, yp, zc + 0.75), (2.1, yp, zc + 0.75), 0.1, pipe, verts=16)
-    rod((-2.1, yp, zc + 0.75), (-2.1, 0, 0.55), 0.1, pipe, verts=16)
+    rod((-2.1, yp, zc + 0.75), (-2.1, 0.1, 0.45), 0.1, pipe, verts=16)
     # devant, sur le plateau : radiateur à gauche (lamelles peintes en bandes), glissière et crosse au centre,
     # volant et engrenages debout à droite, face à l'avant ; une bielle relie la crosse au volant
     yf = yk - rk - 0.6
@@ -136,9 +138,31 @@ def build(view="H", phase=0.0, d=None):
     rod((-2.15, D * 0.3, zc), (-2.15, D * 0.3, zc + 1.7), 0.07, pipe, verts=10)
     bpy.context.view_layer.update()          # matrices à jour (sinon le dernier objet perd son échelle)
     rot = Matrix.Rotation(math.radians(YAW[view]), 4, "Z")
+    if view == "V":                          # nord-sud : allongée de KY pour couvrir ses 5 cases à l'écran
+        rot = Matrix.Diagonal((1, KY, 1, 1)) @ rot
     for o in bpy.context.scene.objects:
         if o.parent is None:
             o.matrix_world = rot @ o.matrix_world
+    connectors(view, d)
+
+
+# raccords du prototype (cases, y vers le sud comme dans le jeu) : position du bord, direction vers l'extérieur
+CONNECTIONS = {"H": [((-2.5, 0), (-1, 0)), ((2.5, 0), (1, 0))], "V": [((0, -2.5), (0, -1)), ((0, 2.5), (0, 1))]}
+STUB = 0.6                                   # longueur de l'embout, du bord de la case vers l'intérieur
+
+
+def connectors(view, d=None):
+    """Embouts des raccords : le tube et la bride du tuyau (pipe.py) au bord de la case, posés dans le repère du
+    monde comme ceux de la chaudière : à l'écran, ils tombent exactement sur ceux d'un tuyau ou d'une autre machine
+    voisine, dont la bride complète le raccord (un bord à `gy` cases du centre, y vers le sud, est en
+    y = (-gy + down) KY + yc dans le monde)."""
+    d = d or DIMS
+    pd, m = PIPE.DIMS, PIPE.mats()
+    for (gx, gy), (vx, vy) in CONNECTIONS[view]:
+        edge = np.array((gx, (-gy + d["down"]) * KY + pd["yc"], pd["r"]))
+        out = np.array((vx, -vy, 0.0))       # repère de Blender : y vers le nord
+        PIPE.tube_path([tuple(edge), tuple(edge - out * STUB)], pd["r"], m["tube"])
+        PIPE.flange(tuple(edge), (-vx, vy), pd, m)
 
 
 def camera_shift(d=None):
