@@ -1,0 +1,9 @@
+{
+ "base_prompt": "pixel art, 16-bit video game sprite of a factory building, seen from above at a 30 degree angle, top face and front face visible, bold simple readable shapes, few large parts, limited color palette, colored dark outlines, flat shading with light from the top left, crisp pixels, plain grey background.",
+ "neg": "photo, realistic, photorealistic, 3d render, smooth shading, gradient, blurry, soft edges, anti-aliasing, noise, grain, text, watermark, signature, isometric, 3/4 view, perspective, characters, people",
+ "lora": ["pixel-art-xl.safetensors:1.1"],
+ "depth": 0.6,
+ "edges": 0.35,
+ "cfg": 2.0,
+ "steps": 8
+}

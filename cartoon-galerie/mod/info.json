@@ -4,6 +4,7 @@
   "title": "Factorio Cartoon : galerie",
   "author": "zlink17",
   "factorio_version": "2.0",
-  "dependencies": ["base >= 2.0.0", "? factorio-cartoon-mod", "? factorio-cartoon-epure"],
+  "dependencies": ["base >= 2.0.0", "? factorio-cartoon-mod", "? factorio-cartoon-epure", "? factorio-pixel-mod",
+    "? factorio-celshading-mod"],
   "description": "Scénario « galerie » (Jeu solo > Scénarios) : une carte qui montre, lot par lot, tout ce qui a été redessiné par le mod cartoon, machines en marche. Désactiver le mod cartoon pour voir la même carte avec les graphismes d'origine."
 }

@@ -1,6 +1,7 @@
 """Original, image cible et rendu Blender côte à côte : en grand, en zoom x2 (cible et rendu), et à la taille du jeu.
 
-Usage : python tools/concept/compare.py <guides> <cible> <rendu> <sortie.png> [--sol herbe|plateforme|gris]
+Usage : python tools/concept/compare.py <guides> <cible> <rendu> <sortie.png> [--sol herbe|plateforme|gris] [--pixel]
+--pixel (mod pixel) : ajoute la cible ramenée à 16 px d'art par case (common.pixelise), entre la cible et le rendu.
 <cible> : l'image retenue telle que sortie de ComfyUI (taille de la toile) ou déjà au cadre du sprite ;
 <rendu> : le sprite produit par le générateur Blender, au cadre de l'original.
 Écrit <sortie.png> et <sortie>-zoom.png.
@@ -9,7 +10,7 @@ import argparse, json, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import DATA, PX, SOLS, sol, to_frame
+from common import DATA, PX, SOLS, pixelise, sol, to_frame
 
 ap = argparse.ArgumentParser()
 ap.add_argument("guides")
@@ -17,6 +18,7 @@ ap.add_argument("cible")
 ap.add_argument("rendu")
 ap.add_argument("out")
 ap.add_argument("--sol", choices=sorted(SOLS), default="gris")
+ap.add_argument("--pixel", action="store_true")
 a = ap.parse_args()
 
 info = json.load(open(os.path.join(a.guides, "guide-sprite.json")))
@@ -39,10 +41,11 @@ def monde(s, n=2):
 
 
 font = ImageFont.load_default(size=26)
-items = [("original", orig), ("cible", cible), ("blender", rendu)]
+items = [("original", orig), ("cible", cible)] + ([("cible en pixels", pixelise(cible, shift))] if a.pixel else []) \
+    + [("blender", rendu)]
 views = [monde(s) for _, s in items]
 cw = max(W, views[0].width) + 12
-out = Image.new("RGBA", (cw * 3, 40 + H + views[0].height + 20), (30, 32, 38, 255))
+out = Image.new("RGBA", (cw * len(items), 40 + H + views[0].height + 20), (30, 32, 38, 255))
 d = ImageDraw.Draw(out)
 for i, ((n, s), v) in enumerate(zip(items, views)):
     d.text((i * cw + cw // 2, 6), n, font=font, fill=(255, 214, 90), anchor="mt")

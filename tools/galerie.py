@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Contrôle du scénario « galerie » (mod cartoon-galerie) : le lance dans l'instance isolée et capture chaque zone.
 
-Usage : python tools/galerie.py [--origine] [--delai SECONDES]
+Usage : python tools/galerie.py [--mod cartoon|pixel|celshading] [--origine] [--delai SECONDES]
 
-Installe cartoon-galerie, le mod cartoon (sauf avec --origine) et le banc d'essai (dont la présence déclenche les
-captures) dans l'instance isolée (tools/factorio.py), lance le scénario et attend « fini.txt ».
-Captures dans .cache/galerie/<cartoon|origine>/ : une image par zone et « ensemble.png » (vue générale) ;
+Installe cartoon-galerie, le mod choisi (cartoon par défaut ; aucun avec --origine) et le banc d'essai (dont la
+présence déclenche les captures) dans l'instance isolée (tools/factorio.py), lance le scénario et attend
+« fini.txt ». La galerie suit les lots du plan cartoon, que les autres mods reprennent (mêmes numéros).
+Captures dans .cache/galerie/<mod|origine>/ : une image par zone et « ensemble.png » (vue générale) ;
 journal.txt liste les entités impossibles à créer.
 
 Pour jouer la galerie dans son propre jeu : tools/install_mod.sh cartoon-galerie, puis Jeu solo > Scénarios.
@@ -32,12 +33,13 @@ def check_lua():
 
 
 def main(argv):
-    variant = "origine" if "--origine" in argv else "cartoon"
+    mod = argv[argv.index("--mod") + 1] if "--mod" in argv else "cartoon"
+    variant = "origine" if "--origine" in argv else mod
     timeout = int(argv[argv.index("--delai") + 1]) if "--delai" in argv else 300
     check_lua()
     mods = [factorio.install("cartoon-galerie"), bench.install_bench()]
-    if variant == "cartoon":
-        mods.append(factorio.install("cartoon"))
+    if variant != "origine":
+        mods.append(factorio.install(mod))
     produced = factorio.WORK / "write" / "script-output" / "galerie" / variant
     shutil.rmtree(produced, ignore_errors=True)
     factorio.stop()

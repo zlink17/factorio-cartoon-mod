@@ -9,7 +9,8 @@ Contrôles sur les fichiers (rapides) :
   - chaque image a un canal alpha si l'original en a un ;
   - aucune ombre (fichier « shadow ») n'est entièrement transparente : elle ne produirait aucune ombre en jeu ;
   - manifest.lua liste exactement les images présentes ;
-  - avertissement pour les images qu'aucun prototype du jeu n'utilise (voir tools/inventory.py).
+  - avertissement pour les images qu'aucun prototype du jeu n'utilise (voir tools/inventory.py) ;
+  - contrôles propres au mod, s'il a un <mod>/controle.py (fonction check(files, overrides)).
 
 --jeu : test de chargement dans une instance isolée de Factorio (tools/factorio.py) avec le mod activé : le mod
 doit se charger, et aucun prototype ne doit encore pointer vers un original que le mod remplace.
@@ -76,6 +77,14 @@ def check_files(mod):
         errors.append(f"HORS MANIFESTE (lancer tools/build_manifest.py) : {game}/{rest}")
     for game, rest in sorted(listed - present):
         errors.append(f"MANIFESTE sans fichier : {game}/{rest}")
+
+    hook = ROOT / mod / "controle.py"            # contrôles propres au mod (ex. pixel : pixels nets, palette)
+    if hook.exists() and files:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(f"controle_{mod}", hook)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        errors += module.check(files, overrides)
     return files, errors
 
 

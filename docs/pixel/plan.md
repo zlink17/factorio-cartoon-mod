@@ -1,7 +1,7 @@
 # Mod Pixel : méthode et plan d'ensemble
 
-Rédigé le 11 octobre 2026. **État : méthode validée par Bastien le 11 octobre (section 8) ; modèles pixel art installés (11 octobre) ;
-prochaine action : étape 0.**
+Rédigé le 11 octobre 2026. **État : méthode validée par Bastien le 11 octobre (section 8). Étape 0 presque finie (section 6) : reste l'essai B→px
+(images cibles de l'assembleur 1 en cours) et la galerie.**
 Situation et pièges connus : [synthese-pixel.md](synthese-pixel.md). Règles visuelles : [`pixel/STYLE.md`](../../pixel/STYLE.md).
 
 Ce document fixe **comment on produit l'intégralité du mod pixel**, sur le modèle du plan du mod cartoon
@@ -104,23 +104,31 @@ par Bastien ; générateur reproductible.
 
 ## 6. Étape 0 : fondations
 
-- [ ] **Passe pixel commune** `pixel/pixlib/` (à partir de `pixutil.py`) : quantification sur palette, contours
-      colorés, nettoyage, export × 4 **dans le cadre de l'original, aligné sur la grille du monde**.
-- [ ] **Table rase** : anciens générateurs (`pixel/pillow/`), images, `manifest.lua`, `poles_data.lua` et corrections
-      de `data-final-fixes.lua` retirés ; le mod repart vide et se charge. Le dernier commit qui les contient est
-      noté dans `synthese-pixel.md`.
-- [ ] **`pixel/lots.py` et `build.py pixel`** : seule façon de produire et d'installer.
-- [ ] **Contrôle pixel** (option de `check_mod.py` ou `tools/check_pixel.py`) : blocs uniformes, palette, alpha,
-      alignement.
-- [ ] **Couverture** `docs/pixel/couverture.md` (`inventory.py pixel`).
-- [ ] **Galerie** paramétrable (`tools/galerie.py --mod pixel`), à faire une fois pour le pixel et le cel-shading.
-- [ ] **Recette ComfyUI** du mod et option de pixélisation dans `planche.py` et `compare.py`.
-- [ ] **Allègement des décorations** : le mécanisme du sous-mod `cartoon-epure/` (probabilité de génération
-      multipliée par famille, réglage de démarrage par famille, commande pour une carte existante) intégré au mod
-      pixel. Départ : **10 %** de la quantité d'origine pour chaque famille, jugé en jeu ; une famille qui
-      surcharge encore passe à 0 (retirée). Seules les familles gardées seront redessinées (lot 2.8).
-- [ ] **Essai B→px** : assembleur 1 et four en pierre, d'après une image cible, rendus par Blender à 16 px par case
-      et posés en jeu. Bastien décide (décision 1).
+- [x] **Table rase** (commit `e0c9a4f`) : anciens générateurs, images, `poles_data.lua` et corrections Lua retirés ;
+      le mod vide se charge (`check_mod.py pixel --jeu`).
+- [x] **Passe pixel commune** `pixel/pixlib/` : `palette.py` (rampes par matière, **provisoires** :
+      `python pixel/pixlib/palette.py palette.png` en montre la planche), `passe.py` (alpha net, palette, contours
+      colorés, jonctions, nettoyage, ombre en aplat), `cadre.py` (art × 4 dans le cadre de l'original, aligné sur
+      la grille du monde ; planches ; icônes 32 px d'art à mipmaps).
+- [x] **Rendu Blender en pixels** `pixel/blender/pxlib.py` : rendu à la résolution d'art (un point par pixel, pas
+      de tramage), matières de la palette en émission (un ton par orientation de face), carte des matières pour
+      la passe ; briques de modélisation reprises du mod cartoon. Vérifié sur une scène d'essai : 7 couleurs, toutes
+      dans la palette.
+- [x] **`pixel/lots.py` et `build.py pixel`** : seule façon de produire et d'installer (aucun lot pour l'instant).
+- [x] **Contrôle pixel** `pixel/controle.py`, appelé par `check_mod.py` (donc par `build.py`) : pixels nets sur la
+      grille du monde (d'après le `shift` du prototype), palette, alpha, ombres en aplat, icônes.
+- [x] **Couverture** [couverture.md](couverture.md) (`inventory.py pixel`).
+- [ ] **Galerie** : `tools/galerie.py --mod pixel` et dépendances facultatives faits ; la détection du mod dans le
+      scénario est faite par la session de la galerie, en attente de son commit.
+- [x] **Recette ComfyUI** [`pixel/concept/`](../../pixel/concept/README.md) (LoRA Pixel Art XL) et option
+      `--pixel` de `planche.py` et `compare.py` (chaque variante aussi à 16 px d'art par case).
+- [x] **Allègement des décorations** : réglages de démarrage par famille dans le mod (10 % par défaut), commande
+      `/pixel-decorations` pour une carte existante. **À juger en jeu par Bastien.**
+- [ ] **Essai B→px** : images cibles de l'assembleur 1 (en cours), choix de Bastien, modèle rendu en pixels,
+      posé en jeu. Bastien décide (décision 1). Puis le four en pierre.
+
+Note : la grille du monde n'a de sens que pour ce qui est posé sur la grille (bâtiments, sols) ; arbres,
+décorations, véhicules et personnages bougent librement, seule la netteté de leurs pixels est contrôlée.
 
 ## 7. Étape 1 : charte visuelle
 

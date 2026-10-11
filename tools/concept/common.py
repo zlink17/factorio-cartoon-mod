@@ -39,3 +39,22 @@ def to_frame(path, guides, info=None):
     frame = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     frame.alpha_composite(part, (x0, y0))
     return frame
+
+
+def pixelise(frame, shift=(0, 0), k=4, colors=24):
+    """Aperçu « pixel art » d'un sprite au cadre de l'original : réduit à 1 px d'art pour k px de fichier (grille
+    alignée sur le monde, comme pixel/pixlib/cadre.py), transparence nette, `colors` couleurs (palette adaptée à
+    l'image : la palette du mod se fixe justement d'après les cibles), puis agrandi au plus proche voisin."""
+    W, H = frame.size
+    ox = (round(W / 2 - shift[0] * PX) % k)
+    oy = (round(H / 2 - shift[1] * PX) % k)
+    px, py = (k - ox) % k, (k - oy) % k                  # marge pour que la grille commence au bord
+    cw, ch = -(-(W + px) // k) * k, -(-(H + py) // k) * k
+    canvas = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    canvas.alpha_composite(frame, (px, py))
+    small = canvas.resize((cw // k, ch // k), Image.BOX)
+    alpha = small.getchannel("A").point(lambda v: 255 if v >= 128 else 0)
+    rgb = small.convert("RGB").quantize(colors, method=Image.Quantize.MEDIANCUT).convert("RGB")
+    rgb.putalpha(alpha)
+    big = rgb.resize((cw, ch), Image.NEAREST)
+    return big.crop((px, py, px + W, py + H))
