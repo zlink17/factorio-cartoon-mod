@@ -1,9 +1,8 @@
 # Mod Cel-shading : approche et plan
 
-Rédigé le 11 octobre 2026. **État : dossier créé (`celshading/`), mod vide qui se charge ; questions de la section 4 tranchées (11 octobre :
-les quatre recommandations). Étape 0 faite : moteur cel-shading, assembleurs du mod cartoon vus en jeu (essai).
-Décision du 11 octobre au soir : modèles refaits de zéro, d'après des images cibles (section 3.3). Étape 1 en cours :
-assembleur 1 modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu le 12 octobre, avis de Bastien attendu.**
+Rédigé le 11 octobre 2026. **État (12 octobre) : étape 0 presque finie (moteur, recette d'images cibles, galerie) ; étape 1 en cours : assembleur 1
+modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbre : images cibles
+en cours. Plan d'implémentation par lots : sections 5 à 10.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -105,8 +104,7 @@ les nouveaux modèles.
 ### 3.5 Outils communs, déjà prêts
 
 Les outils de `tools/` prennent le nom du dossier du mod : `build.py celshading <lot>`, `inventory.py celshading`,
-`check_mod.py celshading --jeu`, `bench.py celshading`, `install_mod.sh celshading`. Seule la galerie est propre
-au cartoon (à rendre paramétrable, étape 0).
+`check_mod.py celshading --jeu`, `bench.py celshading`, `install_mod.sh celshading`. La galerie connaît aussi le mod (`tools/galerie.py --mod celshading`).
 
 ---
 
@@ -122,12 +120,54 @@ au cartoon (à rendre paramétrable, étape 0).
 4. **Par quoi commencer** : (a) **le trio d'essai de l'étape 1** (recommandé) ; (b) directement les machines,
    en réutilisant les modèles cartoon.
 
-## 5. Feuille de route
+## 5. Comment on travaille (plan d'implémentation, 12 octobre)
 
-Même méthode que le mod cartoon ([docs/cartoon/plan.md](../cartoon/plan.md), section 2) : un lot = cadrage,
-prototype, production, contrôle, vérification en jeu, commit.
+Même organisation que le mod cartoon ([docs/cartoon/plan.md](../cartoon/plan.md), section 2) : le travail est
+découpé en **lots**, avec **les mêmes numéros que le mod cartoon** (galerie commune, comparaison des mods), mais
+dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-shading :
 
-### Étape 0 : fondations
+- **Chaque modèle est refait de zéro** d'après une image cible : un lot coûte beaucoup plus cher qu'au cartoon. Deux
+  leviers pour tenir le coût : une **image cible par famille** plutôt que par objet (les trois coffres, le trio de la
+  vapeur), et une **boîte de pièces communes** (`blender/kit.py`, étape 0) pour que chaque machine coûte un assemblage,
+  pas un modèle entier.
+- **Moins de sprites que l'original** (STYLE.md §8) : chaque lot commence par « garder, alléger ou retirer ? ».
+- **Le jeu teinte certains sprites** (feuillage, masques d'équipe, décorations, fluides) : ils sont rendus en tons
+  neutres et doivent rester lisibles une fois teints (ombre bleue x teinte du jeu).
+- **Ombres au sol noires** quelle que soit leur couleur : seule leur forme et leur opacité sont à nous.
+
+### 5.1 Le cycle d'un lot
+
+1. **Cadrage** : liste des fichiers (`tools/inventory.py celshading liste <motif>`), lecture des prototypes (tailles,
+   `shift`, images, directions, teinte par le jeu), technique (section 7). **D'abord : garder, alléger ou retirer ?**
+   Pour chaque famille : quantité (décorations), nombre de modèles distincts (variantes), ou retrait. Le choix est
+   proposé à Bastien avec une recommandation.
+2. **Image cible** (modèles Blender) : recette `celshading/concept/recette.json`, deux séries de 4 graines (proche de
+   l'original / plus libre), planche avec identifiants, vue en grand et à la taille du jeu. Une série par famille.
+   Bastien choisit ; l'image va dans `celshading/concept/cibles/`. Pas d'image cible pour le procédural 2D.
+3. **Prototype** : un objet représentatif, comparé original / cible / rendu (`tools/concept/compare.py`).
+4. **Production** : générateur dans `celshading/blender/` (ou `celshading/terrain/` pour le 2D), déclaré dans
+   `celshading/lots.py`, lancé par `tools/build.py celshading <lot>` (écrit dans les overrides, manifeste, contrôle).
+5. **Contrôle** : `tools/check_mod.py celshading --jeu`.
+6. **Vérification en jeu** : zone du lot dans la galerie (`tools/galerie.py --mod celshading`), banc d'essai pour les
+   vues de détail ; **de jour et de nuit** tant que la nuit n'est pas validée (ombres bleues).
+7. **Commit** du lot, installation dans le jeu de Bastien (`tools/install_mod.sh celshading`), case cochée ici,
+   `STYLE.md` complété, couverture régénérée (`tools/inventory.py celshading`).
+
+### 5.2 Définition de « fini »
+
+Comme au cartoon : chaque fichier du lot est **remplacé, laissé d'origine avec une raison, ou rendu inutile par
+l'allègement** (noté dans le tableau du lot) ; le contrôle passe ; le lot a été vu en jeu ; le générateur se relance
+de zéro et redonne les mêmes fichiers.
+
+### 5.3 Suivi
+
+Ce plan (cases cochées), la galerie (zones par numéro de lot, communes aux trois mods), `docs/celshading/couverture.md`
+(généré ; à compléter pour compter aussi les fichiers rendus inutiles par l'allègement), `STYLE.md`
+([VALIDÉ] / [PROVISOIRE]), une synthèse des leçons (`docs/celshading/synthese-celshading.md`, à créer au premier
+piège rencontré), `changelog.txt` à la première publication.
+
+## 6. Étape 0 : fondations
+
 - [x] Dossier `celshading/`, mod vide (`celshading/mod/`) incompatible avec les mods cartoon et pixel.
 - [x] `celshading/blender/cel_style.py` et `lib.py` : lumière, paliers, teinte d'ombre, contour de silhouette teinté,
       ombres au sol allégées ; mêmes fonctions que la bibliothèque cartoon (reprise telle quelle sauf `mat` et
@@ -135,22 +175,108 @@ prototype, production, contrôle, vérification en jeu, commit.
       avec numpy : pas de compositeur Blender. Éclairement calibré (dessus plat = composante verticale de la lumière).
 - [x] Essai de faisabilité (`blender/essai.py`) : boîte, cylindre, sphère, tore : frontière d'ombre nette qui suit
       la forme, croissant d'ombre, ombres portées sur l'objet.
-- [x] `blender/run_cartoon.py` : rend un générateur du mod cartoon en cel-shading sans le modifier (lot
-      « assembleurs » : les trois assembleurs, planches, ombres et icônes, en 1 min).
-- [x] Galerie : le scénario détecte le mod (`factorio-celshading-mod`, variante « celshading », commit `1e27ad4`) ; `tools/galerie.py --mod celshading` et la dépendance facultative sont faits.
+- [x] `blender/run_cartoon.py` : rend un générateur du mod cartoon en cel-shading sans le modifier (essai du moteur).
+- [x] Galerie : le scénario détecte le mod (variante « celshading », commit `1e27ad4`), `tools/galerie.py --mod celshading`.
+- [x] Recette d'images cibles (`celshading/concept/`), sur les outils communs (`tools/concept/`).
+- [ ] **Boîte de pièces** (`blender/kit.py`) : tirée de l'assembleur 1 une fois validé (tôle rivetée, gros boulons,
+      tuyau à brides, engrenage rond, bloc moteur, pieds), aux proportions « Metal Slug » de la charte.
+- [ ] **Allègement par les prototypes** (à cadrer avec le lot 2.8) : réglages de démarrage du mod pour la quantité de
+      décorations par famille (comme `cartoon-epure`), et, si besoin, moins de variantes listées dans les
+      prototypes (arbres, rochers) plutôt que des fichiers dupliqués : mod plus léger. À vérifier : sans effet sur
+      les autres mods, ni sur les sauvegardes existantes.
+- [ ] **Icônes** : `lib.save_icon` (repris du cartoon) rendu en cel-shading ; angle et contour à valider sur
+      l'icône de l'assembleur 1.
+
+## 7. Quelle technique pour quelle famille
+
+| Code | Technique | Pour |
+|---|---|---|
+| **B** | Blender cel-shading, modèle propre au mod d'après une image cible | machines, bâtiments, véhicules, personnage, ennemis, icônes |
+| **B3** | Blender cel-shading sans image cible dédiée (formes simples, ou cible de la famille réutilisée) | arbres en boules, rochers, fumées en boules, objets sur convoyeurs |
+| **P** | Procédural 2D (OpenCV, palette du mod), motifs peints en aplats | sols, transitions, eau, taches, volutes |
+| **A** | Allégé ou retiré (quantité réduite, variantes regroupées, famille retirée) | décorations, particules, petits effets d'ambiance |
+| **L** | Laissé d'origine (fichier technique : masques, cartes d'effets, bruits de shader, reflets) | — |
+
+## 8. Lots
+
+L'ordre suit l'étape 1 du plan initial : **d'abord l'ambiance** (ce qu'on voit sur tout l'écran : sols, nature,
+eau, fumées), qui fixe la lumière et la palette, **puis les machines** du début de partie. La colonne
+« Allègement » donne la piste à confirmer au cadrage.
 
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
 Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode
 de la section 3.3 (image cible, puis modèle) :
 - [ ] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; nouveau modèle
-      `blender/assembler.py` (planche, ombre, icône), à voir en jeu. Assembleurs 2 et 3 (modèles cartoon) retirés.
-- [ ] **Arbre** (organique) : boules de feuillage.
+      `blender/assembler.py` (planche, ombre, icône), vu en jeu le 12 octobre, avis de Bastien attendu.
+- [ ] **Arbre** (organique) : boules de feuillage. En cours : images cibles (espèce 02).
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.
+- [ ] Vue de nuit des trois objets (ombres bleues de nuit acceptables ?).
 
-Fin d'étape : `STYLE.md` passe de « brouillon » à des règles **[VALIDÉ]**, avec leurs valeurs dans `style.py`.
+Fin d'étape : `STYLE.md` passe de « brouillon » à des règles **[VALIDÉ]**, avec leurs valeurs dans `cel_style.py`.
 
-### Étape 2 : production, ce qui donne l'ambiance d'abord
-Ordre proposé (chaque famille commence par « garder, alléger ou retirer ? », section 3.3) : sols et décorations de Nauvis, eau, arbres, fumées et feu (ce qu'on voit sur tout l'écran),
-puis les lots du début de partie dans l'ordre du mod cartoon (convoyeurs, bras, assembleurs, fours, foreuses,
-coffres, énergie vapeur, tuyaux, petits bâtiments, objets), puis personnage.
+### Étape 2 : Nauvis, début de partie → version 0.1
+
+Ordre de travail de haut en bas ; les numéros restent ceux du mod cartoon (ceux en 1.x sont les familles que le
+cartoon a faites avant son plan).
+
+| Lot | Contenu | Tech. | Allègement (piste) |
+|---|---|---|---|
+| [ ] 1.1 Sols de Nauvis et transitions | herbes, sables, terres, masques de transition | P | moins de variantes de motif par sol ; transitions nettes |
+| [ ] 2.8 Décorations | touffes, buissons, cailloux, taches | P / B3 | **le lot le plus allégé** : familles retirées ou à quelques % (réglage de démarrage), seules les plus lisibles redessinées |
+| [ ] 2.7 Nature | arbres (559 fichiers), rochers, poissons | B3 | 2 ou 3 modèles par espèce répartis sur les 12 variantes, peut-être moins d'espèces ; rochers : quelques modèles |
+| [ ] 2.9 Eau et falaises | eau, rives, falaises | P (eau), B3 (falaises) | eau : écume en lignes blanches, limitée par le shader du jeu |
+| [ ] 3.9a Fumées, vapeur, feu | fumées des fours et chaudières, vapeur, flammes | B3 + P | **avancé** (signature du style) ; particules et petits effets : A |
+| [ ] 1.2 Minerais | fer, cuivre, charbon, pierre, uranium | B3 / P | moins de variantes par stade |
+| [ ] 1.3 Convoyeurs, souterrains, répartiteurs | 3 niveaux + turbo | B | — (vus partout : à soigner) |
+| [ ] 1.4 Bras | 5 bras | B (une cible pour la famille) | — |
+| [ ] 1.5 Poteaux et câbles | poteaux, câbles | B (poteaux), P (câbles) | — |
+| [ ] 1.6 Assembleurs 2 et 3 | | B (dérivés de l'assembleur 1 et du kit) | — |
+| [ ] 2.1 Objets sur les convoyeurs | plaques, engrenages, circuits, packs... | B3 | — |
+| [ ] 2.2 Production de base | four en pierre (fait à l'étape 1), foreuses | B | — |
+| [ ] 2.3 Stockage | coffres bois, fer, acier | B (une cible) | — |
+| [ ] 2.4 Énergie vapeur | pompe côtière, chaudière, machine à vapeur | B (une cible) | — |
+| [ ] 2.5 Tuyaux | tuyaux, souterrains, couvercles | B | — |
+| [ ] 2.6 Petits bâtiments | laboratoire, radar, lampe | B | — |
+| [ ] 2.10 Personnage | animations, 3 armures | B | reprise possible du squelette et des animations du cartoon (copie, sans toucher `cartoon/`) |
+| [ ] 2.11 Chargeurs et lecteur de convoyeur | | B | — |
+| [ ] 2.12 Publication 0.1 | vignette, description (sans nom de Nintendo), captures, changelog | — | — |
+
+### Étapes 3 à 6
+
+Mêmes lots que le mod cartoon (section 5 du plan cartoon), détaillés au moment de les commencer :
+
+| Étape | Lots | Points propres au cel-shading |
+|---|---|---|
+| 3 Milieu de partie → 0.2 | 3.1 fours avancés, 3.2 pétrole, 3.3 circuits, 3.4 solaire et accumulateur, 3.5 trains, 3.6 logistique, 3.7 défense, 3.8 ennemis, 3.9b explosions, restes et particules, 3.10 modules et balise | trains et robots : 36 à 64 orientations, le kit et les cibles par famille comptent beaucoup ; ennemis : formes organiques rondes (le style s'y prête), essai de faisabilité d'abord ; explosions en nuages ronds ; particules et restes : A |
+| 4 Fin de partie → 0.3 | 4.1 nucléaire, 4.2 véhicules, 4.3 silo, 4.4 robots de combat, 4.5 divers et sols construits | sols construits : motifs peints (dalles, béton) |
+| 5 Interface → 0.4 | 5.1 icônes restantes, 5.2 technologies, 5.3 groupes et équipements, 5.4 GUI | icônes des entités modélisées quasi gratuites ; GUI : sans doute laissée d'origine |
+| 6 Space Age → 1.x | 6.1 à 6.7, une planète à la fois | une recette d'image cible par planète (palette propre : Vulcanus, Fulgora, Gleba, Aquilo) |
+
+## 9. Risques et décisions à prendre
+
+| Sujet | Question | Quand |
+|---|---|---|
+| Coût par modèle | Un modèle refait de zéro par objet est long ; tient-on le rythme ? | Mesuré sur l'étape 1 ; kit et cibles par famille (étape 0) |
+| Allègement | Jusqu'où réduire décorations et variantes sans appauvrir le monde ? Par fichiers ou par prototypes ? | Cadrage des lots 2.8 et 2.7 |
+| Nuit | Les ombres bleues rendent-elles la nuit trop bleue ? | Fin de l'étape 1 |
+| Sprites teints par le jeu | Le cel-shading reste-t-il lisible après teinte (feuillage, masques d'équipe) ? | Lots 2.7 et 1.6 |
+| Fumées animées | Une volute en boules cel-shadées, animée sur les planches du jeu, est-elle lisible et fluide ? | Étape 1 (four) |
+| Eau | Le shader du jeu limite ce qu'on peut faire de la mer « Wind Waker » | Lot 2.9 |
+| Personnage et ennemis | Animation organique en cel-shading à coût raisonnable | Lots 2.10 et 3.8 |
+| ComfyUI partagé | Une génération à la fois pour toutes les sessions (carte de 6 Go) | En continu : prévenir avant une série |
+| Nom et textes publics | Ni Zelda ni Wind Waker (marques de Nintendo) | Lot 2.12 |
+| Poids, licence, compatibilité | Comme le mod cartoon (section 6 de son plan) | Avant la 0.1 |
+| Outils communs | Toute évolution de `tools/` reste compatible avec les mods cartoon et pixel | En continu |
+
+## 10. Jalons
+
+| Version | Contenu |
+|---|---|
+| — | Étapes 0 et 1 : moteur, kit, charte validée sur assembleur, arbre, four et fumée |
+| 0.1 | Nauvis, début de partie : ambiance (sols, nature, eau, fumées) et machines des premières heures |
+| 0.2 | Milieu de partie |
+| 0.3 | Fin de partie |
+| 0.4 | Interface |
+| 1.0 | Nauvis entièrement en cel-shading |
+| 1.x | Space Age, planète par planète |
