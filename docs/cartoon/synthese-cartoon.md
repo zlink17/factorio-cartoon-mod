@@ -129,6 +129,7 @@ touffes ton sur ton dans la texture.
 | Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône ; variante humide (réservoirs à hublot, tuyaux, fenêtres de fluide). | `blender/electric_drill.py` |
 | Coffres | Bois, fer, acier : sprite, ombre, icône. Caisse haute et peu profonde (silhouette de l'original) ; cadre, planches et nervures peints sur les faces ; couvercle à pans coupés et loquet (fer), coins et poignée (acier). | `blender/chests.py` |
 | Chaudière | 4 directions, ombres, flammes dans les fentes de la grille (64 images), patch de l'est, icône. | `blender/boiler.py` |
+| Machine à vapeur | Planches horizontale et verticale (32 images : volant, engrenages, crosse et bielle), ombres, icône. | `blender/steam_engine.py` |
 | Machine à vapeur | Planches horizontale et verticale animées (crosse et bielle, un tour en 32 images), ombres, icône. | `blender/steam_engine.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
@@ -237,6 +238,15 @@ touffes ton sur ton dans la texture.
   case) : `down` décale la caméra (0,33 case vers le bas de l'écran), ajusté avec les dimensions. L'ajustement
   par recouvrement doit **pénaliser ce qui sort du cadre** de l'original (coupé net en jeu) et être **borné** :
   libre, il fond tambour et réservoirs en un seul cylindre qui recouvre mieux mais ne ressemble plus à rien.
+- **Roues vues de face : les incliner vers la caméra.** Avec la vue à 30°, une roue debout face à l'avant
+  (volant de la machine à vapeur) est écrasée de moitié en hauteur et se perd dans le plateau ; l'original les
+  montre presque rondes. `steam_engine.face_camera` incline la pièce de 30° vers l'avant **dans le repère du
+  monde** (sinon, une fois le modèle tourné pour l'autre orientation, elle fait face au côté et s'aplatit).
+- **Ajustement borné (machine à vapeur)** : libre, il grossit cylindres et châssis jusqu'à cacher le mécanisme,
+  qui fait la moitié basse de l'original. Bornes dans `BOUNDS` ; le mécanisme suit la position des cylindres.
+- **Canevas de rendu** : il doit contenir aussi le cadre de l'ombre (décalé vers la droite) : l'ombre horizontale
+  de la machine à vapeur (508 px, décalée de 96) sortait d'un canevas de 576 px ; `build.py` a refusé le fichier
+  (taille différente de l'original).
 - **Flammes de la chaudière** : le jeu ne les dessine que dans un petit cadre fixe par direction, et la grille de
   l'original n'est pas au même endroit du tambour d'une direction à l'autre. `boiler.grate_place` calcule, par
   direction, où poser la grille pour qu'elle se projette au centre de ce cadre ; les flammes sont les pixels des
@@ -259,8 +269,8 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 456 fichiers remplacés sur 8 246 à couvrir (18 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 1 456 fichiers remplacés sur 8 246 à couvrir (18 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 19 de chaudière et machine à vapeur, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
-- ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
+- ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 66 Mo d'images dans `cartoon/mod/graphics`.
 - Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.
 - Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon` (la galerie : `tools/install_mod.sh cartoon-galerie`).
