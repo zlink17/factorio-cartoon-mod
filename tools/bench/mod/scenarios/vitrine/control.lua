@@ -328,8 +328,25 @@ local function world()
   s.always_day = true
   s.request_to_generate_chunks({ 0, 0 }, 4)
   s.force_generate_chunk_requests()
+  -- décorations générées dans l'emprise d'un gros rocher : elles passeraient devant lui dans la couche « object »
+  -- (doit être 0 avec le mod cartoon, qui l'interdit par le masque de collision des rochers)
+  local rocks, under, best, best_n = 0, 0, nil, -1
+  for _, e in pairs(s.find_entities_filtered { type = "simple-entity" }) do
+    rocks = rocks + 1
+    local around = #s.find_decoratives_filtered { position = e.position, radius = 4 }
+    if around > best_n then best, best_n = e, around end
+    for _, d in pairs(s.find_decoratives_filtered { area = e.bounding_box }) do
+      if not d.decorative.name:match("decal") then     -- les taches au sol restent dessous : sans importance
+        under = under + 1
+      end
+    end
+  end
+  note(string.format("monde : %d rochers, %d décorations dans leur emprise", rocks, under))
   shots[#shots + 1] = { name = "monde-01", surface = s, position = { 0, 0 }, zoom = ZOOM, w = PAGE_W, h = PAGE_H }
   shots[#shots + 1] = { name = "monde-02", surface = s, position = { 40, 30 }, zoom = 2, w = PAGE_W / 2, h = PAGE_H / 2 }
+  if best then         -- le rocher le plus entouré de décorations, à la résolution du jeu
+    shots[#shots + 1] = { name = "monde-rocher", surface = s, position = best.position, zoom = 2, w = 16, h = 9 }
+  end
 end
 
 -- Vue rapprochée : bras robotisés au travail, dans les 4 directions, entre deux coffres.
@@ -571,6 +588,26 @@ local function detail_rocks()
   end
 end
 
+-- Vue rapprochée : mélange d'entités (arbres, gros rochers) et de décorations tout autour (devant, derrière, côtés) :
+-- une décoration ne doit jamais passer sur un feuillage ou sur un rocher dont elle est derrière.
+local function detail_mix()
+  local s = scene("detail-melange", 1, GROUND, 2)
+  local things = { "tree-01", "tree-05", "tree-08", "big-rock", "huge-rock", "tree-02" }
+  for i, name in ipairs(things) do
+    local x, y = (i - 1) * 5.3 + 2.6, s.y + 9
+    create { name = name, position = { x, y }, force = "neutral" }
+    local list = {}
+    for k = 0, 15 do
+      local a = k * math.pi / 8
+      local d = 1.4 + (k % 2) * 0.8
+      list[#list + 1] = { name = (k % 3 == 0) and "medium-rock" or "green-hairy-grass",
+        position = { x + math.cos(a) * d, y + math.sin(a) * d * 0.9 }, amount = 1 }
+    end
+    pcall(surface.create_decoratives, { check_collision = false, decoratives = list })
+    label(name, x, y + 3.2, 0.4)
+  end
+end
+
 -- Vue rapprochée : les sols de Nauvis côte à côte (on y voit les transitions).
 local function detail_grounds()
   local names = { "grass-1", "grass-2", "grass-3", "grass-4", "dry-dirt", "dirt-1", "dirt-2", "dirt-3", "dirt-4",
@@ -594,7 +631,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

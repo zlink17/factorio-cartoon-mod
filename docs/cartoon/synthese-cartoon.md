@@ -11,10 +11,12 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    « Objets sur les convoyeurs », 2.7 « Nature » et 2.8 « Décorations » faits.**
 2. **Prochaine action : lot 2.2 « Production de base »** (four en pierre, foreuses), puis l'ordre du plan.
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
-   souche de Nauvis passent dans la couche « object », et chaque image est recalée pour que le pied du dessin tombe
+   souche de Nauvis passent dans la couche « lower-object » (triée, sous les entités), et chaque image est recalée pour que le pied du dessin tombe
    sur la position de la décoration (`tools/decorative_feet.py`, lancé par `build.py`, écrit `cartoon/mod/feet.lua` ;
    appliqué dans `data-final-fixes.lua`). Règle voulue par Bastien : ce qui a le pied plus bas à l'écran passe
-   devant. Scène de contrôle : `detail-superpositions` du banc. Limites connues : une image d'herbe à plusieurs
+   devant. Scènes de contrôle : `detail-superpositions`, `detail-melange` et `monde-rocher` du banc. Les gros
+   rochers ne reçoivent plus de décorations dans leur emprise (couche `doodad` dans leur masque de collision ;
+   migration pour les parties existantes). Limites connues : une image d'herbe à plusieurs
    touffes est triée d'un bloc (sur sa touffe la plus basse), pieds à égalité = ordre arbitraire ; performance à
    surveiller sur une grande partie (beaucoup de sprites dans la couche triée). Si une touffe passe encore devant un
    caillou de façon gênante : régénérer les herbes avec une seule touffe par image.
@@ -167,7 +169,11 @@ pour l'ordre de chargement).
 - **Superpositions des décorations** : la couche « decorative » n'est pas triée par profondeur (une touffe derrière
   un caillou peut passer dessus, ce qui ne se voyait pas avec les textures floues d'origine) ; la couche « object »
   est triée par **position** de la décoration, pas par le bas de l'image. D'où le recalage des images sur leur pied
-  (`feet.lua`). Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
+  (`feet.lua`). **Mais dans « object », les décorations ne sont triées qu'entre elles** et dessinées après toutes
+  les entités : touffes et cailloux par-dessus les feuillages et les gros rochers (vu dans la partie de Bastien).
+  D'où la couche « lower-object » : triée elle aussi, mais sous les entités et sous leurs ombres. Le générateur de
+  carte pose des décorations sous les gros rochers (rien ne l'en empêche) : couche `doodad` ajoutée à leur masque
+  de collision. Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
   pointent vers le mod et ne correspondent plus aux clés de `feet.lua`.
 - **Rochers : redessiner l'éclairage de l'original ne donne pas un rocher.** Facettes de Voronoï ou zones de
   lumière tirées en trois tons donnent des taches de camouflage ; il faut construire des volumes (blocs

@@ -16,4 +16,5 @@ rm -rf "$DEST"
 mkdir -p "$DEST"
 cp "$SRC"/info.json "$SRC"/*.lua "$DEST"/
 cp -r "$SRC/graphics" "$DEST"/
+[ -d "$SRC/migrations" ] && cp -r "$SRC/migrations" "$DEST"/
 echo "Installé dans $DEST"
