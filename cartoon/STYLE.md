@@ -42,6 +42,12 @@ Chaque couleur de base est multipliée selon l'orientation de la face :
 
 Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 
+Exception à l'essai : **tuyaux du propulseur** (Space Age, `blender/thruster.py`, matériau `metal`). Bandes selon
+la normale (bords x0,5, flanc x1,0, dessus x1,2) et un reflet en aplat sur le dessus (45 % vers le doré pour le
+cuivre, le bleu pâle pour les durites) : dans une tuyauterie dense, c'est ce qui fait lire chaque tube rond et le
+détache de ses voisins. Plu à Bastien le 11 octobre 2026 ; reste à décider s'il s'étend aux autres tuyaux du mod.
+**[PROVISOIRE]**
+
 ## 5. Palette
 
 **Couleurs de l'assembleur 1 original, conservées** (les assembleurs 2 et 3 gardent leur teinte d'origine : bleu et vert-jaune) : dominante gris-vert (parois), cuivre rouillé (plaques, tuyaux), fer sombre et laiton. Le style cartoon vient des aplats et des contours, pas d'un changement de teintes. 3 teintes maximum par objet. Valeurs dans `style.py` (`PALETTE_HEX`). **[VALIDÉ]**
