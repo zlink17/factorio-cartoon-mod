@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées, lots 2.1, 2.2, 2.3, 2.7 et 2.8 faits ; prochaine action : lot 2.4 (énergie vapeur).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
+Rédigé le 10 octobre 2026. **État (11 octobre) : étapes 0 et 1 terminées, lots 2.1, 2.2, 2.3, 2.7 et 2.8 faits ; lot 2.4 en cours (chaudière et machine à vapeur faites, prochaine action : pompe côtière). Galerie jouable en place (`cartoon-galerie/`).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -58,6 +58,8 @@ Factorio (le mod se charge, aucun prototype ne pointe encore vers un original re
 ### 2.4 Suivi
 
 - **Ce plan** : cases cochées par lot, mis à jour à chaque fin de lot.
+- **La galerie** (`cartoon-galerie/mod/`, scénario « galerie ») : chaque lot y ajoute ou complète sa zone, contrôlée
+  par `tools/galerie.py`, puis installée dans le jeu de Bastien (`tools/install_mod.sh cartoon-galerie`).
 - **`docs/cartoon/couverture.md`** (généré) : pourcentage de fichiers remplacés par famille et par jeu.
 - **`synthese-cartoon.md`** : leçons apprises, enrichie quand on découvre un piège.
 - **Versions** : `info.json` passe en `0.1.0` à la première publication, puis une version mineure par jalon.
@@ -78,6 +80,10 @@ Objectif : rendre la production rapide, vérifiable et reproductible. **C'est l'
       (chaque entité, dans chaque direction, convoyeurs chargés d'objets, sols et nature) et prend des captures avec
       `game.take_screenshot`, lancé en ligne de commande depuis WSL. Même vitrine avec et sans le mod : comparaison
       côte à côte. Si Factorio refuse de démarrer, l'erreur est lue dans `factorio-current.log`.
+- [x] **Galerie jouable** (`cartoon-galerie/mod/`, mod `factorio-cartoon-galerie`, ajoutée le 11 octobre) : scénario
+      lancé par Bastien depuis Jeu solo > Scénarios. Une zone encadrée par lot, machines en marche et réapprovisionnées
+      sans fin, fenêtre pour aller à chaque zone, mode triche, sans ennemis ; le reste de la carte est un Nauvis normal.
+      Le mod cartoon y est facultatif : désactivé, la même carte montre l'original. Contrôle : `tools/galerie.py`.
 - [x] **Une commande de production** : `tools/build.py cartoon <lot>` (lots déclarés dans `cartoon/lots.py`) lance le bon générateur, écrit dans les overrides,
       régénère le manifeste et lance le contrôle. Fini la copie à la main depuis `sortie/`.
 - [x] **Factoriser les générateurs Blender** (`lib.py` : chemins de sortie, sprite + ombre portée, fenêtre de découpe, planches, tiges) : `lib.py` porte déjà le style ; y regrouper ce qui est dupliqué entre

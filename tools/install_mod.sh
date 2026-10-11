@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copie un mod dans le dossier mods de Factorio (Windows, depuis WSL).
-# Usage : tools/install_mod.sh [cartoon|pixel|cartoon-epure] [dossier mods]
+# Usage : tools/install_mod.sh [cartoon|pixel|cartoon-epure|cartoon-galerie] [dossier mods]
 #   défaut : cartoon, AppData\Roaming\Factorio\mods
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,8 +14,9 @@ DEST="$MODS/${NAME}_$VERSION"
 [ -d "$SRC/graphics" ] && python3 "$ROOT/tools/build_manifest.py" "$MOD"
 rm -rf "$DEST"
 mkdir -p "$DEST"
-cp "$SRC"/info.json "$SRC"/*.lua "$DEST"/
-for dir in graphics locale migrations; do
+cp "$SRC"/info.json "$DEST"/
+compgen -G "$SRC/*.lua" > /dev/null && cp "$SRC"/*.lua "$DEST"/
+for dir in graphics locale migrations scenarios; do
   [ -d "$SRC/$dir" ] && cp -r "$SRC/$dir" "$DEST"/
 done
 echo "Installé dans $DEST"

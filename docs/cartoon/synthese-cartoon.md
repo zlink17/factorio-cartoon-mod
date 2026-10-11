@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.2, 2.3, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.2, 2.3, 2.7 et 2.8 faits, lot 2.4 en cours). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -8,8 +8,9 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
-   « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.7 « Nature » et 2.8 « Décorations » faits.**
-2. **Prochaine action : lot 2.4 « Énergie vapeur »** (pompe côtière, chaudière, machine à vapeur), puis l'ordre du plan.
+   « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.7 « Nature » et 2.8 « Décorations » faits ;
+   lot 2.4 « Énergie vapeur » en cours : chaudière et machine à vapeur faites.**
+2. **Prochaine action : pompe côtière (fin du lot 2.4)**, puis l'ordre du plan (2.5 Tuyaux).
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
@@ -29,6 +30,10 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 6. Avant de commiter un lot : `.venv/bin/python tools/inventory.py cartoon` (couverture), cocher le lot dans le plan.
 7. Après le commit : `tools/install_mod.sh cartoon` met à jour le mod dans le jeu de Bastien (accord permanent).
    Le banc d'essai et `check_mod.py --jeu` utilisent une instance isolée et ne touchent pas à son jeu.
+8. **Galerie** : chaque lot fini (ou avancé) ajoute sa zone au scénario « galerie » (`cartoon-galerie/mod/`,
+   mod `factorio-cartoon-galerie`, fonction `build_*` + entrée dans `ZONES` de `scenarios/galerie/control.lua`).
+   Contrôle : `.venv/bin/python tools/galerie.py` (captures par zone dans `.cache/galerie/`, ~1 min). Bastien la
+   lance dans son jeu par Jeu solo > Scénarios ; désactiver le mod cartoon donne la même carte d'origine.
 
 Règles de travail avec Bastien : prévenir **avant** d'installer une application ou une dépendance sur sa machine ;
 solutions gratuites uniquement ; cohérence du style prioritaire ; les choix de style sont les siens (proposer, puis
@@ -65,6 +70,7 @@ cartoon/
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
 cartoon-epure/mod/   sous-mod facultatif « terrain épuré » (voir plus bas)
+cartoon-galerie/mod/ scénario « galerie » : une zone par lot, machines en marche, pour vérifier en jeu
 tools/
   factorio.py       pilote une instance isolée de Factorio depuis WSL (dump des prototypes, lancement, arrêt)
   inventory.py      inventaire des 8 246 images du jeu, rôle et prototypes ; couverture (docs/cartoon/couverture.md)
@@ -103,7 +109,7 @@ touffes ton sur ton dans la texture.
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 437 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 456 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -123,6 +129,7 @@ touffes ton sur ton dans la texture.
 | Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône ; variante humide (réservoirs à hublot, tuyaux, fenêtres de fluide). | `blender/electric_drill.py` |
 | Coffres | Bois, fer, acier : sprite, ombre, icône. Caisse haute et peu profonde (silhouette de l'original) ; cadre, planches et nervures peints sur les faces ; couvercle à pans coupés et loquet (fer), coins et poignée (acier). | `blender/chests.py` |
 | Chaudière | 4 directions, ombres, flammes dans les fentes de la grille (64 images), patch de l'est, icône. | `blender/boiler.py` |
+| Machine à vapeur | Planches horizontale et verticale animées (crosse et bielle, un tour en 32 images), ombres, icône. | `blender/steam_engine.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -252,8 +259,8 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 437 fichiers remplacés sur 8 246 à couvrir (17 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 1 456 fichiers remplacés sur 8 246 à couvrir (18 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
 - ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
 - Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.
-- Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon`.
+- Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon` (la galerie : `tools/install_mod.sh cartoon-galerie`).
