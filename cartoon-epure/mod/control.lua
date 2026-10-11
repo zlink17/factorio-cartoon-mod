@@ -14,5 +14,7 @@ commands.add_command("cartoon-epure", { "command-help.cartoon-epure" }, function
   -- regenerate_decorative ajoute sans retirer l'existant : on supprime d'abord ces décorations sur toute la surface
   surface.destroy_decoratives { name = names }
   surface.regenerate_decorative(names)
+  -- le mod cartoon dégage les gisements ; les décorations refaites les recouvrent : on les redégage
+  if remote.interfaces["factorio-cartoon-mod"] then remote.call("factorio-cartoon-mod", "clear_ores", surface) end
   game.print({ "cartoon-epure.done", surface.name })
 end)

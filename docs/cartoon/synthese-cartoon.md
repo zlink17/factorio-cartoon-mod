@@ -19,6 +19,9 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    contrôle : `detail-superpositions`, `detail-melange` (arbres, rochers, convoyeur) et `monde-rocher` du banc.
    Limites connues : une touffe devant un caillou ou un rocher passe dessous (peu visible) ; pieds à égalité =
    ordre arbitraire ; performance à surveiller sur une grande partie.
+   **Gisements dégagés (11 octobre)** : ces couches passent au-dessus des minerais et les cachaient ; le mod retire
+   herbes, buissons et cailloux des cases de minerai à la génération de la carte (`cartoon/mod/control.lua`, une fois
+   sur une partie existante à l'ajout ou la mise à jour du mod, et commande `/cartoon-minerais`). Les taches au sol restent.
 3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
 4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
