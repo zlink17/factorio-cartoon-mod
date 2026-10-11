@@ -123,6 +123,25 @@ def frustum(z0, h, w0, d0, w1, d1, m, cy=0.0, bevel=0.0):
     return o
 
 
+def hull(bottom, top, m):
+    """Volume à 6 faces entre deux quadrilatères horizontaux (listes de 4 points (x, y, z), même ordre)."""
+    import bmesh
+    bm = bmesh.new()
+    b = [bm.verts.new(v) for v in bottom]
+    t = [bm.verts.new(v) for v in top]
+    bm.faces.new(b[::-1]); bm.faces.new(t)
+    for k in range(4):
+        bm.faces.new((b[k], b[(k + 1) % 4], t[(k + 1) % 4], t[k]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new("hull")
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("hull", me)
+    bpy.context.scene.collection.objects.link(o)
+    me.materials.append(m)
+    return o
+
+
 def tri_plate(center, w, h, depth, tilt_deg, m):
     """Triangle en relief (sommet vers le haut) posé sur une paroi avant inclinée de `tilt_deg`."""
     import bmesh

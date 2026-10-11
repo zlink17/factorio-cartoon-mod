@@ -91,6 +91,19 @@ PALETTE_HEX = {
     # foreuse électrique : poutre jaune-orangé, corps de la tête gris-bleu
     "drill_yellow":       "#e3a32e",
     "drill_body":         "#7f9298",
+    # coffres : bois ocre de l'original, fer rouillé sombre et couvercle gris rosé, acier mauve clair nervuré
+    "chest_wood_frame":   "#cf9d52",
+    "chest_wood":         "#a8743a",
+    "chest_wood_dark":    "#7e5428",
+    "chest_wood_gap":     "#5a3a1c",
+    "chest_iron_body":    "#5f5446",
+    "chest_iron_lid":     "#a08878",
+    "chest_iron_plate":   "#8a7064",
+    "chest_steel":        "#c4bac6",
+    "chest_steel_rib":    "#7d7282",
+    "chest_steel_front":  "#5e534c",
+    "chest_steel_frame":  "#9a6a4a",
+    "chest_steel_rim":    "#8a8090",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

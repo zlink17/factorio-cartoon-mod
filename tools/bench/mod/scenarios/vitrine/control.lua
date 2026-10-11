@@ -621,6 +621,32 @@ local function detail_production()
   animate("anim-foreuses-electriques", 21, s.y + 3, 11, 12, 16, 2)
 end
 
+-- Vue rapprochée : stockage. Coffres en bois, fer et acier, seuls puis en rangées jointives, et en service
+-- (coffre plein, bras, convoyeur, coffre de sortie).
+local function detail_storage()
+  local s = scene("detail-stockage", 1, GROUND, 2)
+  local chests = { "wooden-chest", "iron-chest", "steel-chest" }
+  for k, name in ipairs(chests) do
+    local x = 3 + (k - 1) * 10
+    create { name = name, position = { x + 0.5, s.y + 2.5 } }
+    label(name, x + 0.5, s.y + 3.8, 0.5)
+    for i = 0, 5 do create { name = name, position = { x + i + 0.5, s.y + 6.5 } } end
+    for i = 0, 1 do for j = 0, 1 do create { name = name, position = { x + 7 + i + 0.5, s.y + 1.5 + j } } end end
+  end
+  power(0, s.y + 9, s.w, s.y + s.h)
+  for k, name in ipairs(chests) do
+    local x = 3 + (k - 1) * 10
+    local c = create { name = name, position = { x + 0.5, s.y + 11.5 } }
+    if c then c.insert { name = "iron-plate", count = 200 } end
+    create { name = "fast-inserter", position = { x + 1.5, s.y + 11.5 }, direction = defines.direction.west }
+    for i = 2, 5 do create { name = "transport-belt", position = { x + i + 0.5, s.y + 11.5 },
+      direction = defines.direction.east } end
+    create { name = "fast-inserter", position = { x + 6.5, s.y + 11.5 }, direction = defines.direction.west }
+    create { name = chests[k % 3 + 1], position = { x + 7.5, s.y + 11.5 } }
+  end
+  animate("anim-stockage", 2, s.y + 9, 28, 5, 16, 2)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -689,7 +715,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

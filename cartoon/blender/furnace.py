@@ -20,7 +20,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import style as S
-from lib import box, crop_centered, entity_path, load, mat, render_scene, render_shadow, reset, save_icon
+from lib import box, crop_centered, entity_path, hull, load, mat, render_scene, render_shadow, reset, save_icon
 
 P = S.PALETTE
 NAME = "stone-furnace"
@@ -41,25 +41,6 @@ DIMS = dict(
 BAND = 0.2                                 # bandeau de pierre en haut des parois (hauteur)
 CHIMNEY_H = 0.15                           # cheminée : hauteur au-dessus du corps
 BRICK_ROWS = 5                             # rangées de briques sur la hauteur des parois
-
-
-def hull(bottom, top, m):
-    """Volume à 6 faces entre deux quadrilatères horizontaux (listes de 4 points (x, y, z), même ordre)."""
-    import bpy, bmesh
-    bm = bmesh.new()
-    b = [bm.verts.new(v) for v in bottom]
-    t = [bm.verts.new(v) for v in top]
-    bm.faces.new(b[::-1]); bm.faces.new(t)
-    for k in range(4):
-        bm.faces.new((b[k], b[(k + 1) % 4], t[(k + 1) % 4], t[k]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    me = bpy.data.meshes.new("hull")
-    bm.to_mesh(me)
-    bm.free()
-    o = bpy.data.objects.new("hull", me)
-    bpy.context.scene.collection.objects.link(o)
-    me.materials.append(m)
-    return o
 
 
 def quad(d, f, z):

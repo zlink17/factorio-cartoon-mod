@@ -19,6 +19,7 @@ LOTS = {
     "four": [("blender/furnace.py", [])],                # four en pierre : sprite, ombre, flammes, icône
     "foreuse-charbon": [("blender/burner_drill.py", ["toutes"])],   # 4 directions x 32 images, ombres, icône
     "foreuse-electrique": [("blender/electric_drill.py", ["toutes"])],   # cadres, têtes animées, sorties, icône
+    "coffres": [("blender/chests.py", ["tous"])],        # bois, fer, acier : sprite, ombre, icône
     "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
     "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)

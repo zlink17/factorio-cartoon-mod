@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.2, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.2, 2.3, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -8,8 +8,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
-   « Objets sur les convoyeurs », 2.2 « Production de base », 2.7 « Nature » et 2.8 « Décorations » faits.**
-2. **Prochaine action : lot 2.3 « Stockage »** (coffres en bois, fer, acier), puis l'ordre du plan.
+   « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.7 « Nature » et 2.8 « Décorations » faits.**
+2. **Prochaine action : lot 2.4 « Énergie vapeur »** (pompe côtière, chaudière, machine à vapeur), puis l'ordre du plan.
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
@@ -100,7 +100,7 @@ touffes ton sur ton dans la texture.
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 357 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 437 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -118,6 +118,7 @@ touffes ton sur ton dans la texture.
 | Four en pierre | Pyramide tronquée de briques ocre, cheminée et bouche en pierre grise, ombre, icône ; flammes en aplats (48 images). | `blender/furnace.py` |
 | Foreuse à charbon | 4 directions × 32 images (engrenages, vrille, piston), ombres, icône ; pieds arqués ajustés sur l'original. | `blender/burner_drill.py` |
 | Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône ; variante humide (réservoirs à hublot, tuyaux, fenêtres de fluide). | `blender/electric_drill.py` |
+| Coffres | Bois, fer, acier : sprite, ombre, icône. Caisse haute et peu profonde (silhouette de l'original) ; cadre, planches et nervures peints sur les faces ; couvercle à pans coupés et loquet (fer), coins et poignée (acier). | `blender/chests.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -216,6 +217,11 @@ touffes ton sur ton dans la texture.
   exacte de l'original en aplats (verre sombre, fond et reflets que le jeu teinte) et on place nos réservoirs
   direction par direction sous ces hublots (position 3D déduite de la position à l'écran) ; la pièce avant est
   percée aux hublots, car le jeu dessine les fenêtres avant elle.
+- **Petits objets à motifs (coffres)** : un cadre fait de poutres séparées reçoit un contour par poutre et devient
+  un fil de fer à 64 px. Une seule caisse, avec un matériau par face (`chests.paint`) et le motif peint en
+  coordonnées du monde (`chests.mat_face` : bandes, cadres emboîtés) : un seul contour, lisible.
+- **Coffres : la silhouette de l'original ne suit pas un cube** : face avant de 34 px et dessus de 35 px donnent
+  une caisse de 1,06 case de haut sur 0,63 de profondeur, avancée de 0,24 case dans sa case (les trois coffres).
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
@@ -232,7 +238,7 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 357 fichiers remplacés sur 8 246 à couvrir (16 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 1 437 fichiers remplacés sur 8 246 à couvrir (17 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
 - ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
 - Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.

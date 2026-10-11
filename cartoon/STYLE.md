@@ -131,6 +131,11 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   cuivre, foret à vis, tuyau rouge. Terre remuée en aplat semi-transparent. Voyants, poussières d'origine.
   Variante humide : réservoirs à hublot et tuyaux gris autour du cadre ; fenêtres de fluide en aplats.
   **[VALIDÉ]**
+- **Coffres** (`blender/chests.py`) : une seule caisse par coffre, à la silhouette de l'original ; motifs peints
+  sur les faces, sans relief (cadre clair et planches à joints sombres pour le bois, plus sombres devant ; tôle
+  nervurée claire dessus et sombre devant, cadre gris et rouille pour l'acier). Fer : caisse sombre sur socle à
+  rivets peints, couvercle gris rosé à pans coupés, loquet. Coins de l'acier et poignée laiton en saillie.
+  **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)
