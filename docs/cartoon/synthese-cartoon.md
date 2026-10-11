@@ -11,6 +11,14 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    « Objets sur les convoyeurs » et 2.8 « Décorations » faits.**
 2. **Prochaine action : fin du lot 2.7** (gros rochers, poissons), puis lot 2.2 « Production de base » (four en
    pierre, foreuses) et l'ordre du plan.
+   **En suspens au 11 octobre** (travail d'une autre session, « Cartoon mod terrain layering ») : un correctif
+   non commité dans `cartoon/mod/data-final-fixes.lua` (herbes, buissons et cailloux de Nauvis passés dans la couche
+   « object » pour être triés par profondeur), en attente de la validation de Bastien ; et
+   `tools/bench/mod/scenarios/vitrine/control.lua` non commité, qui contient les scènes `detail_trees` (arbres,
+   cette session) et `detail_overlaps` (l'autre session), plus une scène temporaire `detail_sort` à retirer. Au
+   début de la prochaine session : `git status`, demander à Bastien s'il valide le correctif, puis commiter
+   `control.lua` (sans `detail_sort`) et réinstaller le mod dans son jeu. Son jeu a les arbres mais **pas** ce
+   correctif.
 3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
 4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
