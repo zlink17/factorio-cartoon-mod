@@ -1,7 +1,14 @@
-"""Variantes d'un sprite par ComfyUI : SDXL guidé par la profondeur et les contours de l'original (ControlNet Union)
-et par le style de nos sprites validés (IP-Adapter). Sert d'image cible, pas de sprite final.
+"""Images cibles par ComfyUI : SDXL (DreamShaper XL Turbo) guidé par la profondeur et les contours de l'original
+(ControlNet Union, guides de prepare.py) et, si on en donne, par des images de style (IP-Adapter). Sert d'image
+cible pour modéliser dans Blender, pas de sprite final. Serveur ComfyUI local (127.0.0.1:8188), voir README.
 
-Usage : python concept.py <dossier_guides> <dossier_sortie> <graines> [--prompt ...] [--w 640 --h 1280] ...
+Usage : python -I tools/concept/concept.py <guides> <sortie> <graines> [--recette <mod>/concept/recette.json]
+        [--base-prompt "..."] [--prompt ...] [--depth 0.6] [--edges 0.35] [--styles a.png,b.png --style 0.55]
+        [--init image --denoise 0.7] [--tag v]
+--recette : réglages propres à un mod (JSON : clés = noms des options, ex. "base_prompt", "neg", "styles", "style",
+            "cfg") ; les options passées sur la ligne de commande l'emportent. Le texte de l'objet va dans --prompt.
+Taille de génération : celle de guide-original.png (prepare.py), sauf --w/--h.
+Écrit <sortie>/<tag>-<graine>.png ; ComfyUI est partagé entre les sessions : une génération à la fois.
 """
 import argparse, json, os, time, urllib.request, uuid
 
@@ -14,8 +21,8 @@ ap.add_argument("seeds", type=lambda s: [int(x) for x in s.split(",")])
 ap.add_argument("--prompt", default="")
 ap.add_argument("--neg", default="photo, realistic, photorealistic, texture, noise, grain, rust, dirt, scratches, "
                 "gradient, blurry, text, watermark, signature, perspective, 3/4 view, isometric")
-ap.add_argument("--w", type=int, default=640)
-ap.add_argument("--h", type=int, default=1280)
+ap.add_argument("--w", type=int)
+ap.add_argument("--h", type=int)
 ap.add_argument("--steps", type=int, default=8)
 ap.add_argument("--cfg", type=float, default=2.0)
 ap.add_argument("--depth", type=float, default=0.65)
@@ -26,10 +33,23 @@ ap.add_argument("--init", help="image de départ (img2img) ; sinon génération 
 ap.add_argument("--denoise", type=float, default=1.0)
 ap.add_argument("--edges-file", default="guide-contours.png", help="dans le dossier des guides")
 ap.add_argument("--depth-file", default="guide-profondeur.png")
-ap.add_argument("--styles", default="style-0.png,style-1.png,style-2.png,style-3.png,style-4.png",
-                help="références de style (chemins relatifs aux guides, ou absolus)")
-ap.add_argument("--base-prompt", default=None)
+ap.add_argument("--styles", default="", help="références de style (chemins relatifs aux guides, ou absolus) ; aucune par défaut")
+ap.add_argument("--ckpt", default="DreamShaperXL_Turbo_v2_1.safetensors", help="modèle (models/checkpoints)")
+ap.add_argument("--lora", action="append", default=[], help="LoRA (models/loras) : nom.safetensors:poids, répétable")
+ap.add_argument("--sampler", default="dpmpp_sde")
+ap.add_argument("--scheduler", default="karras")
+ap.add_argument("--base-prompt", help="style du mod (souvent dans la recette)")
+ap.add_argument("--recette", help="réglages du mod (JSON)")
+pre, _ = ap.parse_known_args()
+if pre.recette:
+    ap.set_defaults(**json.load(open(pre.recette)))
 a = ap.parse_args()
+if not a.base_prompt:
+    ap.error("--base-prompt (ou une recette qui le donne) est obligatoire")
+if not (a.w and a.h):
+    from struct import unpack
+    with open(os.path.join(a.guides, "guide-original.png"), "rb") as fh:     # en-tête PNG : largeur, hauteur
+        a.w, a.h = unpack(">II", fh.read(24)[16:24])
 
 
 def upload(path):
@@ -50,18 +70,12 @@ def call(path, data=None):
 
 depth = upload(os.path.join(a.guides, a.depth_file))
 edges = upload(os.path.join(a.guides, a.edges_file))
-styles = [upload(os.path.join(a.guides, p)) for p in a.styles.split(",")]
+styles = [upload(os.path.join(a.guides, p)) for p in a.styles.split(",") if p]
 
-positive = ("cartoon video game sprite of a rocket thruster engine machine, seen from above, top-down view, "
-            "flat colors, cel shading, three tones, thick dark brown outlines, clean simple shapes, "
-            "cream metal body, copper pipes, dark nozzle, plain grey background. " + a.prompt)
-if a.base_prompt is not None:
-    positive = a.base_prompt + " " + a.prompt
+positive = a.base_prompt + " " + a.prompt
 
 g = {
-    "ckpt": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "DreamShaperXL_Turbo_v2_1.safetensors"}},
-    "pos": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["ckpt", 1], "text": positive}},
-    "neg": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["ckpt", 1], "text": a.neg}},
+    "ckpt": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": a.ckpt}},
     "cn": {"class_type": "ControlNetLoader", "inputs": {"control_net_name": "controlnet-union-sdxl-promax.safetensors"}},
     "cn_d": {"class_type": "SetUnionControlNetType", "inputs": {"control_net": ["cn", 0], "type": "depth"}},
     "cn_e": {"class_type": "SetUnionControlNetType",
@@ -79,6 +93,15 @@ g = {
     "ipa": {"class_type": "IPAdapterModelLoader", "inputs": {"ipadapter_file": "ip-adapter-plus_sdxl_vit-h.safetensors"}},
     "clipv": {"class_type": "CLIPVisionLoader", "inputs": {"clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"}},
 }
+# LoRA en chaîne sur le modèle et l'encodeur de texte
+unet, clip = ["ckpt", 0], ["ckpt", 1]
+for i, spec in enumerate(a.lora):
+    name, _, weight = spec.rpartition(":")
+    g[f"lora{i}"] = {"class_type": "LoraLoader", "inputs": {"model": unet, "clip": clip, "lora_name": name,
+                                                           "strength_model": float(weight), "strength_clip": float(weight)}}
+    unet, clip = [f"lora{i}", 0], [f"lora{i}", 1]
+g["pos"] = {"class_type": "CLIPTextEncode", "inputs": {"clip": clip, "text": positive}}
+g["neg"] = {"class_type": "CLIPTextEncode", "inputs": {"clip": clip, "text": a.neg}}
 prev = None
 for i, s in enumerate(styles):
     g[f"st{i}"] = {"class_type": "LoadImage", "inputs": {"image": s}}
@@ -87,10 +110,15 @@ for i, s in enumerate(styles):
     else:
         g[f"bt{i}"] = {"class_type": "ImageBatch", "inputs": {"image1": prev, "image2": [f"st{i}", 0]}}
         prev = [f"bt{i}", 0]
-g["ip"] = {"class_type": "IPAdapterAdvanced",
-           "inputs": {"model": ["ckpt", 0], "ipadapter": ["ipa", 0], "image": prev, "weight": a.style,
-                      "weight_type": "style transfer", "combine_embeds": "average", "start_at": 0.0, "end_at": 1.0,
-                      "embeds_scaling": "V only", "clip_vision": ["clipv", 0]}}
+model = unet
+if styles:
+    g["ip"] = {"class_type": "IPAdapterAdvanced",
+               "inputs": {"model": unet, "ipadapter": ["ipa", 0], "image": prev, "weight": a.style,
+                          "weight_type": "style transfer", "combine_embeds": "average", "start_at": 0.0,
+                          "end_at": 1.0, "embeds_scaling": "V only", "clip_vision": ["clipv", 0]}}
+    model = ["ip", 0]
+else:
+    del g["ipa"], g["clipv"]
 if a.init:
     g["init"] = {"class_type": "LoadImage", "inputs": {"image": upload(a.init)}}
     g["init_s"] = {"class_type": "ImageScale", "inputs": {"image": ["init", 0], "upscale_method": "lanczos",
@@ -99,8 +127,8 @@ if a.init:
 else:
     g["lat"] = {"class_type": "EmptyLatentImage", "inputs": {"width": a.w, "height": a.h, "batch_size": 1}}
 g["ks"] = {"class_type": "KSampler",
-           "inputs": {"model": ["ip", 0], "positive": ["app_e", 0], "negative": ["app_e", 1], "latent_image": ["lat", 0],
-                      "seed": 0, "steps": a.steps, "cfg": a.cfg, "sampler_name": "dpmpp_sde", "scheduler": "karras",
+           "inputs": {"model": model, "positive": ["app_e", 0], "negative": ["app_e", 1], "latent_image": ["lat", 0],
+                      "seed": 0, "steps": a.steps, "cfg": a.cfg, "sampler_name": a.sampler, "scheduler": a.scheduler,
                       "denoise": a.denoise}}
 g["dec"] = {"class_type": "VAEDecode", "inputs": {"samples": ["ks", 0], "vae": ["ckpt", 2]}}
 g["save"] = {"class_type": "SaveImage", "inputs": {"images": ["dec", 0], "filename_prefix": "concept"}}

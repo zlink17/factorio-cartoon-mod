@@ -52,11 +52,16 @@ Le travail est découpé en **lots** (une famille d'objets : « fours », « arb
 
 1. **Cadrage** : liste des fichiers à refaire (sortie de l'inventaire), lecture des prototypes (tailles, `shift`, nombre
    d'images, `line_length`, directions), choix de la technique, questions de style à trancher avec Bastien.
-2. **Prototype** : un seul objet représentatif, validé visuellement (aperçu à la taille du jeu, à côté de l'original).
-3. **Production** : générateur complet, qui écrit **directement** dans `cartoon/mod/graphics/overrides/`.
-4. **Contrôle automatique** : tailles, ombres non vides, manifeste à jour (voir 2.3).
-5. **Vérification en jeu** : capture du banc d'essai (voir étape 0), comparée à la capture d'origine.
-6. **Commit** du lot (générateur + PNG + manifeste + mise à jour de `STYLE.md` et de la couverture), puis **la case
+2. **Image cible** (machines et objets modélisés en 3D) : variantes générées par ComfyUI, guidées par l'original et
+   par la recette du mod ; Bastien choisit (ou mélange) ; l'image retenue va dans `cartoon/concept/cibles/`.
+   Méthode : [methode-images-cibles.md](../methode-images-cibles.md) ; recette : [`cartoon/concept/`](../../cartoon/concept/).
+   Pas pour le procédural 2D (sols, décorations, eau), qui suit l'original.
+3. **Prototype** : un seul objet représentatif, modélisé d'après l'image cible, validé visuellement (comparaison
+   original / cible / rendu, à la taille du jeu : `tools/concept/compare.py`).
+4. **Production** : générateur complet, qui écrit **directement** dans `cartoon/mod/graphics/overrides/`.
+5. **Contrôle automatique** : tailles, ombres non vides, manifeste à jour (voir 2.3).
+6. **Vérification en jeu** : capture du banc d'essai (voir étape 0), comparée à la capture d'origine.
+7. **Commit** du lot (générateur + PNG + manifeste + mise à jour de `STYLE.md` et de la couverture), puis **la case
    du lot est cochée ici**.
 
 ### 2.2 Définition de « fini »

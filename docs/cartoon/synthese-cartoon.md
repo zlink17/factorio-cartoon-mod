@@ -56,6 +56,7 @@ Les contraintes de départ : outils gratuits uniquement, GPU modeste (GTX 1660 S
 | IA locale (ComfyUI, SD 1.5 + ControlNet canny) | **Essayée, non retenue** pour les machines. Sur un rendu Blender, les formes tiennent mais l'IA n'apporte rien de net (à denoise bas) ou casse le style (à denoise 0,5 : textures, couleurs parasites). Outils conservés dans `cartoon/ai/`. |
 | **Rendus 3D toon avec Blender (`bpy`)** | **Technique principale.** Un modèle 3D par objet, rendu avec la même projection que l'original, ce qui garantit cohérence, animations parfaites et réutilisation entre niveaux (assembleurs 1 à 3, convoyeurs jaune/rouge/bleu/turbo...). |
 | Génération 2D procédurale (OpenCV) | Utilisée pour les **sols** (textures plates tuilables) et les **câbles**. |
+| **Images cibles par ComfyUI, puis Blender** (11 octobre) | **Retenue** pour concevoir les nouvelles machines : SDXL guidé par la profondeur et les contours de l'original et par le style de nos sprites (IP-Adapter) donne des variantes ; Bastien choisit ; le modèle Blender la reproduit. Essai : propulseur. [Méthode](../methode-images-cibles.md), recette dans `cartoon/concept/`. |
 
 ## 3. Organisation du repo
 

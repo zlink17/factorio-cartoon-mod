@@ -2,7 +2,7 @@
 
 Usage : python cartoon/blender/thruster.py <dossier_sortie>
 
-Cible : la variante m70-42 générée par ComfyUI (.cache/essai-propulseur/comfyui/gen/m70-42.png), choisie par
+Cible : la variante m70-42 générée par ComfyUI (cartoon/concept/cibles/propulseur-m70-42.png), choisie par
 Bastien le 11 octobre 2026. On en garde les grandes masses et les couleurs, pas la tuyauterie fine.
 Écrit pour l'instant une seule image fixe au cadre de l'original (thruster-essai.png, 264 x 542) ; la planche
 animée (64 images : toute la machine vibre), le support au sol, les raccords et l'icône viendront si la méthode

@@ -1,5 +1,8 @@
 # IA : assets refaits par un modèle d'image
 
+> **Approche abandonnée** (l'IA y fait le sprite final). Remplacée par les images cibles : l'IA donne la direction,
+> Blender produit. Voir [docs/methode-images-cibles.md](../../docs/methode-images-cibles.md) et `cartoon/concept/`.
+
 Les sprites sont regénérés par un modèle d'image (ComfyUI en local, ou Gemini) à partir de l'original ou d'un rendu Blender, puis remis au bon format.
 Ils sont rangés dans `cartoon/mod/graphics/overrides/`.
 
