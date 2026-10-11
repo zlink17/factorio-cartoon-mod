@@ -1,0 +1,14 @@
+{
+  "name": "factorio-celshading-mod",
+  "version": "0.0.1",
+  "title": "Factorio Cel-Shading",
+  "author": "zlink17",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.0",
+    "! factorio-cartoon-mod",
+    "! factorio-pixel-mod",
+    "? space-age"
+  ],
+  "description": "Remplace les textures du jeu par une version en cel-shading : couleurs vives, ombre et lumière à bord franc, ombres teintées, fumées et vagues stylisées."
+}

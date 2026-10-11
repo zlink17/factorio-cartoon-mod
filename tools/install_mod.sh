@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copie un mod dans le dossier mods de Factorio (Windows, depuis WSL).
-# Usage : tools/install_mod.sh [cartoon|pixel|cartoon-epure|cartoon-galerie] [dossier mods]
+# Usage : tools/install_mod.sh [cartoon|pixel|celshading|cartoon-epure|cartoon-galerie] [dossier mods]
 #   défaut : cartoon, AppData\Roaming\Factorio\mods
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

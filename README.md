@@ -7,6 +7,7 @@ Chaque mod a son dossier, avec **le mod installable** (`mod/`) et **les outils q
 |---|---|---|---|---|
 | **Cartoon** | aplats, gros contours | [`cartoon/`](cartoon/) | rendus Blender ; IA (ComfyUI), mise de côté | assembleurs, convoyeurs, bras |
 | **Pixel** | pixel art | [`pixel/`](pixel/) | dessin en code avec Pillow | assembleurs, convoyeurs, bras, minerais |
+| **Cel-shading** | style Wind Waker : ombre à bord franc, couleurs vives | [`celshading/`](celshading/) | rendus Blender cel-shading (prévu) | démarrage : approche dans [docs/celshading/plan.md](docs/celshading/plan.md) |
 
 ```
 cartoon/                  mod cartoon
@@ -17,6 +18,9 @@ cartoon/                  mod cartoon
 pixel/                    mod pixel
   mod/                    le mod
   pillow/                 sprites dessinés en code (Pillow) + palette
+celshading/               mod cel-shading (démarrage)
+  mod/                    le mod
+  STYLE.md                guide de style (brouillon)
 tools/                    outils communs aux mods
   build_manifest.py       génère <mod>/mod/manifest.lua
   install_mod.sh          copie un mod dans le dossier mods de Factorio
@@ -47,4 +51,4 @@ tools/install_mod.sh pixel
 
 Chaque mod a son propre README avec ses commandes de génération : [cartoon](cartoon/README.md), [pixel](pixel/README.md).
 
-> Les deux mods remplacent les mêmes textures : n'en activer qu'un à la fois dans Factorio.
+> Les mods remplacent les mêmes textures : n'en activer qu'un à la fois dans Factorio.
