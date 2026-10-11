@@ -110,6 +110,11 @@ PALETTE_HEX = {
     "engine_tank":        "#b5ad98",
     "engine_rust":        "#8a4a2c",
     "engine_pipe":        "#a3a8a6",
+    # pompe côtière : réservoir brun sombre à bord jaune, gaines orange annelées
+    "pump_yellow":        "#cf9a30",
+    "pump_tank":          "#5e4030",
+    "pump_hose":          "#d8875a",
+    "pump_hose_dark":     "#8e4e30",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 

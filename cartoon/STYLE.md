@@ -147,6 +147,12 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   images. **Volant et engrenages inclinés face à la caméra** (plan à 30° de l'horizontale, dans les deux
   orientations) : debout face à l'avant, la vue à 30° les écrase de moitié et ils se perdent dans le plateau.
   **[PROVISOIRE]**
+- **Pompe côtière** (`blender/offshore_pump.py`) : réservoir à deux lobes brun sombre à large bord jaune, plongé
+  dans l'eau (son bas est le calque « sous l'eau ») ; deux cylindres sombres jointifs à fenêtre sur le dessus et
+  piston clair qui va et vient (32 images, les deux en opposition) ; grosses gaines orange annelées (anneaux
+  peints sur un seul maillage) en arceaux du réservoir aux cylindres et des cylindres au collecteur ; bride claire
+  face au tuyau ; pieds rouille sur la berge (calque du sol). Fenêtres placées direction par direction sous les
+  fenêtres de fluide de l'original (eau teintée par le jeu, gardée à sa forme, en aplats). **[PROVISOIRE]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

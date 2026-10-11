@@ -704,6 +704,49 @@ local function detail_steam_engines()
   animate("anim-machines-vapeur", 2, ey - 3.5, 20, 7, 16, 2)
 end
 
+-- Vue rapprochée : pompes côtières dans les 4 directions autour d'un étang, eau évacuée par un tuyau infini
+-- (elles tournent), et une à l'arrêt (sans sortie).
+local function detail_offshore_pumps()
+  local s = scene("detail-pompes-cotieres", 1, GROUND, 2)
+  local x1, y1, x2, y2 = 8, s.y + 5, 18, s.y + 10
+  local t = {}
+  for x = x1, x2 - 1 do for y = y1, y2 - 1 do t[#t + 1] = { name = "water", position = { x, y } } end end
+  surface.set_tiles(t, true, false, true)
+  local function turn(d, dx, dy)
+    if d == "east" then return -dy, dx elseif d == "south" then return -dx, -dy
+    elseif d == "west" then return dy, -dx end
+    return dx, dy
+  end
+  local shores = { north = { 11.5, y2 + 0.5 }, south = { 11.5, y1 - 0.5 }, east = { x1 - 0.5, y1 + 2.5 },
+    west = { x2 + 0.5, y1 + 2.5 } }
+  for _, d in ipairs({ "north", "east", "south", "west" }) do
+    for _, k in ipairs({ 0, -0.5, 0.5, -1, 1 }) do
+      local dx, dy = turn(d, 0, k)
+      local pos = { shores[d][1] + dx, shores[d][2] + dy }
+      if surface.can_place_entity { name = "offshore-pump", position = pos, direction = defines.direction[d],
+        force = "player" } then
+        local e = create { name = "offshore-pump", position = pos, direction = defines.direction[d] }
+        if e then
+          local ox, oy = turn(d, 0, 1)
+          local p = create { name = "infinity-pipe", position = { e.position.x + ox, e.position.y + oy } }
+          if p then pcall(function() p.set_infinity_pipe_filter { name = "water", percentage = 0, mode = "exactly" } end) end
+        end
+        break
+      end
+    end
+  end
+  local pos = { 15.5, y2 + 0.5 }          -- à l'arrêt : sans sortie
+  for _, k in ipairs({ 0, 0.5, 1 }) do
+    if surface.can_place_entity { name = "offshore-pump", position = { pos[1], pos[2] + k }, direction = defines.direction.north,
+      force = "player" } then
+      create { name = "offshore-pump", position = { pos[1], pos[2] + k }, direction = defines.direction.north }
+      break
+    end
+  end
+  label("offshore-pump", 13, y2 + 3.5, 0.5)
+  animate("anim-pompes-cotieres", 4, s.y + 2, 18, 12, 16, 2)
+end
+
 -- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
 local function detail_wet_drills()
   local s = scene("detail-foreuses-humides", 1, GROUND, 2)
@@ -772,7 +815,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

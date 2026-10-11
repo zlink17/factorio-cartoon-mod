@@ -22,7 +22,9 @@ LOTS = {
     "coffres": [("blender/chests.py", ["tous"])],        # bois, fer, acier : sprite, ombre, icône
     "chaudiere": [("blender/boiler.py", ["toutes"])],    # 4 directions, ombres, flammes, patch de l'est, icône
     "machine-vapeur": [("blender/steam_engine.py", ["toutes"])],   # planches H et V (32 images), ombres, icône
-    "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
+    "pompe-cotiere": [("blender/offshore_pump.py", ["toutes"])],   # 4 directions (32 images), ombres, pieds,
+                                                                   # partie immergée, fluide, vitres, icône
+    "objets":[("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
     "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)
     "rochers": [("terrain/rocks.py", ["toutes"])],              # gros rochers en blocs à facettes, poissons (2D)

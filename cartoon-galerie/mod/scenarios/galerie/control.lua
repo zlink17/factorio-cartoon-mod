@@ -399,6 +399,32 @@ local function build_steam(x0, y0)
   local eei = create { name = "electric-energy-interface", position = { bx + 3.5, by - 7 } }
   if eei then pcall(function() eei.power_production = 0; eei.power_usage = 1.8e6; eei.electric_buffer_size = 1e7 end) end
   label("pompe côtière, chaudière, machines à vapeur", bx, y0 + 22.3, 0.6)
+  -- pompes côtières dans les 4 directions autour d'un étang, l'eau évacuée par un tuyau infini (elles tournent)
+  local ex1, ey1, ex2, ey2 = x0 + 12, y0 + 21, x0 + 22, y0 + 26
+  tiles("water", ex1, ey1, ex2, ey2)
+  local shores = { [N] = { (ex1 + ex2) / 2, ey2 + 0.5 }, [S] = { (ex1 + ex2) / 2, ey1 - 0.5 },
+    [E] = { ex1 - 0.5, (ey1 + ey2) / 2 }, [W] = { ex2 + 0.5, (ey1 + ey2) / 2 } }
+  for _, d in ipairs(DIRS) do
+    local sx, sy = shores[d[2]][1], shores[d[2]][2]
+    local placed
+    for _, k in ipairs({ 0, -0.5, 0.5, -1, 1 }) do      -- recul vers la terre, en cases
+      local dx, dy = turn(d[2], 0, k)
+      local pos = { sx + dx, sy + dy }
+      if surface.can_place_entity { name = "offshore-pump", position = pos, direction = d[2], force = "player" } then
+        placed = create { name = "offshore-pump", position = pos, direction = d[2] }
+        break
+      end
+    end
+    if placed then
+      local dx, dy = turn(d[2], 0, 1)
+      infinity(placed.position.x + dx, placed.position.y + dy, "water", true)
+      local lx, ly = turn(d[2], 0, 2.2)
+      label(d[1], placed.position.x + lx, placed.position.y + ly - 0.3, 0.5)
+    else
+      note("échec : offshore-pump " .. d[1] .. " (pas de place sur la rive)")
+    end
+  end
+  label("pompes côtières (eau évacuée : elles tournent)", (ex1 + ex2) / 2, ey2 + 4.3, 0.6)
 end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -505,8 +531,7 @@ local ZONES = {
   { id = "objets", titre = "Lot 2.1 · Objets sur les convoyeurs", w = 46, h = 35, build = build_items },
   { id = "production", titre = "Lot 2.2 · Production de base", w = 42, h = 28, build = build_production },
   { id = "stockage", titre = "Lot 2.3 · Stockage", w = 36, h = 13, build = build_storage },
-  { id = "energie", titre = "Lot 2.4 · Énergie vapeur (chaudière et machine à vapeur faites ; pompe côtière à venir)",
-    w = 56, h = 23, build = build_steam },
+  { id = "energie", titre = "Lot 2.4 · Énergie vapeur", w = 56, h = 32, build = build_steam },
   { id = "nature", titre = "Lot 2.7 · Nature", w = 44, h = 38, build = build_nature },
   { id = "decorations", titre = "Lot 2.8 · Décorations", w = 34, h = 32, build = build_decoratives },
   { id = "superpositions", titre = "Lot 2.8 · Superpositions (tri par profondeur)", w = 34, h = 30,
