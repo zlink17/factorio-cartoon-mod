@@ -19,4 +19,19 @@ compgen -G "$SRC/*.lua" > /dev/null && cp "$SRC"/*.lua "$DEST"/
 for dir in graphics locale migrations scenarios; do
   [ -d "$SRC/$dir" ] && cp -r "$SRC/$dir" "$DEST"/
 done
+# Un mod que Factorio découvre est activé d'office : un nouveau mod de textures entrerait en conflit avec celui qui
+# est actif (ils sont incompatibles entre eux). On l'inscrit donc désactivé s'il n'est pas encore dans la liste ;
+# ensuite, le choix du joueur (activé ou non) est conservé.
+python3 - "$MODS/mod-list.json" "$NAME" <<'PY'
+import json, sys
+path, name = sys.argv[1:]
+try:
+    data = json.load(open(path, encoding="utf-8"))
+except FileNotFoundError:
+    sys.exit()
+if all(m["name"] != name for m in data["mods"]):
+    data["mods"].append({"name": name, "enabled": False})
+    json.dump(data, open(path, "w", encoding="utf-8"), indent=2)
+    print(f"{name} inscrit désactivé dans mod-list.json (à activer dans le menu Mods)")
+PY
 echo "Installé dans $DEST"

@@ -15,7 +15,7 @@ import math, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
-from lib import (S, reset, couleur, box, cyl, gear, render_scene, render_shadow, crop_centered, entity_path,
+from lib import (S, reset, couleur, box, cyl, gear, rod, render_scene, render_shadow, crop_centered, entity_path,
                  save_icon, sheet)
 
 NAME = "assembling-machine-1"
@@ -24,12 +24,14 @@ BBOX = (25, 2, 188, 199)       # pixels opaques de l'image 0 de l'original : lar
 N_FRAMES = 32
 COLUMNS = 8
 SHADOW_CELL, SHADOW_OFFSET = (190, 165), (17, 6)   # cadre de l'ombre originale et position de son centre (px)
-SUN_SHEAR = (0.3, 0.02)          # ombre au sol : décalage par unité de hauteur (droite, vers le bas)
+SUN_SHEAR = (0.5, 0.03)          # ombre au sol : décalage par unité de hauteur (droite, vers le bas) ;
+                                 # calé pour que l'ombre aille aussi loin à droite que l'originale
 CANVAS = 400
 
 # couleurs mesurées sur les images cibles (ton « éclairé »)
 VERT, BLEU = "#9ab590", "#4b7a8e"
 LAITON, CUIVRE, SOMBRE = "#e5aa44", "#8a5d31", "#3b3f3a"
+ROUGE, BLANC = "#b5503a", "#e4e2d4"
 
 
 def lisse(o):
@@ -86,6 +88,7 @@ def build(phase=0.0):
     reset()
     vert, bleu = couleur("vert", VERT), couleur("bleu", BLEU)
     laiton, cuivre, sombre = couleur("laiton", LAITON), couleur("cuivre", CUIVRE), couleur("sombre", SOMBRE)
+    rouge, blanc = couleur("rouge", ROUGE), couleur("blanc", BLANC)
 
     # --- socle et corps ----------------------------------------------------------------------------------------
     box((0, 0, 0.05), (2.8, 2.75, 0.1), sombre, 0.04)
@@ -93,7 +96,11 @@ def build(phase=0.0):
     arrondi(prisme(coins_coupes(-1.36, -1.36, 1.36, 1.3, 0.1, 0.4), coins_coupes(-1.2, -0.85, 1.2, 1.15, zt, 0.3),
                    vert), 0.09)
 
-    # tablier avant : quatre panneaux plus clairs posés sur la pente
+    # pieds sombres sous le bord avant (e-11)
+    for x in (-1.08, -0.54, 0.0, 0.54, 1.08):
+        arrondi(box((x, -1.38, 0.05), (0.3, 0.1, 0.1), sombre), 0.03, 2)
+
+    # tablier avant : quatre panneaux posés sur la pente
     pente = math.degrees(math.atan((1.36 - 0.85) / (zt - 0.1)))
     for x in (-0.87, -0.29, 0.29, 0.87):
         arrondi(box((x, -1.12, 0.52), (0.52, 0.04, 0.78), vert, rot_x=-pente), 0.03, 2)
@@ -110,8 +117,9 @@ def build(phase=0.0):
     lisse(cyl((-0.55, 0.3, zt + 0.89), 0.22, 0.05, laiton, verts=40))
     cyl((-0.55, 0.3, zt + 0.92), 0.09, 0.03, sombre, verts=24)
     # tambour cuivré devant le moteur, bague de laiton
-    lisse(cyl((-0.55, -0.4, zt + 0.33), 0.36, 0.6, cuivre, verts=48))
-    lisse(cyl((-0.55, -0.4, zt + 0.1), 0.375, 0.16, laiton, verts=48))
+    lisse(cyl((-0.55, -0.38, zt + 0.38), 0.29, 0.7, cuivre, verts=48))
+    lisse(cyl((-0.55, -0.38, zt + 0.12), 0.305, 0.16, laiton, verts=48))
+    lisse(cyl((-0.55, -0.38, zt + 0.66), 0.305, 0.08, laiton, verts=48))
     # long arbre de laiton vers la droite
     lisse(cyl((0.4, -0.45, zt + 0.3), 0.12, 1.25, laiton, verts=32, rot=(0, 90, 0)))
     # entonnoir de laiton couché, pointé vers la droite, et son embout
@@ -130,6 +138,23 @@ def build(phase=0.0):
     gear((0.8, -0.05, zt + 0.12), 0.17, 0.1, 6, phase * 2 * 360 / 6, laiton, cuivre)
     # cheminée de laiton à gauche, un peu penchée
     lisse(cyl((-1.0, 0.8, zt + 0.45), 0.11, 0.8, laiton, verts=32, rot=(0, -12, 0)))
+
+    # --- détails (e-15) ---------------------------------------------------------------------------------------------
+    # troisième engrenage, en cuivre, à moitié caché derrière l'entonnoir
+    engrenage_debout((0.62, 0.95, zt + 0.42), 0.24, 7, -a * 10 / 7 + 30, cuivre, laiton)
+    # raccord entre le tambour et l'arbre, avec un tuyau vert qui monte vers le moteur
+    arrondi(box((-0.12, -0.45, zt + 0.3), (0.26, 0.34, 0.34), vert), 0.06)
+    lisse(rod((-0.12, -0.38, zt + 0.45), (-0.12, -0.05, zt + 0.62), 0.065, vert, verts=24))
+    # tuyau vert qui descend le long de la paroi gauche, vanne blanche
+    for p0, p1 in [((-0.9, 0.05, zt + 0.55), (-1.22, 0.05, zt + 0.55)), ((-1.22, 0.05, zt + 0.55), (-1.4, 0.05, 0.25))]:
+        lisse(rod(p0, p1, 0.07, vert, verts=24))
+    bpy.ops.mesh.primitive_torus_add(location=(-1.27, 0.05, zt + 0.4), rotation=(0, math.radians(90 - 11), 0),
+                                     major_radius=0.12, minor_radius=0.04, major_segments=32, minor_segments=12)
+    lisse(bpy.context.object).data.materials.append(blanc)
+    # plaque de cuivre à fente sur le plateau, bande rouge au coin arrière gauche
+    arrondi(box((0.42, -0.05, zt + 0.17), (0.24, 0.24, 0.04), cuivre), 0.02, 2)
+    box((0.42, -0.05, zt + 0.195), (0.05, 0.13, 0.02), sombre)
+    arrondi(box((-1.12, 0.62, zt + 0.08), (0.06, 0.5, 0.22), rouge), 0.02, 2)
 
 def measure(path):
     import cv2, numpy as np

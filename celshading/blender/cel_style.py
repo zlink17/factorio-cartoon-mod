@@ -33,4 +33,4 @@ OUTLINE_BLUE = 1.25        # ... avec un peu plus de bleu, comme les ombres
 # --- Ombres au sol ----------------------------------------------------------------------------------------------
 # Le jeu dessine les sprites d'ombre en noir (couleur ignorée) ; les originaux sont opaques. Alpha plus bas :
 # ombre plus légère. Bord net (pas de flou).
-GROUND_SHADOW_ALPHA = 0.70
+GROUND_SHADOW_ALPHA = 0.85     # 0,70 au départ : trop pâle en jeu (12 octobre)
