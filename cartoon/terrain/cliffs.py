@@ -1,18 +1,23 @@
-"""Falaises de Nauvis en colonnes prismatiques, comme les gros rochers (`rocks.py`).
+"""Falaises de Nauvis : ce qui ne dépend pas du dessin de la roche (lecture de l'original, ombres, découpe).
 
-Usage : python cartoon/terrain/cliffs.py <dossier_sortie> [planche[,planche...]|toutes]
-        planche = sides, outer, inner, entrance
+Module utilisé par cartoon/blender/cliffs_3d.py, qui dessine la roche (relief à facettes, tons de l'original).
 
 Chaque orientation de falaise est une cellule de 256 px (4 cases à l'échelle 0,5) de quatre planches : côtés
 (`cliff-sides`, 8 x 4 cellules), coins extérieurs et intérieurs (`cliff-outer`, `cliff-inner`), entrées
-(`cliff-entrance`, 4 x 4). Le jeu dessine chaque cellule en deux calques : le haut de la falaise, au-dessus des
-entités, et le pied (`-lower`), dessous ; plus une ombre portée (`-shadow`).
-- silhouette : réunion des corps des deux calques (alpha > 200 : le pied porte en plus un halo d'ombre peu opaque) ;
-- colonnes prismatiques posées sur la silhouette, de l'arrière vers l'avant (`rocks.blocks`), à taille fixe en
-  cases (une même falaise garde le même grain d'une cellule à l'autre) ; contour noir chaud sur la silhouette ;
-- halo du pied : en aplat sombre semi-transparent, comme l'ombre intégrée des rochers ;
-- répartition : chaque pixel va au calque qui le portait dans l'original (alpha lissé le plus fort).
-Laissés d'origine : ombres portées (`-shadow`, déjà des aplats nets), falaises de Space Age (étape 6).
+(`cliff-entrance`, 4 x 4). Le jeu dessine chaque cellule en deux calques : le haut, au-dessus des entités, et le
+pied (`-lower`), dessous ; plus une ombre (`-shadow`, même origine que le sprite, cellules de 320 px : 64 px de
+marge à droite ; 256 px pour les entrées).
+- silhouette : réunion des corps des deux calques de l'original (alpha > 200), gardée au pixel près ;
+- la cellule est prolongée de ses bords (PAD) avant de dessiner, puis recadrée : une falaise se continue dans la
+  cellule voisine, le dessin ne doit pas s'aligner sur le bord ;
+- pas de halo : l'original peint au pied un fondu sombre semi-transparent, qui passe sur la roche voisine ;
+- répartition : chaque pixel va au calque qui le portait dans l'original (alpha lissé le plus fort) ;
+- ombre : une falaise est une marche de terrain, éclairée par la gauche. Le haut est toujours à gauche du sens de
+  la falaise (ORIENTATIONS : `west_to_east` a le haut au nord, d'où la grande paroi vue de face ; `south_to_north`
+  l'a à l'ouest). Seules les parois dont le haut est à l'ouest (tronçons parcourus vers le nord) jettent une ombre :
+  leur roche balayée vers la droite (SHADOW_RUN), gardée sur le terrain bas et hors de la roche. Un trou a donc sa
+  paroi gauche ombrée et rien en haut ; un plateau n'a pas d'ombre dessus, seulement à droite. L'original suit la
+  même règle, mais son ombre est coupée net au bord des cellules (le fondu du pied le cachait).
 """
 import os
 import sys
@@ -21,103 +26,185 @@ import zlib
 import cv2
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(__file__))
-from decoratives import FACTORIO_DATA, OUTLINE_BGR, OUTLINE_PX, SHADOW_ALPHA, SS, Rng, hx  # noqa: E402
-from rocks import blocks  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from decoratives import FACTORIO_DATA, OUTLINE_BGR, OUTLINE_PX, SS, hx  # noqa: E402
 
-CLIFF = ("#3f2d1e", "#6e5238", "#b59c78")          # flanc sombre, flanc éclairé, dessus : brun de l'original
 SHEETS = ("sides", "outer", "inner", "entrance")
 CELL = 256
-BLOCK_PX = 16.0          # demi-largeur d'une colonne (px du fichier, 64 par case)
-HEIGHT = 5.0             # hauteur des colonnes, en demi-largeurs
-SIDES = 6
+PAD = 40                 # px : prolongement de la cellule (bords répétés) avant de poser les formes
+SHADOW_RUN = 96          # longueur de l'ombre portée vers la droite (px du fichier, ~ 1,5 case, comme l'original)
+
+# sens de la falaise de chaque cellule : planche -> {rangée: (entrée, sortie)} ; entrées : {(rangée, colonne): ...}
+ORIENTATIONS = {
+    "sides": {0: ("east", "west"), 1: ("south", "north"), 2: ("west", "east"), 3: ("north", "south")},
+    "outer": {0: ("north", "east"), 1: ("east", "south"), 2: ("south", "west"), 3: ("west", "north")},
+    "inner": {0: ("west", "south"), 1: ("north", "west"), 2: ("east", "north"), 3: ("south", "east")},
+    "entrance": {0: (("none", "east"), ("west", "none")), 1: (("none", "north"), ("south", "none")),
+                 2: (("none", "west"), ("east", "none")), 3: (("none", "south"), ("north", "none"))},
+}
+SIDE_POINT = {"west": (0, 128), "east": (256, 128), "north": (128, 0), "south": (128, 256)}
 SRC = os.path.join(FACTORIO_DATA, "base", "graphics", "terrain", "cliffs")
 
-
-def silhouette(body):
-    """Masque du corps (bool, taille du fichier) -> à SS, trous bouchés, bord en pans droits."""
-    body = body.astype(np.uint8)
-    body = cv2.morphologyEx(body, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-    body = cv2.morphologyEx(body, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    h, w = body.shape
-    cs, _ = cv2.findContours(body, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    m = np.zeros((h * SS, w * SS), np.uint8)
-    for c in cs:
-        if cv2.contourArea(c) < 12:
-            continue
-        p = cv2.approxPolyDP(c, 1.2, True).astype(np.float32) * SS + SS / 2
-        cv2.fillPoly(m, [np.round(p).astype(np.int32)], 1)
-    return m
+ROCK = ("#3e2b1d", "#6f5136", "#9b7b55", "#cdb38a")   # creux, flanc sombre, flanc éclairé, dessus
 
 
-PAD = 48                 # px : la cellule est prolongée de ses bords avant de poser les colonnes (voir render_cell)
+# --- lecture de l'original ----------------------------------------------------------------------------------------
+
+def load(sheet):
+    up = cv2.imread(os.path.join(SRC, f"cliff-{sheet}.png"), cv2.IMREAD_UNCHANGED)
+    low = cv2.imread(os.path.join(SRC, f"cliff-{sheet}-lower.png"), cv2.IMREAD_UNCHANGED)
+    return up, low
 
 
-def render_cell(up, low, seed):
-    """Une cellule (BGRA haut, BGRA pied) -> (haut, pied) redessinés, mêmes tailles.
-    Une falaise se continue dans la cellule voisine : on prolonge la cellule (bords répétés) avant de poser les
-    colonnes, puis on recadre ; sans cela, les colonnes s'alignent sur le bord de la cellule (ligne de sommets et
-    contour droits au raccord)."""
-    H, W = up.shape[:2]
-    up = cv2.copyMakeBorder(up, PAD, PAD, PAD, PAD, cv2.BORDER_REPLICATE)
-    low = cv2.copyMakeBorder(low, PAD, PAD, PAD, PAD, cv2.BORDER_REPLICATE)
-    h, w = up.shape[:2]
-    au, al = up[:, :, 3].astype(np.float32), low[:, :, 3].astype(np.float32)
-    sil = silhouette((au > 200) | (al > 200))
-    rgba = np.zeros((h * SS, w * SS, 4), np.float32)
-    if sil.sum():
-        ys, xs = np.nonzero(sil)
-        size = BLOCK_PX * SS / max(xs.max() - xs.min(), ys.max() - ys.min(), 1)   # blocks() : part de la taille
-        tone, line = blocks(sil, size, HEIGHT, SIDES, Rng(seed))
-        inside = (tone >= 0) & (cv2.dilate(sil, np.ones((2 * SS + 1, 2 * SS + 1), np.uint8)) > 0)
-        cols = [hx(t) for t in CLIFF]
-        color = np.zeros((h * SS, w * SS, 3), np.float32)
-        for t in range(3):
-            color[tone == t] = cols[t]
-        color[(line > 0) & inside] = np.array(cols[0]) * 0.55
-        thick = max(1, int(round(OUTLINE_PX * SS)))
-        disk = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * thick + 1, 2 * thick + 1))
-        out = (cv2.dilate(inside.astype(np.uint8), disk) > 0) & ~inside
-        color[out] = OUTLINE_BGR
-        alpha = (inside | out).astype(np.float32)
-        rgba[..., :3] = color * alpha[..., None]
-        rgba[..., 3] = alpha * 255
-    else:
-        alpha = np.zeros((h * SS, w * SS), np.float32)
-    a0 = cv2.resize(np.maximum(au, al), (w * SS, h * SS), interpolation=cv2.INTER_LINEAR)
-    halo = (cv2.GaussianBlur((a0 > 40).astype(np.float32), (0, 0), SS) > 0.5) & (alpha == 0)
-    rgba[halo, 3] = SHADOW_ALPHA * 255
-    small = cv2.resize(rgba, (w, h), interpolation=cv2.INTER_AREA)
+def body_of(up, low):
+    """Corps de la falaise (uint8 0/1), trous de 3 px bouchés."""
+    b = ((up[..., 3] > 200) | (low[..., 3] > 200)).astype(np.uint8)
+    return cv2.morphologyEx(b, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+
+
+def luminance(up, low, body):
+    """Luminosité de l'original sur le corps (moyenne locale qui ignore le fond)."""
+    a_u = up[..., 3:4] / 255.0
+    a_l = low[..., 3:4] / 255.0
+    rgb = up[..., :3] * a_u + low[..., :3] * a_l * (1 - a_u)
+    rgb = rgb / np.maximum(a_u + a_l * (1 - a_u), 1e-6)
+    lum = cv2.cvtColor(np.clip(rgb, 0, 255).astype(np.uint8), cv2.COLOR_BGR2GRAY).astype(np.float32)
+    w = cv2.GaussianBlur(body.astype(np.float32), (0, 0), 2)
+    return cv2.GaussianBlur(lum * body, (0, 0), 2) / np.maximum(w, 1e-3)
+
+
+def big(mask):
+    """Masque 0/1 à la taille du fichier -> booléen à SS, bord lissé."""
+    h, w = mask.shape
+    return cv2.resize(mask.astype(np.float32), (w * SS, h * SS), interpolation=cv2.INTER_LINEAR) > 0.5
+
+
+def disk(r):
+    r = max(1, int(round(r)))
+    return cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1))
+
+
+# --- commun ---------------------------------------------------------------------------------------------------------
+
+def finish(color, inside, lines):
+    """Couleur et traits (à SS) -> BGRA à la taille du fichier : traits intérieurs en brun très sombre, contour noir
+    chaud à l'intérieur de la silhouette (la silhouette d'origine ne bouge pas)."""
+    h, w = inside.shape
+    color = color.copy()
+    color[lines & inside] = np.array(hx(ROCK[0]), np.float32) * 0.6
+    thick = max(1, int(round(OUTLINE_PX * SS)))
+    rim = inside & ~(cv2.erode(inside.astype(np.uint8), disk(thick)) > 0)
+    color[rim] = OUTLINE_BGR
+    alpha = inside.astype(np.float32)
+    rgba = np.zeros((h, w, 4), np.float32)
+    rgba[..., :3] = color * alpha[..., None]
+    rgba[..., 3] = alpha * 255
+    small = cv2.resize(rgba, (w // SS, h // SS), interpolation=cv2.INTER_AREA)
     a = np.clip(small[..., 3:4] / 255.0, 1e-6, 1)
-    im = np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
-    # chaque pixel au calque qui le portait (alpha lissé, pour que les bords et le contour suivent)
+    return np.dstack([np.clip(small[..., :3] / a, 0, 255), small[..., 3:4]]).astype(np.uint8)
+
+
+def split(im, up, low):
+    """Chaque pixel au calque (haut, pied) qui le portait dans l'original."""
+    au, al = up[..., 3].astype(np.float32), low[..., 3].astype(np.float32)
     su, sl = cv2.GaussianBlur(au, (0, 0), 3), cv2.GaussianBlur(al, (0, 0), 3)
-    to_up = (su >= sl) & ((su > 0) | (sl > 0))
+    to_up = su >= sl
     hi, lo = im.copy(), im.copy()
     hi[~to_up] = 0
     lo[to_up] = 0
-    crop = (slice(PAD, PAD + H), slice(PAD, PAD + W))
-    return hi[crop], lo[crop]
+    return hi, lo
 
 
-def build(sheet, out):
-    up = cv2.imread(os.path.join(SRC, f"cliff-{sheet}.png"), cv2.IMREAD_UNCHANGED)
-    low = cv2.imread(os.path.join(SRC, f"cliff-{sheet}-lower.png"), cv2.IMREAD_UNCHANGED)
+def orientation(sheet, r, c):
+    o = ORIENTATIONS[sheet][r]
+    return o[c // 2] if sheet == "entrance" else o
+
+
+def low_ground(entry, exit_, shape):
+    """(terrain bas, ombrant) pour la cellule prolongée de PAD. Bas : à droite du chemin entrée -> centre -> sortie
+    (le haut est à gauche). Ombrant : les pixels dont le tronçon de chemin le plus proche monte vers le nord, c.-à-d.
+    les parois dont le haut est à l'ouest, face à la lumière : seules elles jettent une ombre (balayer aussi les
+    parois est-ouest y laisse des franges, les dents de la roche). Une extrémité (« none ») prolonge le chemin."""
+    c = np.array([128.0, 128.0])
+    a = np.array(SIDE_POINT[entry], float) if entry != "none" else None
+    b = np.array(SIDE_POINT[exit_], float) if exit_ != "none" else None
+    a = a if a is not None else 2 * c - b
+    b = b if b is not None else 2 * c - a
+    a, b = a + (a - c) * 2, b + (b - c) * 2                   # chemin prolongé au-delà de la cellule
+    h, w = shape
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float64)
+    pts = np.stack([xs - PAD, ys - PAD], -1)
+    best_d = np.full((h, w), np.inf)
+    side = np.zeros((h, w))
+    north = np.zeros((h, w), bool)
+    for p0, p1 in ((a, c), (c, b)):
+        t = p1 - p0
+        u = np.clip(((pts - p0) @ t) / (t @ t), 0, 1)
+        d = np.linalg.norm(pts - (p0 + u[..., None] * t), axis=-1)
+        left = np.array([t[1], -t[0]])                        # à gauche du sens (y vers le bas)
+        s_ = (pts - p0) @ left
+        closer = d < best_d
+        best_d[closer] = d[closer]
+        side[closer] = s_[closer]
+        north[closer] = t[1] < -0.3 * np.linalg.norm(t)
+    return side < 0, north
+
+
+def shadow_cell(alpha_padded, width, low, caster):
+    """Ombre (BGRA width x 256) : la roche (alpha de la cellule prolongée de PAD) balayée vers la droite, gardée sur
+    le terrain bas `low`. Même origine que le sprite (prototype : shift de 0,5 case pour 64 px de plus en largeur).
+    Le pied de la falaise (`-lower`) est dessiné sous les ombres : on retire de l'ombre toute la roche, y compris
+    celle qui se prolonge dans la cellule voisine (bords répétés), sinon l'ombre fait un voile sur la roche."""
+    extra = width - CELL                                       # l'ombre déborde de la cellule à droite
+    a = cv2.copyMakeBorder((alpha_padded > 127).astype(np.uint8), 0, 0, 0, extra, cv2.BORDER_REPLICATE)
+    low = cv2.copyMakeBorder(low.astype(np.uint8), 0, 0, 0, extra, cv2.BORDER_REPLICATE)
+    caster = cv2.copyMakeBorder(caster.astype(np.uint8), 0, 0, 0, extra, cv2.BORDER_REPLICATE)
+    src = a & caster
+    h, w = a.shape
+    # longueur adaptée à la cellule : l'image d'ombre ne déborde que de 64 px à droite ; une ombre coupée par son
+    # bord fait un trait droit. On la raccourcit pour que son bout suive le profil de la roche (10e centile de la
+    # place disponible par rangée, les éclats isolés ne comptent pas).
+    run = SHADOW_RUN
+    rows = src[PAD:PAD + CELL].any(1)
+    if rows.any():
+        right = (src[PAD:PAD + CELL][rows] > 0)[:, ::-1].argmax(1)          # distance au bord droit du canevas
+        room = right - (w - (PAD + width))                                  # place jusqu'au bord de l'image d'ombre
+        run = int(np.clip(np.percentile(room, 10) - 4, 24, SHADOW_RUN))
+    sw = np.zeros((h, w), np.uint8)
+    for d in range(0, run + 1, 2):
+        sw[:, d:] = np.maximum(sw[:, d:], src[:, :w - d])
+    sw[(cv2.dilate(a, np.ones((3, 3), np.uint8)) > 0) | (low == 0)] = 0
+    out = np.zeros((CELL, width, 4), np.uint8)
+    out[..., 3] = sw[PAD:PAD + CELL, PAD:PAD + width] * 255
+    return out
+
+
+def pad(im):
+    return cv2.copyMakeBorder(im, PAD, PAD, PAD, PAD, cv2.BORDER_REPLICATE)
+
+
+def build(sheet, out, render):
+    """Écrit les trois fichiers d'une planche ; `render(up, low, seed)` dessine la cellule prolongée (BGRA)."""
+    up, low = load(sheet)
+    rows, cols = up.shape[0] // CELL, up.shape[1] // CELL
     hi, lo = np.zeros_like(up), np.zeros_like(low)
-    for y in range(0, up.shape[0], CELL):
-        for x in range(0, up.shape[1], CELL):
-            seed = zlib.crc32(f"{sheet}-{x}-{y}".encode())
-            hi[y:y + CELL, x:x + CELL], lo[y:y + CELL, x:x + CELL] = render_cell(
-                up[y:y + CELL, x:x + CELL], low[y:y + CELL, x:x + CELL], seed)
+    sw = cv2.imread(os.path.join(SRC, f"cliff-{sheet}-shadow.png"), cv2.IMREAD_UNCHANGED).shape[1] // cols
+    sh = np.zeros((up.shape[0], cols * sw, 4), np.uint8)
+    for r in range(rows):
+        for c in range(cols):
+            y, x = r * CELL, c * CELL
+            cu, cl = up[y:y + CELL, x:x + CELL], low[y:y + CELL, x:x + CELL]
+            if max(cu[..., 3].max(), cl[..., 3].max()) == 0:
+                continue
+            im = render(pad(cu), pad(cl), zlib.crc32(f"{sheet}-{r}-{c}".encode()))
+            low_side, caster = low_ground(*orientation(sheet, r, c), im.shape[:2])
+            sh[y:y + CELL, c * sw:(c + 1) * sw] = shadow_cell(im[..., 3], sw, low_side, caster)
+            crop = im[PAD:PAD + CELL, PAD:PAD + CELL].copy()
+            crop[body_of(cu, cl) == 0] = 0            # la silhouette d'origine, au pixel près
+            hi[y:y + CELL, x:x + CELL], lo[y:y + CELL, x:x + CELL] = split(crop, cu, cl)
     dst = os.path.join(out, "base", "terrain", "cliffs")
     os.makedirs(dst, exist_ok=True)
     cv2.imwrite(os.path.join(dst, f"cliff-{sheet}.png"), hi)
     cv2.imwrite(os.path.join(dst, f"cliff-{sheet}-lower.png"), lo)
+    cv2.imwrite(os.path.join(dst, f"cliff-{sheet}-shadow.png"), sh)
 
-
-if __name__ == "__main__":
-    out = sys.argv[1] if len(sys.argv) > 1 else "cliffs_out"
-    which = sys.argv[2] if len(sys.argv) > 2 else "toutes"
-    for s in (SHEETS if which == "toutes" else which.split(",")):
-        build(s, out)
-        print("OK", s, flush=True)

@@ -125,10 +125,14 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
 - **Rives** : masques de rive à bord net (comme les sols), recalés pour que deux variantes voisines se raccordent ;
   **berge** en aplat de terre sous le bord sud de la terre (vue à 30°, comme les bâtiments), cernée de noir chaud,
   trait fin sur les autres bords. Sable : plage basse (berge de 4 px), le sable se voit sous l'eau. **[PROVISOIRE]**
-- **Falaises** (`terrain/cliffs.py`) : **colonnes prismatiques** hautes (orgues basaltiques) posées sur la silhouette
-  de l'original, comme les gros rochers mais à taille fixe (demi-largeur 16 px, hauteur 5 demi-largeurs) ; dessus
-  beige, flancs bruns sombres, contour noir chaud ; halo du pied en aplat semi-transparent ; ombres d'origine.
-  **[PROVISOIRE]**
+- **Falaises** (`blender/cliffs_3d.py`, `terrain/cliffs.py`) : **pans à facettes** (relief en paroi presque
+  verticale, découpé en dalles et simplifié par Blender) sur la silhouette exacte de l'original ; chaque pan prend
+  **le ton de l'original** sous lui, en 4 tons bruns (creux, flanc sombre, flanc éclairé, dessus ; seuils communs à
+  toutes les falaises) : parois éclairées à gauche, à contre-jour à droite, comme Wube. Trait sombre entre deux pans
+  de tons différents, contour noir chaud, pas de halo au pied. **Ombre portée selon le relief** : la lumière vient de
+  la gauche, seules les parois dont le haut est à l'ouest jettent une ombre, vers la droite, sur le terrain bas
+  (~1,5 case) ; rien sur un plateau, rien en haut d'un trou. **[VALIDÉ]** (écartés : colonnes hexagonales, tons du
+  rendu 3D, blocs anguleux, lobes, talus de terre)
 - **Four en pierre** (`blender/furnace.py`) : pyramide tronquée de briques ocre (texture de briques procédurale,
   joints sombres, sans relief), bandeau et cheminée en pierre grise, bouche encadrée de pierre. Flammes en aplats à
   trois tons (rouge, orange, jaune), langues en gouttes qui ondulent en boucle de 48 images, sans contour, limitées

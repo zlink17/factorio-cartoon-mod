@@ -64,10 +64,11 @@ cartoon/
   mod/        le mod installable (info.json, Lua, manifest.lua, graphics/overrides/)
   blender/    générateurs 3D : style.py (source de vérité), lib.py, assembler*.py, animate.py, belt.py, inserter.py,
               underground.py, splitter.py, pole.py, ore.py, items.py, furnace.py, burner_drill.py, electric_drill.py,
-              chests.py, boiler.py, steam_engine.py, offshore_pump.py, pipe.py, lamp.py, lab.py, radar.py
+              chests.py, boiler.py, steam_engine.py, offshore_pump.py, pipe.py, lamp.py, lab.py, radar.py,
+              cliffs_3d.py (falaises : relief à facettes, tons de l'original)
   terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets), decoratives.py, trees.py,
               rocks.py (gros rochers, poissons), water.py (eaux, rives, bruit et
-              cartes d'effet du shader de l'eau), cliffs.py (falaises)
+              cartes d'effet du shader de l'eau), cliffs.py (falaises : lecture, ombres, calques)
   lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
@@ -111,7 +112,7 @@ touffes ton sur ton dans la texture.
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 578 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 582 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -136,7 +137,7 @@ touffes ton sur ton dans la texture.
 | Tuyaux | 18 formes (droits, coudes, T, croix, bouts, fenêtres) et tuyau isolé, ombre incluse ; fonds des fenêtres ; souterrains (4) ; couvercles et ombres ; raccords des assembleurs 2 et 3 ; icônes. | `blender/pipe.py` |
 | Petits bâtiments | Petite lampe (sprite, ombre) ; laboratoire (33 images, lueur bleue qui vacille, ombre, intégration) ; radar (64 orientations de l'antenne, ombres, intégration) ; 3 icônes. | `blender/lamp.py`, `lab.py`, `radar.py` |
 | Eau et rives | 6 eaux en aplats (vaguelettes, taches de fond pour l'eau peu profonde et la vase) ; bruit du shader de l'eau lissé (grandes taches nettes) et cartes d'effet des rives en paliers ; rives de l'herbe, des terres et du sable : masques nets recalés, berge de terre cernée sous les bords sud, plage basse pour le sable ; bords d'eau peu profonde nets. | `terrain/water.py` |
-| Falaises de Nauvis | 4 planches × 2 calques (haut, pied) : colonnes prismatiques hautes sur la silhouette de l'original, halo du pied en aplat ; ombres d'origine. | `terrain/cliffs.py` |
+| Falaises de Nauvis | 4 planches × 3 fichiers (haut, pied, ombre) : pans à facettes d'un relief simplifié, chacun au ton de l'original (4 tons bruns), silhouette exacte ; ombre portée vers la droite par les seules parois dont le haut est à l'ouest, sur le terrain bas. | `blender/cliffs_3d.py`, `terrain/cliffs.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -318,10 +319,27 @@ touffes ton sur ton dans la texture.
   et sable diffèrent beaucoup). L'overlay déborde sur la case du dessous : on n'y dessine que la berge qui y pend.
 - **Falaises** : chaque orientation est une cellule de 256 px en deux calques (haut, pied `-lower`) qui se
   chevauchent ; on dessine la réunion des deux corps (alpha > 200), puis chaque pixel retourne au calque qui le
-  portait. Les cellules se suivent le long d'une chaîne : **prolonger la cellule** (bords répétés, 48 px) avant de
-  poser les colonnes, sinon elles s'alignent sur le bord (ligne de sommets et contour droits au raccord). Le banc
-  pose des **anneaux** de falaises (`ring` : sortie d'une cellule = entrée de la suivante) : la génération de
-  carte n'en a posé aucune sur la surface de test.
+  portait. Les cellules se suivent le long d'une chaîne : **prolonger la cellule** (bords répétés, 40 px) avant de
+  dessiner, sinon le dessin s'aligne sur le bord. Le banc pose des **anneaux** de falaises (`ring` : sortie d'une
+  cellule = entrée de la suivante ; sens horaire = un trou, sens inverse = un plateau) : la génération de carte
+  n'en a posé aucune sur la surface de test.
+- **Une falaise est une marche de terrain : le haut est à gauche de son sens** (`west_to_east` : haut au nord,
+  grande paroi vue de face ; `south_to_north` : haut à l'ouest). La lumière vient de la gauche : seules les parois
+  au haut à l'ouest jettent une ombre, vers la droite, sur le bas. Sans cette règle (roche balayée vers la droite
+  partout), un plateau reçoit des ombres dessus et un trou en a tout autour : remarque de Bastien.
+- **Le pied (`-lower`) est dessiné sous les ombres** : une ombre qui passe sur la roche d'une cellule voisine y
+  fait un voile ; l'ombre est retirée de toute la roche (y compris celle qui se prolonge hors de la cellule). L'image
+  d'ombre ne déborde que de 64 px à droite de la cellule : une ombre plus longue y est coupée en trait droit ; sa
+  longueur est adaptée par cellule (`shadow_cell`).
+- **Tons d'une roche : ceux de l'original, pas ceux d'un relief inventé.** Rendu en trois tons Blender, un relief
+  calculé met les clairs et les sombres au hasard et change d'une cellule à l'autre ; tirés de l'original, ils
+  disent où est la lumière. Seuils **communs à toutes les cellules** : des centiles par cellule rendaient sombre une
+  paroi pourtant éclairée. Le relief ne sert qu'à découper les pans (facettes du maillage simplifié, projetées).
+  Écartés aussi (pistes montrées en jeu) : colonnes hexagonales comme les gros rochers, blocs anguleux, lobes,
+  talus de terre ; postérisation simple de l'original (bonne lecture, mais taches molles).
+- **Interop WSL → Windows capricieuse** (« UtilAcceptVsock: accept4 failed 110 ») : `powershell.exe` et `cmd.exe`
+  échouent par moments, d'où un `factorio.stop()` sans effet ni erreur et une instance isolée qui reste ouverte
+  (journal verrouillé). Après un banc, vérifier que `write/factorio-current.log` se renomme ; sinon relancer l'arrêt.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
@@ -338,10 +356,10 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 578 fichiers remplacés sur 8 246 à couvrir (19 %) : 1 560 dans `base` (38 %), 13 pour Space Age, 5 dans `core`
-  (câbles). Par rôle : 1 438 sprites, 88 icônes, 48 ombres, 4 masques ; plus 7 fichiers techniques retouchés (bruit
+- 1 582 fichiers remplacés sur 8 246 à couvrir (19 %) : 1 564 dans `base` (38 %), 13 pour Space Age, 5 dans `core`
+  (câbles). Par rôle : 1 438 sprites, 88 icônes, 52 ombres, 4 masques ; plus 7 fichiers techniques retouchés (bruit
   et cartes d'effet de l'eau). Détail : [couverture.md](couverture.md).
-- ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 83 Mo d'images dans
+- ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 82 Mo d'images dans
   `cartoon/mod/graphics`.
 - Tout le mod se régénère en ~19 min (`tools/build.py cartoon tous --verifier`, 11 octobre : reproductible, 1 534
   fichiers identiques) ; le banc d'essai fait ses 428 captures en ~40 s par passe.

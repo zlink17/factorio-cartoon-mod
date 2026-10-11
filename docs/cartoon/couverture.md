@@ -8,12 +8,12 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1560 | 4143 | 38 % |
+| `base` | 1564 | 4143 | 38 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **1578** | **8246** | **19 %** |
+| **Total** | **1582** | **8246** | **19 %** |
 
 ## Par rôle
 
@@ -21,7 +21,7 @@ sont exclus du décompte (174 fichiers).
 |---|---:|---:|
 | sprite | 1438 | 5483 |
 | icone | 88 | 1525 |
-| ombre | 48 | 822 |
+| ombre | 52 | 822 |
 | lumiere | 0 | 135 |
 | masque | 4 | 281 |
 
@@ -278,11 +278,11 @@ Faites : `advanced-circuit`, `assembling-machine`, `automation-science-pack`, `b
 
 ### technology : 0 / 131
 
-### terrain : 66 / 143
+### terrain : 70 / 143
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
-| ◐ cliffs | 8 | 12 | 4 |
+| ✅ cliffs | 12 | 12 | 4 |
 | concrete | 0 | 17 | 10 |
 | ✅ deepwater | 3 | 3 | 0 |
 | ✅ deepwater-green | 3 | 3 | 0 |

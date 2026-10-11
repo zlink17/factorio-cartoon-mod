@@ -22,7 +22,7 @@ Inventaire des PNG du jeu (Factorio 2.0, dossier `data/`) :
 
 ### Avancement (11 octobre 2026, soir)
 
-**1 578 fichiers remplacés sur 8 246 (19 %), dont 1 560 sur 4 143 dans `base` (38 %)** : l'objectif de la 0.1
+**1 582 fichiers remplacés sur 8 246 (19 %), dont 1 564 sur 4 143 dans `base` (38 %)** : l'objectif de la 0.1
 (~25 % de `base`) est dépassé, porté par les décorations (721 / 759) et les arbres. Détail par famille :
 [couverture.md](couverture.md) (généré).
 
@@ -33,11 +33,11 @@ Inventaire des PNG du jeu (Factorio 2.0, dossier `data/`) :
 | 2 Début de partie (0.1) | 9 lots sur 12 faits : 2.1 à 2.9. Restent 2.10 Personnage, 2.11 Chargeurs et lecteur de convoyeur, 2.12 Publication |
 | 3 à 6 | pas commencées |
 
-Validation par Bastien (style, en jeu) : 2.1 à 2.5, 2.7 et 2.8 validés ; **2.6 Petits bâtiments et 2.9 Eau et falaises à regarder**
-(galerie, zones « Lot 2.6 » et « Lot 2.9 ») ; le radar est le modèle le moins fidèle. Décision en attente hors lot : garder ou non
+Validation par Bastien (style, en jeu) : 2.1 à 2.5, 2.7, 2.8 et les falaises du 2.9 validés ; **2.6 Petits
+bâtiments et l'eau du 2.9 à regarder** (galerie, zones « Lot 2.6 » et « Lot 2.9 ») ; le radar est le modèle le moins fidèle. Décision en attente hors lot : garder ou non
 le sous-mod « terrain épuré » (`cartoon-epure/`).
 
-Poids : 83 Mo d'images dans `cartoon/mod/graphics` (à 19 %) ; à suivre (voir risques, section 6).
+Poids : 82 Mo d'images dans `cartoon/mod/graphics` (à 19 %) ; à suivre (voir risques, section 6).
 
 Beaucoup de fichiers n'ont pas besoin d'être refaits : masques (`*_mask.png`, teintés par le jeu), cartes d'effets
 (`effect_map`), reflets dans l'eau, bruits et LUT de shaders. Le premier travail de l'étape 0 est de les distinguer.
@@ -150,7 +150,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | [x] 2.6 Petits bâtiments | Laboratoire, radar, petite lampe | B | `lamp.py`, `lab.py`, `radar.py` : 11 fichiers (lampe et ombre ; laboratoire 33 images, ombre, intégration ; radar 64 orientations, ombres, intégration ; 3 icônes) ; vus en jeu (`detail-petits-batiments`, galerie). Laissés : halos (lampe allumée, laboratoire), reflet du radar (technique), restes (lot 3.9) |
 | [x] 2.7 Nature | Rochers, arbres (559 fichiers : ~15 espèces × variantes × feuillage), poissons | P | Arbres : 448 fichiers (`terrain/trees.py`, gros lobes teintés par le jeu). Gros rochers et poissons : 54 fichiers (`terrain/rocks.py`, blocs prismatiques) ; vus en jeu (`detail-arbres`, `detail-rochers`). Reflets dans l'eau : fichiers techniques, laissés d'origine |
 | [x] 2.8 Décorations | Touffes d'herbe, buissons, cailloux, taches (669 fichiers, `terrain/decoratives.py`) | P | Une touffe sur cinq, contour teinté, taches à 60 %. Laissés aux autres lots : gros rochers (2.7), traces d'ennemis (3.8), sol nucléaire (4.5) |
-| [x] 2.9 Eau et falaises | Eau (profonde, peu profonde, verte, boue), rives, falaises | P | `terrain/water.py` : 36 fichiers (18 planches d'eau, 8 planches de rives à masque net et berge cernée, 10 bords d'eau peu profonde) et 7 fichiers techniques retouchés (bruit du shader lissé, 6 cartes d'effet en paliers). `terrain/cliffs.py` : 8 planches (colonnes prismatiques, haut et pied). Vus en jeu (`detail-eau`, `detail-falaises`, galerie). Laissés : ombres des falaises (aplats), `water-patch`, rives des sols construits (lot 4.5), transitions vers le vide, falaises et rives de Space Age (étape 6), `water-wube` |
+| [x] 2.9 Eau et falaises | Eau (profonde, peu profonde, verte, boue), rives, falaises | P | `terrain/water.py` : 36 fichiers (18 planches d'eau, 8 planches de rives à masque net et berge cernée, 10 bords d'eau peu profonde) et 7 fichiers techniques retouchés (bruit du shader lissé, 6 cartes d'effet en paliers). `blender/cliffs_3d.py` (et `terrain/cliffs.py`) : 12 fichiers (4 planches × haut, pied, ombre) : pans à facettes aux tons de l'original, ombres portées selon le relief (validées par Bastien après quatre pistes). Vus en jeu (`detail-eau`, `detail-falaises`, galerie). Laissés : `water-patch`, rives des sols construits (lot 4.5), transitions vers le vide, falaises et rives de Space Age (étape 6), `water-wube` |
 | [ ] 2.10 Personnage | Inactif, course, minage, mort, avec et sans arme, 3 niveaux d'armure | B | Modèle articulé : nouveau savoir-faire (rig + animation) |
 | [ ] 2.11 Chargeurs et lecteur de convoyeur | Chargeurs 1 à 3 + turbo, lecteur de convoyeur, paratonnerre | B | Restes de la synthèse |
 | [ ] 2.12 Publication 0.1 | Vignette du mod, description, captures, `changelog.txt`, publication sur le portail des mods | — | Décider le nom public |
@@ -216,7 +216,7 @@ Un sous-plan par planète, détaillé le moment venu. Ordre proposé : celui du 
 | Arbres et décorations | Un modèle par espèce ou un générateur paramétré ? Les feuilles se prêtent mal aux contours nets. | **Décidé (lot 2.7)** : procédural 2D, feuillage en gros lobes teinté par le jeu |
 | Transitions de sol | Garder les masques d'origine (fondus doux) ou les refaire nets ? | **Décidé (étape 1)** : masques nets |
 | GUI | Refaire l'interface ou la laisser d'origine ? | Cadrage du lot 5.4 |
-| Poids du mod | Le jeu d'origine pèse 2,4 Go de graphismes ; à 19 % fait (11 octobre), le mod pèse 83 Mo. Prévoir l'optimisation des PNG (`oxipng`) et suivre la taille à chaque version. | À chaque publication |
+| Poids du mod | Le jeu d'origine pèse 2,4 Go de graphismes ; à 19 % fait (11 octobre), le mod pèse 82 Mo. Prévoir l'optimisation des PNG (`oxipng`) et suivre la taille à chaque version. | À chaque publication |
 | Compatibilité | Autres mods qui réutilisent les fichiers de base (ils hériteront du style, c'est voulu) ; mods qui modifient les mêmes entités. | Avant la 0.1 |
 | Licence | Nos sprites sont des créations (rendus de nos modèles), pas des retouches des fichiers de Wube : à rappeler dans la description. Choisir une licence pour le code et les images. | Avant la 0.1 |
 | Mod pixel | Les deux mods partagent les outils (`tools/`). Toute évolution de l'outillage doit rester compatible avec le mod pixel. | En continu |
