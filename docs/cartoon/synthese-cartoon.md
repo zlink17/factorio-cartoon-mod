@@ -11,14 +11,14 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    « Objets sur les convoyeurs » et 2.8 « Décorations » faits.**
 2. **Prochaine action : fin du lot 2.7** (gros rochers, poissons), puis lot 2.2 « Production de base » (four en
    pierre, foreuses) et l'ordre du plan.
-   **En suspens au 11 octobre** (travail d'une autre session, « Cartoon mod terrain layering ») : un correctif
-   non commité dans `cartoon/mod/data-final-fixes.lua` (herbes, buissons et cailloux de Nauvis passés dans la couche
-   « object » pour être triés par profondeur), en attente de la validation de Bastien ; et
-   `tools/bench/mod/scenarios/vitrine/control.lua` non commité, qui contient les scènes `detail_trees` (arbres,
-   cette session) et `detail_overlaps` (l'autre session), plus une scène temporaire `detail_sort` à retirer. Au
-   début de la prochaine session : `git status`, demander à Bastien s'il valide le correctif, puis commiter
-   `control.lua` (sans `detail_sort`) et réinstaller le mod dans son jeu. Son jeu a les arbres mais **pas** ce
-   correctif.
+   **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
+   souche de Nauvis passent dans la couche « object », et chaque image est recalée pour que le pied du dessin tombe
+   sur la position de la décoration (`tools/decorative_feet.py`, lancé par `build.py`, écrit `cartoon/mod/feet.lua` ;
+   appliqué dans `data-final-fixes.lua`). Règle voulue par Bastien : ce qui a le pied plus bas à l'écran passe
+   devant. Scène de contrôle : `detail-superpositions` du banc. Limites connues : une image d'herbe à plusieurs
+   touffes est triée d'un bloc (sur sa touffe la plus basse), pieds à égalité = ordre arbitraire ; performance à
+   surveiller sur une grande partie (beaucoup de sprites dans la couche triée). Si une touffe passe encore devant un
+   caillou de façon gênante : régénérer les herbes avec une seule touffe par image.
 3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
 4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
@@ -163,6 +163,11 @@ pour l'ordre de chargement).
 - **Plusieurs sessions Claude peuvent travailler en même temps** sur le repo et sur l'instance isolée de Factorio
   (`ListAgents`) : deux bancs simultanés se percutent (fichier introuvable, journal verrouillé). Règle convenue : un
   seul banc ou build à la fois, demander avant d'en lancer un, chacun commite ses propres fichiers.
+- **Superpositions des décorations** : la couche « decorative » n'est pas triée par profondeur (une touffe derrière
+  un caillou peut passer dessus, ce qui ne se voyait pas avec les textures floues d'origine) ; la couche « object »
+  est triée par **position** de la décoration, pas par le bas de l'image. D'où le recalage des images sur leur pied
+  (`feet.lua`). Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
+  pointent vers le mod et ne correspondent plus aux clés de `feet.lua`.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.

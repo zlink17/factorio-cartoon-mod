@@ -506,6 +506,46 @@ local function detail_decoratives()
   end
 end
 
+-- Vue rapprochée : les arbres de Nauvis, quatre exemplaires de chaque (variantes et teintes tirées au hasard).
+local function detail_trees()
+  local names = {}
+  for name, p in pairs(prototypes.entity) do
+    if p.type == "tree" and (name:match("^tree%-") or name:match("dead") or name:match("dry")) then
+      names[#names + 1] = name
+    end
+  end
+  table.sort(names)
+  local s = scene("detail-arbres", 3, GROUND, 2)
+  for i, name in ipairs(names) do
+    local page, k = math.floor((i - 1) / 8), (i - 1) % 8
+    local x, y = page * (s.w + 8) + (k % 4) * 8, s.y + math.floor(k / 4) * 9
+    for j = 0, 3 do
+      create { name = name, position = { x + 1.5 + (j % 2) * 3.5, y + 3.5 + math.floor(j / 2) * 3.5 }, force = "neutral" }
+    end
+    label(name, x + 4, y + 8.3, 0.5)
+  end
+end
+
+-- Vue rapprochée : superpositions. Un caillou par case, entouré d'herbes devant, derrière et sur les côtés : les
+-- herbes de derrière doivent passer sous le caillou, celles de devant par-dessus.
+local function detail_overlaps()
+  local rocks = { "medium-rock", "small-rock", "tiny-rock", "medium-sand-rock" }
+  local grasses = { "green-hairy-grass", "green-small-grass", "brown-hairy-grass", "green-croton", "green-pita",
+    "green-bush-mini" }
+  local s = scene("detail-superpositions", 1, GROUND, 2)
+  for i, rock in ipairs(rocks) do
+    for j, grass in ipairs(grasses) do
+      local x, y = (j - 1) * 5.3 + 2.6, s.y + (i - 1) * 4.5 + 2
+      local list = { { name = rock, position = { x, y }, amount = 1 } }   -- le caillou d'abord : le pire cas
+      for k, d in ipairs({ { 0, -0.7 }, { -0.8, 0 }, { 0.8, 0 }, { 0, 0.7 }, { -0.5, 0.9 }, { 0.5, -0.9 } }) do
+        list[k + 1] = { name = grass, position = { x + d[1], y + d[2] }, amount = 1 }
+      end
+      pcall(surface.create_decoratives, { check_collision = false, decoratives = list })
+      label(rock .. " / " .. grass, x, y + 1.6, 0.3)
+    end
+  end
+end
+
 -- Vue rapprochée : les sols de Nauvis côte à côte (on y voit les transitions).
 local function detail_grounds()
   local names = { "grass-1", "grass-2", "grass-3", "grass-4", "dry-dirt", "dirt-1", "dirt-2", "dirt-3", "dirt-4",
@@ -529,7 +569,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

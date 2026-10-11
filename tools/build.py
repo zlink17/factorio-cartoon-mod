@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_manifest  # noqa: E402
 import check_mod  # noqa: E402
+import decorative_feet  # noqa: E402
 import factorio  # noqa: E402
 
 ROOT = factorio.ROOT
@@ -115,6 +116,7 @@ def main(argv):
         print("Reproductible." if not differences else f"{differences} fichiers diffèrent du mod.")
         sys.exit(1 if differences else 0)
     entries = build_manifest.build_manifest(mod)
+    decorative_feet.build_feet(mod)
     files, errors = check_mod.check_files(mod)
     print(f"Manifeste : {len(entries)} sprites ; contrôle : {len(errors)} problèmes.")
     print("\n".join(errors))

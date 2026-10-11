@@ -33,4 +33,29 @@ local function walk(tbl)
   end
 end
 
+-- Superpositions : les herbes, buissons et cailloux de Nauvis sont presque tous dans la couche « decorative », que le
+-- jeu ne trie pas par profondeur ; avec des contours nets, une touffe posée derrière un caillou se voit par-dessus.
+-- On les met dans la couche « object » (celle des arbres et des gros rochers), que le jeu trie par position ; et on
+-- décale chaque image pour poser le pied du dessin (feet.lua) sur cette position : ce qui est plus bas à l'écran
+-- passe devant. Les taches au sol restent dessous.
+local feet = require("feet")
+for _, name in pairs({ "green-hairy-grass", "green-carpet-grass", "green-small-grass", "brown-hairy-grass",
+  "brown-carpet-grass", "green-asterisk", "green-asterisk-mini", "brown-asterisk", "brown-asterisk-mini",
+  "red-asterisk", "green-pita", "green-pita-mini", "red-pita", "brown-fluff", "brown-fluff-dry", "green-bush-mini",
+  "garballo", "garballo-mini-dry", "green-croton", "red-croton", "green-desert-bush", "red-desert-bush",
+  "white-desert-bush", "small-rock", "tiny-rock", "medium-rock", "medium-sand-rock", "small-sand-rock",
+  "muddy-stump" }) do
+  local decorative = data.raw["optimized-decorative"][name]
+  if decorative then
+    decorative.render_layer = "object"
+    for _, picture in pairs(decorative.pictures or {}) do
+      local foot = feet[picture.filename]
+      if foot and not picture.x and not picture.y then     -- image entière (pas un morceau de planche)
+        local shift = picture.shift or { 0, 0 }
+        picture.shift = { shift[1] or shift.x, -foot * (picture.scale or 1) / 32 }
+      end
+    end
+  end
+end
+
 walk(data.raw)
