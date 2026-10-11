@@ -43,6 +43,16 @@ DIMS = dict(
     end=0.6,           # bouts : avancée du bouchon au-delà du centre (fraction de demi-case)
 )
 ARMS = {"n": (0, 1), "e": (1, 0), "s": (0, -1), "w": (-1, 0)}       # vers le milieu de chaque bord (y : nord)
+# Le sol est raccourci à l'écran par cos(30°) (style.GROUND_STRETCH = False) : une case nord-sud n'y ferait que 55 px
+# au lieu des 64 qui séparent deux tuyaux en jeu, d'où un écart entre les brides de deux tuyaux verticaux. Les
+# positions au sol nord-sud sont donc allongées de KY : les bords de la case tombent à 32 px du centre. Le tube garde
+# sa section ronde.
+KY = 1 / math.cos(math.radians(S.PITCH_BUILDING_DEG))
+
+
+def half(a):
+    """Du centre au milieu du bord `a` de la case (repère de Blender, nord-sud allongé de KY)."""
+    return np.array((ARMS[a][0] * 0.5, ARMS[a][1] * 0.5 * KY, 0.0))
 
 # formes du jeu -> bras (fichier pipe-<forme>.png)
 SHAPES = {
@@ -113,7 +123,7 @@ def shape(arms, d, m):
     r, yc = d["r"], d["yc"]
     z = r
     c = np.array((0.0, yc, z))
-    vec = {a: np.array((*ARMS[a], 0.0)) * 0.5 for a in arms}
+    vec = {a: half(a) for a in arms}
     done = set()
     # droits : bras opposés
     for a, b in (("e", "w"), ("n", "s")):
@@ -171,6 +181,12 @@ def glass(sprite, rel):
     hole = cv2.morphologyEx(hole, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(hole)
     keep = lab == (1 + int(np.argmax(st[1:, 4])))                                   # la plus grande ouverture
+    if "vertical" in rel:
+        # l'original perce le flanc gauche de son tube, où le jeu dessine le fluide (bande x 46-64, mesurée en jeu :
+        # le fond de fenêtre plus large ne se remplit pas) : ouverture droite, à la place de celle de l'original
+        ys, xs = np.nonzero(keep.any(1))[0], np.nonzero(keep.any(0))[0]
+        keep = np.zeros_like(keep)
+        keep[ys.min() + 2:ys.max() - 1, xs.min() + 2:xs.max() + 1] = True          # cadre dans le tube
     out = sprite.copy()
     k = np.ones((3, 3), np.uint8)
     frame = cv2.dilate(keep.astype(np.uint8), k, iterations=3).astype(bool) & ~keep
@@ -225,7 +241,7 @@ def build_underground(which, d=None):
     m = mats()
     r, yc = d["r"], d["yc"]
     a, reach = UNDERGROUND[which]
-    edge = np.array((ARMS[a][0] * 0.5, yc + ARMS[a][1] * 0.5, r))
+    edge = np.array((0.0, yc, r)) + half(a)
     inward = -np.array((*ARMS[a], 0.0))
     knee = edge + inward * max(0.0, reach - r)
     pts = [tuple(edge)]
@@ -259,7 +275,7 @@ def build_cover(direction, d=None):
     reset()
     m = mats()
     a = COVERS[direction]
-    edge = (ARMS[a][0] * 0.5, d["yc"] + ARMS[a][1] * 0.5, d["r"])
+    edge = tuple(np.array((0.0, d["yc"], d["r"])) + half(a))
     cap(edge, (-ARMS[a][0], -ARMS[a][1]), d, m)
 
 

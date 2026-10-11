@@ -235,23 +235,27 @@ def build(direction="N", d=None):
 
 # raccords du prototype pour le nord (cases, y vers le sud comme dans le jeu) : position, direction vers l'extérieur
 CONNECTIONS = [((-1, 0.5), (-1, 0)), ((1, 0.5), (1, 0)), ((0, -0.5), (0, -1))]   # eau, eau, vapeur
-STUB = 0.75                                  # longueur de l'embout, du bord de la case vers l'intérieur
+STUB = 0.75                                  # longueur minimale de l'embout, du bord de la case vers l'intérieur
+STUB_IN = 0.85                               # l'embout s'enfonce au moins jusqu'à cette distance du centre (réservoir)
 
 
 def connectors(direction, d=None):
     """Embouts des raccords : le tube et la bride du tuyau (pipe.py), au bord de la case, posés dans le repère du
-    monde après la rotation : à l'écran, ils tombent exactement sur ceux d'un tuyau voisin. Le tuyau est dessiné
-    `pipe.DIMS["yc"]` plus au sud que sa case, la chaudière `down` plus bas à l'écran : on décale l'embout d'autant."""
+    monde après la rotation : à l'écran, ils tombent exactement sur ceux d'un tuyau voisin. Le sol est raccourci à
+    l'écran par cos(30°) (1 case nord-sud = pipe.KY dans le monde), le tuyau est dessiné `pipe.DIMS["yc"]` plus au
+    sud que sa case et la chaudière `down` cases plus bas à l'écran : un bord à `gy` cases du centre (y vers le sud)
+    est donc en y = -gy KY + yc + down KY dans le monde."""
     d = d or DIMS
     pd, m = PIPE.DIMS, PIPE.mats()
     k = {"N": 0, "E": 1, "S": 2, "W": 3}[direction]
-    dy = pd["yc"] + d["down"]                # le sol est étiré en y par render_scene : 1 case au sol = 1 case à l'écran
     for (px, py), (vx, vy) in CONNECTIONS:
         for _ in range(k):                   # quart de tour horaire dans le repère du jeu
             px, py, vx, vy = -py, px, -vy, vx
+        gx, gy = px + vx * 0.5, py + vy * 0.5                              # bord de la case (jeu, y vers le sud)
+        edge = np.array((gx, (-gy + d["down"]) * PIPE.KY + pd["yc"], pd["r"]))
         out = np.array((vx, -vy, 0.0))       # repère de Blender : y vers le nord
-        edge = np.array((px, -py + dy, pd["r"])) + out * 0.5
-        PIPE.tube_path([tuple(edge), tuple(edge - out * STUB)], pd["r"], m["tube"])
+        stub = max(STUB, abs(float(edge[:2] @ out[:2])) - STUB_IN)         # jusque dans le réservoir
+        PIPE.tube_path([tuple(edge), tuple(edge - out * stub)], pd["r"], m["tube"])
         PIPE.flange(tuple(edge), (-vx, vy), pd, m)
 
 
