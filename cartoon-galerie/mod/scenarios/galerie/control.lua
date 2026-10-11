@@ -593,6 +593,56 @@ local function build_overlaps(x0, y0)
 end
 
 ------------------------------------------------------------------------------------------------------------------------
+-- Lot 2.9 : eau et rives (un lac de chaque eau sur quatre sols), falaises en anneaux parcourus dans les deux sens
+-- (côtés, coins intérieurs et extérieurs).
+local function cliff_ring(x0, y0, n, clockwise)
+  local cells = {}
+  for k = 0, n - 1 do cells[#cells + 1] = { x0 + 4 * k, y0 } end
+  for k = 1, n - 1 do cells[#cells + 1] = { x0 + 4 * (n - 1), y0 + 4 * k } end
+  for k = n - 2, 0, -1 do cells[#cells + 1] = { x0 + 4 * k, y0 + 4 * (n - 1) } end
+  for k = n - 2, 1, -1 do cells[#cells + 1] = { x0, y0 + 4 * k } end
+  local opposite = { east = "west", west = "east", north = "south", south = "north" }
+  local function side(from, to)
+    if to[1] > from[1] then return "east" elseif to[1] < from[1] then return "west"
+    elseif to[2] > from[2] then return "south" else return "north" end
+  end
+  local m = #cells
+  for i, c in ipairs(cells) do
+    local prev, nxt = cells[(i - 2) % m + 1], cells[i % m + 1]
+    local entry, exit = opposite[side(prev, c)], side(c, nxt)
+    if not clockwise then entry, exit = exit, entry end
+    create { name = "cliff", position = c, cliff_orientation = entry .. "-to-" .. exit, force = "neutral" }
+  end
+end
+
+local function build_water(x0, y0)
+  local grounds = { "grass-1", "dirt-4", "sand-1", "red-desert-1" }
+  local waters = { "water", "deepwater", "water-green", "deepwater-green", "water-shallow", "water-mud" }
+  for gi, ground in ipairs(grounds) do
+    local gy = y0 + (gi - 1) * 9
+    tiles(ground, x0, gy, x0 + 34, gy + 9)
+    local t = {}
+    for wi, water in ipairs(waters) do
+      local cx, cy = x0 + 3 + (wi - 1) * 5.6, gy + 4.5
+      for x = math.floor(cx - 3), math.ceil(cx + 3) do
+        for y = gy + 1, gy + 7 do
+          local a = math.atan2(y + 0.5 - cy, x + 0.5 - cx)
+          local r = 2.2 + 0.5 * math.sin(3 * a + wi + gi) + 0.3 * math.cos(5 * a + gi)
+          if (x + 0.5 - cx) ^ 2 + ((y + 0.5 - cy) * 0.9) ^ 2 < r * r then
+            t[#t + 1] = { name = water, position = { x, y } }
+          end
+        end
+      end
+    end
+    pcall(surface.set_tiles, t, true, false, true)
+    label(ground, x0 + 17, gy + 7.9, 0.4)
+  end
+  for k = 0, 2 do create { name = "fish", position = { x0 + 3 + k * 5.6, y0 + 4.5 }, force = "neutral" } end
+  cliff_ring(x0 + 40, y0 + 4, 3, true)
+  cliff_ring(x0 + 40, y0 + 20, 3, false)
+  label("falaises (les deux sens)", x0 + 48, y0 + 34, 0.5)
+end
+
 -- Les zones, dans l'ordre du plan (docs/cartoon/plan.md). w, h : taille en cases.
 
 local ZONES = {
@@ -612,6 +662,7 @@ local ZONES = {
   { id = "decorations", titre = "Lot 2.8 · Décorations", w = 34, h = 32, build = build_decoratives },
   { id = "superpositions", titre = "Lot 2.8 · Superpositions (tri par profondeur)", w = 34, h = 30,
     build = build_overlaps },
+  { id = "eau", titre = "Lot 2.9 · Eau et falaises", w = 58, h = 36, build = build_water },
 }
 
 -- Range les zones en lignes de ROW_WIDTH cases au plus ; renvoie la taille totale.

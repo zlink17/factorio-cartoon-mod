@@ -872,6 +872,67 @@ local function detail_grounds()
   end
 end
 
+-- Vue rapprochée : eau et rives. Une rangée par sol (herbe, terre, sable, désert rouge), un lac de chaque eau.
+local function detail_water()
+  local grounds = { "grass-1", "dirt-4", "sand-1", "red-desert-1" }
+  local waters = { "water", "deepwater", "water-green", "deepwater-green", "water-shallow", "water-mud" }
+  local s = scene("detail-eau", 2, GROUND, 2)
+  for gi, ground in ipairs(grounds) do
+    local page, row = math.floor((gi - 1) / 2), (gi - 1) % 2
+    local x0, y0 = page * (s.w + 8), s.y + row * 9
+    local t = {}
+    for x = x0, x0 + s.w - 1 do for y = y0, y0 + 8 do t[#t + 1] = { name = ground, position = { x, y } } end end
+    surface.set_tiles(t, true, false, true)
+    t = {}
+    for wi, water in ipairs(waters) do
+      local cx, cy = x0 + 2.8 + (wi - 1) * 5.3, y0 + 4.5
+      for x = math.floor(cx - 3), math.ceil(cx + 3) do
+        for y = y0 + 1, y0 + 7 do
+          local a = math.atan2(y + 0.5 - cy, x + 0.5 - cx)
+          local r = 2.3 + 0.6 * math.sin(3 * a + wi + gi) + 0.3 * math.cos(5 * a + gi)
+          if (x + 0.5 - cx) ^ 2 + ((y + 0.5 - cy) * 0.9) ^ 2 < r * r then t[#t + 1] = { name = water, position = { x, y } } end
+        end
+      end
+    end
+    surface.set_tiles(t, true, false, true)
+    if gi == 1 then
+      for k = 0, 2 do create { name = "fish", position = { x0 + 2.8 + k * 5.3, y0 + 4.5 }, force = "neutral" } end
+    end
+    label(ground, x0 + s.w / 2, y0 + 7.9, 0.5)
+  end
+end
+
+-- Vue rapprochée : falaises en chaînes fermées (anneaux sur la grille de 4 cases des falaises), parcourues dans les
+-- deux sens : on voit les côtés, les coins intérieurs et extérieurs, et leurs raccords.
+local function ring(x0, y0, n, clockwise)
+  local cells = {}
+  for k = 0, n - 1 do cells[#cells + 1] = { x0 + 4 * k, y0, "west", "east" } end
+  for k = 1, n - 1 do cells[#cells + 1] = { x0 + 4 * (n - 1), y0 + 4 * k, "north", "south" } end
+  for k = n - 2, 0, -1 do cells[#cells + 1] = { x0 + 4 * k, y0 + 4 * (n - 1), "east", "west" } end
+  for k = n - 2, 1, -1 do cells[#cells + 1] = { x0, y0 + 4 * k, "south", "north" } end
+  local m = #cells
+  for i, c in ipairs(cells) do         -- entrée : d'où l'on vient ; sortie : où l'on va
+    local prev, nxt = cells[(i - 2) % m + 1], cells[i % m + 1]
+    local function side(from, to)
+      if to[1] > from[1] then return "east" elseif to[1] < from[1] then return "west"
+      elseif to[2] > from[2] then return "south" else return "north" end
+    end
+    local opposite = { east = "west", west = "east", north = "south", south = "north" }
+    local entry, exit = opposite[side(prev, c)], side(c, nxt)
+    if not clockwise then entry, exit = exit, entry end
+    create { name = "cliff", position = { c[1], c[2] }, cliff_orientation = entry .. "-to-" .. exit, force = "neutral" }
+  end
+end
+
+local function detail_cliffs()
+  local s = scene("detail-falaises", 1, GROUND, 2)
+  ring(4, s.y + 3, 3, true)
+  ring(18, s.y + 3, 3, false)
+  local t = {}                         -- un peu de sable et d'eau à côté : la falaise au milieu des sols
+  for x = 0, 31 do for y = 15, 17 do t[#t + 1] = { name = "sand-1", position = { x, s.y + y } } end end
+  surface.set_tiles(t, true, false, true)
+end
+
 local function build()
   surface = game.create_surface("vitrine", nauvis_settings(1))
   surface.always_day = true
@@ -879,7 +940,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_pipes, detail_small_buildings, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_storage, detail_steam, detail_steam_engines, detail_offshore_pumps, detail_pipes, detail_small_buildings, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds, detail_water, detail_cliffs }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

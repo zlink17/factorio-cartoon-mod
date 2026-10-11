@@ -117,6 +117,18 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   grès olive, qui ressort sur le sable). Ombre de l'original en aplat. **[VALIDÉ]**
 - **Poissons** : silhouette nette (fuseau et queue en V) à la place de la tache floue, même teinte et même opacité,
   sans contour (ils sont sous l'eau). **[VALIDÉ]**
+- **Eau** (`terrain/water.py`) : l'eau profonde est peinte par le shader du jeu (couleur du prototype et bruit
+  animé) ; on **lisse son bruit** (`water-noise.png`) : de grandes taches claires et sombres à bord net au lieu du
+  grain. Textures des eaux en aplat avec quelques vaguelettes (visibles surtout sur l'eau peu profonde et la vase,
+  avec des taches de fond). Bord de l'eau (cartes d'effet) en **paliers francs** : bande sombre et écume en bandes.
+  **[PROVISOIRE]**
+- **Rives** : masques de rive à bord net (comme les sols), recalés pour que deux variantes voisines se raccordent ;
+  **berge** en aplat de terre sous le bord sud de la terre (vue à 30°, comme les bâtiments), cernée de noir chaud,
+  trait fin sur les autres bords. Sable : plage basse (berge de 4 px), le sable se voit sous l'eau. **[PROVISOIRE]**
+- **Falaises** (`terrain/cliffs.py`) : **colonnes prismatiques** hautes (orgues basaltiques) posées sur la silhouette
+  de l'original, comme les gros rochers mais à taille fixe (demi-largeur 16 px, hauteur 5 demi-largeurs) ; dessus
+  beige, flancs bruns sombres, contour noir chaud ; halo du pied en aplat semi-transparent ; ombres d'origine.
+  **[PROVISOIRE]**
 - **Four en pierre** (`blender/furnace.py`) : pyramide tronquée de briques ocre (texture de briques procédurale,
   joints sombres, sans relief), bandeau et cheminée en pierre grise, bouche encadrée de pierre. Flammes en aplats à
   trois tons (rouge, orange, jaune), langues en gouttes qui ondulent en boucle de 48 images, sans contour, limitées

@@ -8,18 +8,18 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1516 | 4143 | 37 % |
+| `base` | 1560 | 4143 | 38 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **1534** | **8246** | **19 %** |
+| **Total** | **1578** | **8246** | **19 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 1394 | 5483 |
+| sprite | 1438 | 5483 |
 | icone | 88 | 1525 |
 | ombre | 48 | 822 |
 | lumiere | 0 | 135 |
@@ -278,14 +278,14 @@ Faites : `advanced-circuit`, `assembling-machine`, `automation-science-pack`, `b
 
 ### technology : 0 / 131
 
-### terrain : 22 / 143
+### terrain : 66 / 143
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
-| cliffs | 0 | 12 | 4 |
+| ◐ cliffs | 8 | 12 | 4 |
 | concrete | 0 | 17 | 10 |
-| deepwater | 0 | 3 | 0 |
-| deepwater-green | 0 | 3 | 0 |
+| ✅ deepwater | 3 | 3 | 0 |
+| ✅ deepwater-green | 3 | 3 | 0 |
 | hazard-concrete-left | 0 | 2 | 0 |
 | hazard-concrete-right | 0 | 2 | 0 |
 | lab-tiles | 0 | 3 | 0 |
@@ -294,11 +294,11 @@ Faites : `advanced-circuit`, `assembling-machine`, `automation-science-pack`, `b
 | stone-path | 0 | 8 | 0 |
 | ◐ terrain | 19 | 22 | 0 |
 | tutorial-grid | 0 | 7 | 0 |
-| water | 0 | 3 | 0 |
-| water-green | 0 | 3 | 0 |
-| water-mud | 0 | 8 | 0 |
-| water-shallow | 0 | 8 | 0 |
-| water-transitions | 0 | 17 | 0 |
+| ✅ water | 3 | 3 | 0 |
+| ✅ water-green | 3 | 3 | 0 |
+| ✅ water-mud | 8 | 8 | 0 |
+| ✅ water-shallow | 8 | 8 | 0 |
+| ◐ water-transitions | 8 | 17 | 0 |
 | water-wube | 0 | 1 | 0 |
 
 

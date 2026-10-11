@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1 à 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1 à 2.9 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -9,8 +9,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
    « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.4 « Énergie vapeur », 2.5 « Tuyaux »,
-   2.6 « Petits bâtiments », 2.7 « Nature » et 2.8 « Décorations » faits.**
-2. **Prochaine action : lot 2.9 Eau et falaises**, puis l'ordre du plan (2.10 Personnage, 2.11 Chargeurs).
+   2.6 « Petits bâtiments », 2.7 « Nature », 2.8 « Décorations » et 2.9 « Eau et falaises » faits.**
+2. **Prochaine action : lot 2.10 Personnage**, puis l'ordre du plan (2.11 Chargeurs, 2.12 Publication).
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
@@ -66,7 +66,8 @@ cartoon/
               underground.py, splitter.py, pole.py, ore.py, items.py, furnace.py, burner_drill.py, electric_drill.py,
               chests.py, boiler.py, steam_engine.py, offshore_pump.py, pipe.py, lamp.py, lab.py, radar.py
   terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets), decoratives.py, trees.py,
-              rocks.py (gros rochers, poissons)
+              rocks.py (gros rochers, poissons), water.py (eaux, rives, bruit et
+              cartes d'effet du shader de l'eau), cliffs.py (falaises)
   lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
@@ -110,7 +111,7 @@ touffes ton sur ton dans la texture.
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 534 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 578 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -134,6 +135,8 @@ touffes ton sur ton dans la texture.
 | Pompe côtière | 4 directions × 32 images (pistons dans les fenêtres des cylindres), ombres, pieds, bas du réservoir sous l'eau, eau des fenêtres et vitres en aplats (forme de l'original), icône. | `blender/offshore_pump.py` |
 | Tuyaux | 18 formes (droits, coudes, T, croix, bouts, fenêtres) et tuyau isolé, ombre incluse ; fonds des fenêtres ; souterrains (4) ; couvercles et ombres ; raccords des assembleurs 2 et 3 ; icônes. | `blender/pipe.py` |
 | Petits bâtiments | Petite lampe (sprite, ombre) ; laboratoire (33 images, lueur bleue qui vacille, ombre, intégration) ; radar (64 orientations de l'antenne, ombres, intégration) ; 3 icônes. | `blender/lamp.py`, `lab.py`, `radar.py` |
+| Eau et rives | 6 eaux en aplats (vaguelettes, taches de fond pour l'eau peu profonde et la vase) ; bruit du shader de l'eau lissé (grandes taches nettes) et cartes d'effet des rives en paliers ; rives de l'herbe, des terres et du sable : masques nets recalés, berge de terre cernée sous les bords sud, plage basse pour le sable ; bords d'eau peu profonde nets. | `terrain/water.py` |
+| Falaises de Nauvis | 4 planches × 2 calques (haut, pied) : colonnes prismatiques hautes sur la silhouette de l'original, halo du pied en aplat ; ombres d'origine. | `terrain/cliffs.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -297,6 +300,28 @@ touffes ton sur ton dans la texture.
   `always_day` reste de jour.
 - **Banc** : une chaudière ne brûle en continu que si elle a de l'eau et peut évacuer sa vapeur : tuyaux infinis
   (`set_infinity_pipe_filter`, eau « at-least », vapeur « exactly » 0).
+- **Eau profonde : c'est le shader qui la peint**, pas la texture du sol. Les tuiles d'eau ont `effect = "water"`
+  (prototype `tile-effect`) : couleur opaque `effect_color` et bruit animé `terrain/effects/water-noise.png` ; nos
+  vaguelettes ne se voient que sur l'eau peu profonde et la vase (couleur d'effet à 12 % d'opacité). Lisser ce
+  bruit (flou raccordable, même moyenne et même écart-type) suffit à rendre l'eau cartoon : les seuils du shader
+  découpent de grandes taches nettes. Les cartes d'effet des rives (`effect-maps/water-*-mask.png`, rouge et bleu)
+  pilotent écume et assombrissement du bord : quantifiées en trois paliers, ce sont des bandes franches.
+- **Planche de rives** (`water-transitions/<sol>.png`, 3200 × 2368) : overlay (x = 0), fond (x = 1088, inutilisé si
+  `background_enabled = false`), masque (x = 2176, blanc = terre, cellules de 64). Bandes : coins intérieurs (y = 0),
+  extérieurs (576), côtés (1152), U (1728), O (2304), quatre orientations par bande. **La hauteur des cellules
+  d'overlay dépend de `tile_height` du prototype** : 2 cases (rangées tous les 128 px) pour l'herbe et les terres,
+  1 case (tous les 64 px) pour le sable ; une erreur d'un rang donne des traits au milieu des terres. Le sable est
+  aussi dessiné sous l'eau (`background_layer_group = "water"`) : plage.
+- **Les variantes de rive ne se raccordent qu'à quelques px près** (jusqu'à 14 px sur les côtés : le fondu
+  d'origine le cachait). Un bord net fait des marches à chaque case : `water.snap` recale chaque masque, sur 16 px le
+  long des bords de cellule, à la position médiane des côtés de la même planche (propre à chaque sol : herbe, terres
+  et sable diffèrent beaucoup). L'overlay déborde sur la case du dessous : on n'y dessine que la berge qui y pend.
+- **Falaises** : chaque orientation est une cellule de 256 px en deux calques (haut, pied `-lower`) qui se
+  chevauchent ; on dessine la réunion des deux corps (alpha > 200), puis chaque pixel retourne au calque qui le
+  portait. Les cellules se suivent le long d'une chaîne : **prolonger la cellule** (bords répétés, 48 px) avant de
+  poser les colonnes, sinon elles s'alignent sur le bord (ligne de sommets et contour droits au raccord). Le banc
+  pose des **anneaux** de falaises (`ring` : sortie d'une cellule = entrée de la suivante) : la génération de
+  carte n'en a posé aucune sur la surface de test.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
@@ -309,13 +334,14 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 4 (fin de partie), 5 (interface), 6 (Space Age). Points ouverts notés pendant l'étape 1 :
 - les décorations d'origine jurent sur les sols en aplats : lot 2.8 à avancer juste après le lot 2.1 ;
 - pièces « patch » des souterrains laissées vides (les objets passent un instant sur le bord du capot : à peine visible) ;
-- eau et bords d'eau encore d'origine (lot 2.9) ; patch « gelé » d'Aquilo (étape 6).
+- patch « gelé » d'Aquilo (étape 6) ; rives des sols construits (béton, pierre, remblai : lot 4.5).
 
 ## 8. Chiffres
 
-- 1 534 fichiers remplacés sur 8 246 à couvrir (19 %) : 1 516 dans `base` (37 %), 13 pour Space Age, 5 dans `core`
-  (câbles). Par rôle : 1 394 sprites, 88 icônes, 48 ombres, 4 masques. Détail : [couverture.md](couverture.md).
-- ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 72 Mo d'images dans
+- 1 578 fichiers remplacés sur 8 246 à couvrir (19 %) : 1 560 dans `base` (38 %), 13 pour Space Age, 5 dans `core`
+  (câbles). Par rôle : 1 438 sprites, 88 icônes, 48 ombres, 4 masques ; plus 7 fichiers techniques retouchés (bruit
+  et cartes d'effet de l'eau). Détail : [couverture.md](couverture.md).
+- ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 83 Mo d'images dans
   `cartoon/mod/graphics`.
 - Tout le mod se régénère en ~19 min (`tools/build.py cartoon tous --verifier`, 11 octobre : reproductible, 1 534
   fichiers identiques) ; le banc d'essai fait ses 428 captures en ~40 s par passe.
