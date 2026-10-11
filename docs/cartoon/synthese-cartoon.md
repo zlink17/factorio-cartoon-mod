@@ -10,9 +10,10 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
    « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.4 « Énergie vapeur », 2.5 « Tuyaux »,
    2.6 « Petits bâtiments », 2.7 « Nature », 2.8 « Décorations » et 2.9 « Eau et falaises » faits ; 2.10 « Personnage » commencé.**
-2. **Prochaine action : finir le lot 2.10 Personnage** (modèle commité ; reste la production complète
-   `tools/build.py cartoon personnage`, ~30 min, le contrôle, la vue en jeu dans la galerie, zone « Lot 2.10 »),
-   puis l'ordre du plan (2.11 Chargeurs, 2.12 Publication).
+2. **Lot 2.10 Personnage : produit et vu en jeu (12 octobre), en attente de l'avis de Bastien** (galerie, zone
+   « Lot 2.10 »). Les armures 2 et 3 sont des formes provisoires, à dessiner une fois le personnage validé (image
+   cible à faire). Relance complète : `tools/build.py cartoon personnage` (~45 min). Puis l'ordre du plan
+   (2.11 Chargeurs, 2.12 Publication).
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).

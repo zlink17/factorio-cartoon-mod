@@ -225,11 +225,12 @@ def build():
     # fusil : en bandoulière dans le dos (crosse en bas à gauche, canon en haut à droite), ou en main
     part(rbox((0.08, 0.06, 0.5), 0.02), "chest", (0.0, 0.3, 0.32), "gun_back", M["gun"], rot=(0, -40, 0))
     part(rbox((0.07, 0.05, 0.12), 0.015), "chest", (0.08, 0.33, 0.28), "gun_back", M["gun_dark"], rot=(0, -40, 0))
-    part(rbox((0.08, 0.46, 0.1), 0.02), "haR", (-0.04, -0.12, 0.0), "gun_hand", M["gun"])
-    part(rbox((0.06, 0.1, 0.12), 0.015), "haR", (-0.04, 0.02, -0.08), "gun_hand", M["gun_dark"])
-    # pioche : manche dans la main droite, fer au bout
-    part(limb(0.5, 0.022, 0.022), "haR", (0, -0.22, 0), "pick", M["wood"], rot=(90, 0, 0))
-    part(rbox((0.045, 0.06, 0.34), 0.015), "haR", (0, -0.46, 0), "pick", M["tool"])
+    # en main : le long de l'avant-bras (axe -z de la main), chargeur vers le bas du bras tendu (+y local)
+    part(rbox((0.08, 0.1, 0.5), 0.02), "haR", (-0.03, 0.0, -0.14), "gun_hand", M["gun"])
+    part(rbox((0.06, 0.12, 0.07), 0.015), "haR", (-0.03, 0.09, -0.1), "gun_hand", M["gun_dark"])
+    # pioche : manche dans la main droite, dans le prolongement de l'avant-bras, fer en travers au bout
+    part(limb(0.52, 0.024, 0.024), "haR", (0, 0, -0.2), "pick", M["wood"])
+    part(rbox((0.05, 0.36, 0.06), 0.015), "haR", (0, -0.03, -0.45), "pick", M["tool"])
     bpy.context.view_layer.update()
 
 
@@ -268,9 +269,9 @@ def pose_idle(t):
 
 
 def aim():
-    """Fusil tenu à deux mains devant soi, à hauteur de hanche."""
-    rot("shR", x=-35, y=6); rot("elR", x=-55)
-    rot("shL", x=-55, y=-20, z=-30); rot("elL", x=-50)
+    """Fusil tenu à deux mains devant soi, avant-bras à l'horizontale ; la main gauche soutient le canon."""
+    rot("shR", x=-62, z=-8); rot("elR", x=-28)
+    rot("shL", x=-55, z=38); rot("elL", x=-42)
 
 
 def pose_idle_gun(t):

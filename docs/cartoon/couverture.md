@@ -8,22 +8,22 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1564 | 4143 | 38 % |
+| `base` | 1626 | 4143 | 39 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
-| `core` | 5 | 456 | 1 % |
-| **Total** | **1582** | **8246** | **19 %** |
+| `core` | 6 | 456 | 1 % |
+| **Total** | **1645** | **8246** | **20 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 1438 | 5483 |
-| icone | 88 | 1525 |
-| ombre | 52 | 822 |
+| sprite | 1457 | 5483 |
+| icone | 89 | 1525 |
+| ombre | 77 | 822 |
 | lumiere | 0 | 135 |
-| masque | 4 | 281 |
+| masque | 22 | 281 |
 
 ## `base` par famille
 
@@ -81,7 +81,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ✅ white-desert-bush | 20 | 20 | 0 |
 | ✅ worms-decal | 16 | 16 | 0 |
 
-### entity : 688 / 2289
+### entity : 750 / 2289
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -113,7 +113,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | cargo-pod | 0 | 20 | 3 |
 | cargo-wagon | 0 | 19 | 10 |
 | centrifuge | 0 | 10 | 6 |
-| character | 0 | 63 | 43 |
+| ◐ character | 62 | 63 | 43 |
 | chemical-plant | 0 | 13 | 1 |
 | circuit-connector | 0 | 16 | 4 |
 | cliff-explosives | 0 | 2 | 1 |
@@ -585,4 +585,6 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 |---|---:|---:|---:|
 | fluid-visualization | 0 | 4 | 0 |
 
-### icons : 0 / 337
+### icons : 1 / 337
+
+Faites : `character`.
