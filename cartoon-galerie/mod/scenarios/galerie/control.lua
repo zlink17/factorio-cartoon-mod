@@ -19,8 +19,14 @@ local PIPE_DRAIN = 2           -- débit du réseau de tuyaux (par tick : 120/s,
 local PUMP_DRAIN = 5           -- eau retirée à la sortie de chaque pompe côtière (par tick : 300/s)
 
 local BENCH = script.active_mods["cartoon-bench"] ~= nil
-local CARTOON = script.active_mods["factorio-cartoon-mod"] ~= nil
-local VARIANT = CARTOON and "cartoon" or "origine"
+-- Variante graphique : le premier mod de style actif (captures dans script-output/galerie/<variante>/).
+local STYLES = { { "factorio-cartoon-mod", "cartoon" }, { "factorio-pixel-mod", "pixel" },
+  { "factorio-celshading-mod", "celshading" } }
+local VARIANT = "origine"
+for _, m in ipairs(STYLES) do
+  if script.active_mods[m[1]] then VARIANT = m[2]; break end
+end
+local STYLED = VARIANT ~= "origine"
 
 local N, E, S, W = defines.direction.north, defines.direction.east, defines.direction.south, defines.direction.west
 local DIRS = { { "nord", N }, { "est", E }, { "sud", S }, { "ouest", W } }
@@ -139,9 +145,23 @@ local function load_belt(e, items, k)
   end
 end
 
+-- Presque à saturation : 4 objets par voie et par case (le maximum), une place laissée libre une case sur trois
+-- pour que les fusions des répartiteurs avancent. Objets par petits groupes, comme une ligne réelle.
+local function fill_belt(e, items, k)
+  for line = 1, 2 do
+    for slot = 0, 3 do
+      if not (slot == 3 and k % 3 == 0) then
+        local item = items[(math.floor((k * 4 + slot) / 3) + line * 2) % #items + 1]
+        pcall(function() e.get_transport_line(line).insert_at(0.125 + slot * 0.25, { name = item, count = 1 }) end)
+      end
+    end
+  end
+end
+
 -- Boucle de convoyeurs ; specials[{x, y}] (clé "x,y") : "in"/"out" (souterrain), "skip" (case enterrée),
--- "split" (répartiteur, sa seconde sortie part vers l'extérieur sur deux cases).
-local function belt_loop(belt, x0, y0, w, h, ccw, specials, items)
+-- "split" (répartiteur, sa seconde sortie part vers l'extérieur sur deux cases), "splitter" (répartiteur seul, sa
+-- seconde voie côté extérieur). fill : remplir presque à saturation (fill_belt) au lieu d'un convoyeur sur deux.
+local function belt_loop(belt, x0, y0, w, h, ccw, specials, items, fill)
   local cells = perimeter(w, h, ccw)
   local under = belt:gsub("transport%-belt", "underground-belt")
   local split = belt:gsub("transport%-belt", "splitter")
@@ -152,17 +172,18 @@ local function belt_loop(belt, x0, y0, w, h, ccw, specials, items)
     local kind = specials and specials[c[1] .. "," .. c[2]]
     if kind == "in" or kind == "out" then
       create { name = under, position = pos, direction = dir, type = kind == "in" and "input" or "output" }
-    elseif kind == "split" then
+    elseif kind == "split" or kind == "splitter" then
       local ox, oy = 0, 0                          -- vers l'extérieur du rectangle
       if c[2] == 0 then oy = -1 elseif c[2] == h - 1 then oy = 1 elseif c[1] == 0 then ox = -1 else ox = 1 end
       create { name = split, position = { pos[1] + ox / 2, pos[2] + oy / 2 }, direction = dir }
       local vx, vy = nx[1] - c[1], nx[2] - c[2]
-      for k = 1, 2 do
+      for k = 1, kind == "split" and 2 or 0 do
         create { name = belt, position = { pos[1] + ox + vx * k, pos[2] + oy + vy * k }, direction = dir }
       end
     elseif kind ~= "skip" then
       local e = create { name = belt, position = pos, direction = dir }
-      if e and items and i % 2 == 1 then load_belt(e, items, i) end
+      if e and items and fill then fill_belt(e, items, i)
+      elseif e and items and i % 2 == 1 then load_belt(e, items, i) end
     end
   end
 end
@@ -178,17 +199,29 @@ local function belt_tiers()
   return list
 end
 
--- Étape 1 : convoyeurs, souterrains, répartiteurs de chaque niveau.
+-- Étape 1 : convoyeurs, souterrains, répartiteurs de chaque niveau, en circuit fermé chargé presque à saturation.
+-- En haut un anneau horaire (15 x 7) coupé de deux souterrains ; deux répartiteurs sur son bas (vers l'ouest) :
+-- celui de droite détourne la moitié du flux dans une boucle de liaison qui descend, traverse le répartiteur du
+-- haut de l'anneau du bas (antihoraire, 15 x 7) et remonte rejoindre l'anneau par le répartiteur de gauche.
+local BELT_CIRCUIT_ITEMS = { "iron-ore", "iron-gear-wheel", "copper-plate", "coal", "electronic-circuit",
+  "iron-plate", "stone", "copper-cable", "copper-ore", "steel-plate" }
+
 local function build_belts(x0, y0)
   for t, p in ipairs(belt_tiers()) do
-    local x = x0 + (t - 1) * 16 + 1
-    -- boucle horaire avec un souterrain en haut (vers l'est) et un en bas (vers l'ouest)
-    belt_loop(p.name, x, y0 + 1, 12, 6, false,
-      { ["3,0"] = "in", ["4,0"] = "skip", ["5,0"] = "skip", ["6,0"] = "out",
-        ["8,5"] = "in", ["7,5"] = "skip", ["6,5"] = "skip", ["5,5"] = "out" }, BELT_ITEMS)
-    -- boucle antihoraire avec un répartiteur en haut et un en bas
-    belt_loop(p.name, x, y0 + 11, 12, 6, true, { ["5,0"] = "split", ["6,5"] = "split" }, BELT_ITEMS)
-    label(p.name, x + 6, y0 + 19, 0.8)
+    local x = x0 + (t - 1) * 18
+    belt_loop(p.name, x, y0, 15, 7, false,
+      { ["4,0"] = "in", ["5,0"] = "skip", ["6,0"] = "skip", ["7,0"] = "out",
+        ["12,6"] = "splitter", ["10,6"] = "in", ["9,6"] = "skip", ["8,6"] = "skip", ["7,6"] = "out",
+        ["3,6"] = "splitter" }, BELT_CIRCUIT_ITEMS, true)
+    belt_loop(p.name, x, y0 + 12, 15, 7, true, { ["6,0"] = "splitter" }, BELT_CIRCUIT_ITEMS, true)
+    -- liaison : de la sortie sud du répartiteur de droite à l'entrée sud de celui de gauche
+    local link = { { 11, 7, W }, { 10, 7, S }, { 10, 8, S }, { 10, 9, S }, { 10, 10, S }, { 10, 11, W }, { 9, 11, W },
+      { 8, 11, W }, { 7, 11, W }, { 5, 11, W }, { 4, 11, N }, { 4, 10, N }, { 4, 9, N }, { 4, 8, N }, { 4, 7, W } }
+    for i, l in ipairs(link) do
+      local e = create { name = p.name, position = { x + l[1] + 0.5, y0 + l[2] + 0.5 }, direction = l[3] }
+      if e then fill_belt(e, BELT_CIRCUIT_ITEMS, i + 7) end
+    end
+    label(p.name, x + 7.5, y0 + 19.3, 0.8)
   end
 end
 
@@ -218,15 +251,20 @@ end
 -- Étape 1 : assembleurs 1 à 3 au travail.
 local function build_assemblers(x0, y0)
   power({ x0 + 1, y0 + 6 }, { { x0 + 4, y0 + 6 }, { x0 + 20, y0 + 6 } })
+  -- bras qui déposent vers le sud (le sens de « direction » a changé avec la 2.0 : on le vérifie)
+  local function inserter_south(x, y)
+    local ins = create { name = "fast-inserter", position = { x, y }, direction = S }
+    if ins and ins.drop_position.y < ins.position.y then ins.direction = N end
+  end
   for n = 1, 3 do
     local x = x0 + 8.5 + (n - 1) * 8
-    local a = create { name = "assembling-machine-" .. n, position = { x, y0 + 6.5 } }
-    if a then a.set_recipe("iron-gear-wheel"); keep(a, { clear = true }) end
-    keep(create { name = "iron-chest", position = { x, y0 + 2.5 } }, { input = { "iron-plate", 400 } })
-    create { name = "fast-inserter", position = { x, y0 + 3.5 }, direction = S }
-    create { name = "fast-inserter", position = { x, y0 + 9.5 }, direction = S }
-    keep(create { name = "wooden-chest", position = { x, y0 + 10.5 } }, { clear = true })
-    label("assembling-machine-" .. n, x, y0 + 11.6, 0.6)
+    local a = create { name = "assembling-machine-" .. n, position = { x, y0 + 6.5 } }   -- cases y0+5 à y0+8
+    if a then a.set_recipe("iron-gear-wheel") end
+    keep(create { name = "iron-chest", position = { x, y0 + 3.5 } }, { input = { "iron-plate", 400 } })
+    inserter_south(x, y0 + 4.5)
+    inserter_south(x, y0 + 8.5)
+    keep(create { name = "wooden-chest", position = { x, y0 + 9.5 } }, { clear = true })
+    label("assembling-machine-" .. n, x, y0 + 10.6, 0.6)
   end
 end
 
@@ -402,9 +440,10 @@ local function build_steam(x0, y0)
   create { name = "steam-engine", position = { bx, by - 8.5 }, direction = N }
   local px = bx - 2
   local pump
-  for _, y in ipairs({ y0 + 17.5, y0 + 17, y0 + 18, y0 + 18.5 }) do
-    if surface.can_place_entity { name = "offshore-pump", position = { px, y }, direction = N, force = "player" } then
-      pump = create { name = "offshore-pump", position = { px, y }, direction = N }
+  -- la direction d'une pompe côtière pointe vers l'eau (sa sortie est à l'opposé) : l'eau est au sud
+  for _, y in ipairs({ y0 + 16.5, y0 + 17, y0 + 16, y0 + 17.5, y0 + 18 }) do
+    if surface.can_place_entity { name = "offshore-pump", position = { px, y }, direction = S, force = "player" } then
+      pump = create { name = "offshore-pump", position = { px, y }, direction = S }
       break
     end
   end
@@ -670,10 +709,83 @@ local function build_water(x0, y0)
   label("falaises (les deux sens)", x0 + 48, y0 + 34, 0.5)
 end
 
+-- Lot 2.10 : le personnage, une ligne par armure (aucune, lourde, assistée) : au repos dans les 8 directions,
+-- un qui court en rond (octogone), un qui mine, un qui tire en courant ; morts en bas. Couleurs de joueur variées.
+local DIR8 = { "north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest" }
+local CHAR_COLORS = { { 0.869, 0.5, 0.13 }, { 0.8, 0.15, 0.15 }, { 0.2, 0.45, 0.9 }, { 0.25, 0.7, 0.25 } }
+
+local function character_at(x, y, armor, k)
+  local c = create { name = "character", position = { x, y } }
+  if not c then return end
+  c.color = CHAR_COLORS[(k or 0) % #CHAR_COLORS + 1]
+  if armor then c.get_inventory(defines.inventory.character_armor).insert { name = armor, count = 1 } end
+  return c
+end
+
+local function build_characters(x0, y0)
+  local armors = { { nil, "sans armure" }, { "heavy-armor", "armure lourde" }, { "power-armor", "armure assistée" } }
+  storage.chars = { face = {}, run = {}, mine = {}, shoot = {} }
+  for r, a in ipairs(armors) do
+    local y = y0 + 2 + (r - 1) * 7
+    label(a[2], x0 + 1, y - 1.6, 0.6, "left")
+    for d = 1, 8 do                                  -- au repos, une direction chacun
+      local c = character_at(x0 + 1 + d * 2, y + 1, a[1], d)
+      if c then table.insert(storage.chars.face, { c = c, dir = defines.direction[DIR8[d]] }) end
+    end
+    local c = character_at(x0 + 22, y + 1, a[1], r)    -- course en rond
+    if c then table.insert(storage.chars.run, c) end
+    local ore_pos = { x0 + 30.5, y + 1.5 }             -- minage d'un gisement (côté ouest du personnage)
+    create { name = "iron-ore", position = ore_pos, amount = 1000000, force = "neutral" }
+    c = character_at(x0 + 32, y + 1.5, a[1], r + 1)
+    if c then table.insert(storage.chars.mine, { c = c, pos = ore_pos }) end
+    c = character_at(x0 + 37, y + 1, a[1], r + 2)      -- tir en courant
+    if c then
+      c.get_inventory(defines.inventory.character_guns).insert { name = "submachine-gun", count = 1 }
+      c.get_inventory(defines.inventory.character_ammo).insert { name = "firearm-magazine", count = 200 }
+      table.insert(storage.chars.shoot, c)
+    end
+  end
+  label("au repos (8 directions)", x0 + 10, y0 + 22, 0.5)
+  label("course", x0 + 22, y0 + 22, 0.5)
+  label("minage", x0 + 31, y0 + 22, 0.5)
+  label("tir", x0 + 37, y0 + 22, 0.5)
+  for k = 0, 3 do
+    pcall(surface.create_entity, { name = "character-corpse", position = { x0 + 4 + k * 4, y0 + 24.5 },
+      inventory_size = 0, force = "player" })
+  end
+end
+
+-- Animation des personnages de la galerie (appelée à chaque tick).
+local function characters(tick)
+  local ch = storage.chars
+  if not ch then return end
+  for _, f in ipairs(ch.face) do                       -- un pas au début pour prendre la direction, puis repos
+    if f.c.valid then f.c.walking_state = { walking = tick < 3, direction = f.dir } end
+  end
+  local d = defines.direction[DIR8[math.floor(tick / 15) % 8 + 1]]   -- octogone d'environ 5 cases
+  for _, c in ipairs(ch.run) do
+    if c.valid then c.walking_state = { walking = true, direction = d } end
+  end
+  for _, c in ipairs(ch.shoot) do
+    if c.valid then
+      c.walking_state = { walking = true, direction = d }
+      c.shooting_state = { state = defines.shooting.shooting_selected,
+        position = { c.position.x + 3 * math.sin(tick / 60), c.position.y - 3 * math.cos(tick / 60) } }
+    end
+  end
+  for _, m in ipairs(ch.mine) do
+    if m.c.valid then
+      m.c.update_selected_entity(m.pos)
+      m.c.mining_state = { mining = true, position = m.pos }
+      if tick % 600 == 0 then m.c.get_main_inventory().clear() end
+    end
+  end
+end
+
 -- Les zones, dans l'ordre du plan (docs/cartoon/plan.md). w, h : taille en cases.
 
 local ZONES = {
-  { id = "convoyeurs", titre = "Étape 1 · Convoyeurs, souterrains, répartiteurs", w = 64, h = 20, build = build_belts },
+  { id = "convoyeurs", titre = "Étape 1 · Convoyeurs, souterrains, répartiteurs", w = 69, h = 21, build = build_belts },
   { id = "bras", titre = "Étape 1 · Bras robotisés", w = 48, h = 34, build = build_inserters },
   { id = "assembleurs", titre = "Étape 1 · Assembleurs", w = 30, h = 13, build = build_assemblers },
   { id = "pylones", titre = "Étape 1 · Poteaux et câbles", w = 64, h = 20, build = build_poles },
@@ -690,6 +802,7 @@ local ZONES = {
   { id = "superpositions", titre = "Lot 2.8 · Superpositions (tri par profondeur)", w = 34, h = 30,
     build = build_overlaps },
   { id = "eau", titre = "Lot 2.9 · Eau et falaises", w = 58, h = 36, build = build_water },
+  { id = "personnage", titre = "Lot 2.10 · Personnage", w = 42, h = 26, build = build_characters },
 }
 
 -- Range les zones en lignes de ROW_WIDTH cases au plus ; renvoie la taille totale.
@@ -730,7 +843,7 @@ local function build()
   tiles(GROUND, x1, y1, x2, y2)
 
   label("Galerie du mod cartoon", width / 2, -11, 3)
-  label(CARTOON and "Mod cartoon actif" or "Mod cartoon inactif : graphismes d'origine", width / 2, -6, 1)
+  label(STYLED and "Mod " .. VARIANT .. " actif" or "Aucun mod de style : graphismes d'origine", width / 2, -6, 1)
   label("Fenêtre « Galerie » en haut à gauche pour aller à une zone", width / 2, -4, 0.7)
   storage.keep = {}
   storage.flows = {}
@@ -764,7 +877,7 @@ end
 local function gui(player)
   if player.gui.left.galerie then player.gui.left.galerie.destroy() end
   local f = player.gui.left.add { type = "frame", name = "galerie", caption = "Galerie", direction = "vertical" }
-  f.add { type = "label", caption = CARTOON and "Mod cartoon actif" or "Mod cartoon inactif (origine)" }
+  f.add { type = "label", caption = STYLED and "Mod " .. VARIANT .. " actif" or "Aucun mod de style (origine)" }
   for i, z in ipairs(storage.zones) do
     f.add { type = "button", caption = z.titre, tags = { galerie = "zone", zone = i } }.style.horizontally_stretchable = true
   end
@@ -838,6 +951,7 @@ end
 
 script.on_event(defines.events.on_tick, function(event)
   flows()
+  characters(event.tick)
   if storage.tags_pending and event.tick % 60 == 30 then
     local s = game.surfaces.nauvis
     local done = true
@@ -854,7 +968,7 @@ script.on_event(defines.events.on_tick, function(event)
   if event.tick == SHOT_TICK then
     for _, z in ipairs(storage.zones) do shoot(z.id, z.x - 2, z.y - 6, z.w + 4, z.h + 8, 1) end
     for _, z in ipairs(storage.zones) do      -- gros plans : raccords des tuyaux
-      if z.id == "energie" or z.id == "tuyaux" then shoot(z.id .. "-x2", z.x - 2, z.y - 6, z.w + 4, z.h + 8, 2) end
+      if z.id == "energie" or z.id == "tuyaux" or z.id == "personnage" then shoot(z.id .. "-x2", z.x - 2, z.y - 6, z.w + 4, z.h + 8, 2) end
     end
     local width, height = 0, 0
     for _, z in ipairs(storage.zones) do width, height = math.max(width, z.x + z.w), math.max(height, z.y + z.h) end
