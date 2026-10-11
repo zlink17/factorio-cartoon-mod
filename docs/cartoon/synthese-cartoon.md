@@ -115,6 +115,7 @@ touffes ton sur ton dans la texture.
 | Décorations de Nauvis | 669 fichiers, 37 familles : touffes et buissons (une touffe sur cinq, contour teinté), rameaux, agaves, crotons, buissons touffus en lobes (roux, rosé, blanc), touffes de paille, petits palmiers (garballo), cailloux en facettes, souches, taches au sol à 60 %. Procédural 2D, placé d'après le canal alpha de l'original. | `terrain/decoratives.py` |
 | Arbres de Nauvis | 9 espèces (troncs, feuillage en 3 états, normales, souches) et 5 arbres morts ou secs : 448 fichiers. Feuillage en gros lobes ronds (sapin : étages pointus) en tons neutres, teinté par le jeu ; troncs en aplat à trois tons tirés de l'original ; ombres d'origine. | `terrain/trees.py` |
 | Gros rochers et poissons | `big-rock` (20), `huge-rock` (16), `big-sand-rock` (16) : blocs prismatiques posés sur la silhouette de l'original (colonnes hexagonales ; grès en gros blocs olive), teintes sombres proches de l'original. Poissons : silhouette nette sous l'eau. | `terrain/rocks.py` |
+| Four en pierre | Pyramide tronquée de briques ocre, cheminée et bouche en pierre grise, ombre, icône ; flammes en aplats (48 images). | `blender/furnace.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -193,6 +194,12 @@ touffes ton sur ton dans la texture.
   lumière tirées en trois tons donnent des taches de camouflage ; il faut construire des volumes (blocs
   prismatiques à dessus clair et flanc droit sombre). Le corps d'un gros rocher se lit à **alpha > 200** (son ombre
   intégrée est à ~140), pas au seuil de valeur des décorations (< 35), qui perd ses faces sombres.
+- **Projection des bâtiments** : la caméra est à 30° de la **verticale** ; à 64 px par case, une longueur au sol
+  (axe y) s'affiche à 55 px (× cos 30°), une hauteur à 32 px (× sin 30°). Les sprites de Wube ne suivent pas
+  exactement une géométrie simple (le four est plus étroit à l'arrière) : on ajuste les dimensions du modèle par
+  recouvrement de silhouette avec l'original (descente de coordonnées, quelques dizaines de rendus sans contour).
+- **Petits motifs (briques, rivets) : pas en relief.** Chaque arête vive reçoit un contour Freestyle, qui noie les
+  petites pièces ; peindre le motif par une texture procédurale (nœud « Brick Texture ») sur une face plate.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.

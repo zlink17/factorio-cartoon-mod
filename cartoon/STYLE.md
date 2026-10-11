@@ -117,6 +117,10 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   grès olive, qui ressort sur le sable). Ombre de l'original en aplat. **[VALIDÉ]**
 - **Poissons** : silhouette nette (fuseau et queue en V) à la place de la tache floue, même teinte et même opacité,
   sans contour (ils sont sous l'eau). **[VALIDÉ]**
+- **Four en pierre** (`blender/furnace.py`) : pyramide tronquée de briques ocre (texture de briques procédurale,
+  joints sombres, sans relief), bandeau et cheminée en pierre grise, bouche encadrée de pierre. Flammes en aplats à
+  trois tons (rouge, orange, jaune), langues en gouttes qui ondulent en boucle de 48 images, sans contour, limitées
+  à l'ouverture de la bouche. Halos lumineux d'origine. **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

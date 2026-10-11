@@ -121,7 +121,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | Lot | Contenu | Tech. | Remarques |
 |---|---|---|---|
 | [x] 2.1 Objets sur les convoyeurs | Plaques, engrenage, câble, circuits, acier, briques, bois, plastique, soufre, batterie, packs de science... (30 icônes, `items.py`) | B | Vue à 45°, rotation libre ; vu en jeu (`detail-objets`) |
-| [ ] 2.2 Production de base | Four en pierre, foreuse à charbon, foreuse électrique (69 fichiers, animée, 4 directions) | B | |
+| [ ] 2.2 Production de base | Four en pierre, foreuse à charbon, foreuse électrique (69 fichiers, animée, 4 directions) | B | **Four fait** (`furnace.py`, flammes en aplats ; halos d'origine). Décidé : foreuse à charbon puis électrique, variante « humide » comprise ; poussière et fumées au lot 3.9 ; épaves au lot 3.9 |
 | [ ] 2.3 Stockage | Coffres bois, fer, acier | B | Rapide |
 | [ ] 2.4 Énergie vapeur | Pompe côtière, chaudière, machine à vapeur | B | Animations, flammes, vapeur |
 | [ ] 2.5 Tuyaux | Tuyau (28 variantes de raccord), tuyau souterrain, couvercles de tuyaux, tuyaux des assembleurs 2 et 3 | B | Vue de dessus (règle des objets au sol) |

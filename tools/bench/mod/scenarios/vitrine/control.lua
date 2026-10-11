@@ -579,6 +579,21 @@ local function detail_rocks()
   end
 end
 
+-- Vue rapprochée : production de base. Fours en pierre (un éteint, deux allumés), au milieu de décorations.
+local function detail_production()
+  local s = scene("detail-production", 1, GROUND, 2)
+  for k = 0, 2 do
+    local x, y = 3 + k * 4, s.y + 4
+    local f = create { name = "stone-furnace", position = { x, y } }
+    if f and k > 0 then
+      f.insert { name = "coal", count = 50 }
+      f.insert { name = k == 1 and "iron-ore" or "copper-ore", count = 50 }
+    end
+  end
+  label("stone-furnace", 7, s.y + 6.2, 0.6)
+  animate("anim-fours", 1, s.y + 2, 12, 4, 16, 2)
+end
+
 -- Vue rapprochée : mélange d'entités (arbres, gros rochers) et de décorations tout autour (devant, derrière, côtés) :
 -- une décoration ne doit jamais passer sur un feuillage ou sur un rocher dont elle est derrière.
 local function detail_mix()
@@ -629,7 +644,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

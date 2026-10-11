@@ -16,6 +16,7 @@ LOTS = {
     "repartiteurs": [("blender/splitter.py", ["tous"])],
     "pylones": [("blender/pole.py", ["tous"])],          # et câbles (jeu core)
     "minerais": [("blender/ore.py", ["tous"])],
+    "four": [("blender/furnace.py", [])],                # four en pierre : sprite, ombre, flammes, icône
     "objets": [("blender/items.py", ["tous"])],          # icônes des objets intermédiaires (aussi sur les convoyeurs)
     "decorations": [("terrain/decoratives.py", ["toutes"])],   # touffes, buissons, rameaux (procédural 2D)
     "arbres": [("terrain/trees.py", ["toutes"])],                # tronc, feuillage, normales, souches (procédural 2D)

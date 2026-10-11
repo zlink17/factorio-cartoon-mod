@@ -79,6 +79,12 @@ PALETTE_HEX = {
     "sci_purple": "#9a48d4",
     "sci_yellow": "#e3b83a",
     "sci_white":  "#eeeeee",
+    # four en pierre : briques ocre de l'original, pierre grise, suie
+    "furnace_brick":      "#c9a83c",
+    "furnace_brick_dark": "#a88a30",
+    "furnace_stone":      "#b8b2a3",
+    "furnace_mortar":     "#6e5a3a",
+    "furnace_soot":       "#2a211b",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 
