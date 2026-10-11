@@ -63,7 +63,8 @@ Les contraintes de départ : outils gratuits uniquement, GPU modeste (GTX 1660 S
 cartoon/
   mod/        le mod installable (info.json, Lua, manifest.lua, graphics/overrides/)
   blender/    générateurs 3D : style.py (source de vérité), lib.py, assembler*.py, animate.py, belt.py, inserter.py,
-              underground.py, splitter.py, pole.py, ore.py
+              underground.py, splitter.py, pole.py, ore.py, items.py, furnace.py, burner_drill.py, electric_drill.py,
+              chests.py, boiler.py, steam_engine.py, offshore_pump.py, pipe.py, lamp.py, lab.py, radar.py
   terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets), decoratives.py, trees.py,
               rocks.py (gros rochers, poissons)
   lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
@@ -312,8 +313,9 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 534 fichiers remplacés sur 8 246 à couvrir (19 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 9 de coffres, 44 d'énergie vapeur (chaudière, machine à vapeur, pompe côtière), 42 de tuyaux, 11 de petits bâtiments, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
-  5 de câbles (jeu `core`), 13 pour Space Age.
-- ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 66 Mo d'images dans `cartoon/mod/graphics`.
-- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.
+- 1 534 fichiers remplacés sur 8 246 à couvrir (19 %) : 1 516 dans `base` (37 %), 13 pour Space Age, 5 dans `core`
+  (câbles). Par rôle : 1 394 sprites, 88 icônes, 48 ombres, 4 masques. Détail : [couverture.md](couverture.md).
+- ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 72 Mo d'images dans
+  `cartoon/mod/graphics`.
+- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 428 captures en ~40 s par passe.
 - Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon` (la galerie : `tools/install_mod.sh cartoon-galerie`).

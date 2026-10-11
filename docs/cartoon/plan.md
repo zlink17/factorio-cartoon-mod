@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. **État (11 octobre) : étapes 0 et 1 terminées, lots 2.1 à 2.8 faits ; prochaine action : lot 2.9 Eau et falaises. Galerie jouable en place (`cartoon-galerie/`).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
+Rédigé le 10 octobre 2026. **État (11 octobre, soir) : étapes 0 et 1 terminées, lots 2.1 à 2.8 faits ; prochaine action : lot 2.9 Eau et falaises. Galerie jouable en place (`cartoon-galerie/`).** Avancement détaillé : section 1 ci-dessous ; leçons et mode d'emploi : [synthese-cartoon.md](synthese-cartoon.md).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -20,8 +20,24 @@ Inventaire des PNG du jeu (Factorio 2.0, dossier `data/`) :
 | `elevated-rails` | 186 | rails surélevés, trains vus en hauteur |
 | `quality` | 52 | icônes de qualité, modules |
 
-**Fait : 153 fichiers (≈ 2 %).** Mais ce sont les fichiers les plus visibles des premières heures de jeu, et la chaîne
-de production (Blender, contrôle des tailles, manifeste, installation) est en place.
+### Avancement (11 octobre 2026, soir)
+
+**1 534 fichiers remplacés sur 8 246 (19 %), dont 1 516 sur 4 143 dans `base` (37 %)** : l'objectif de la 0.1
+(~25 % de `base`) est dépassé, porté par les décorations (721 / 759) et les arbres. Détail par famille :
+[couverture.md](couverture.md) (généré).
+
+| Étape | État |
+|---|---|
+| 0 Outillage | fait |
+| 1 Validation de l'existant | fait |
+| 2 Début de partie (0.1) | 8 lots sur 12 faits : 2.1 à 2.8. Restent 2.9 Eau et falaises, 2.10 Personnage, 2.11 Chargeurs et lecteur de convoyeur, 2.12 Publication |
+| 3 à 6 | pas commencées |
+
+Validation par Bastien (style, en jeu) : 2.1 à 2.5, 2.7 et 2.8 validés ; **2.6 Petits bâtiments à regarder**
+(galerie, zone « Lot 2.6 ») ; le radar est le modèle le moins fidèle. Décision en attente hors lot : garder ou non
+le sous-mod « terrain épuré » (`cartoon-epure/`).
+
+Poids : 72 Mo d'images dans `cartoon/mod/graphics` (à 19 %) ; à suivre (voir risques, section 6).
 
 Beaucoup de fichiers n'ont pas besoin d'être refaits : masques (`*_mask.png`, teintés par le jeu), cartes d'effets
 (`effect_map`), reflets dans l'eau, bruits et LUT de shaders. Le premier travail de l'étape 0 est de les distinguer.
@@ -197,10 +213,10 @@ Un sous-plan par planète, détaillé le moment venu. Ordre proposé : celui du 
 | Sujet | Question | Quand |
 |---|---|---|
 | Créatures et personnage | Blender sait-il produire des animations organiques lisibles en style cartoon à un coût raisonnable ? | Essai de faisabilité au lot 2.10 |
-| Arbres et décorations | Un modèle par espèce ou un générateur paramétré ? Les feuilles se prêtent mal aux contours nets. | Cadrage du lot 2.7 |
-| Transitions de sol | Garder les masques d'origine (fondus doux) ou les refaire nets ? | Étape 1 |
+| Arbres et décorations | Un modèle par espèce ou un générateur paramétré ? Les feuilles se prêtent mal aux contours nets. | **Décidé (lot 2.7)** : procédural 2D, feuillage en gros lobes teinté par le jeu |
+| Transitions de sol | Garder les masques d'origine (fondus doux) ou les refaire nets ? | **Décidé (étape 1)** : masques nets |
 | GUI | Refaire l'interface ou la laisser d'origine ? | Cadrage du lot 5.4 |
-| Poids du mod | Le jeu d'origine pèse 2,4 Go de graphismes ; à 2 % fait, le mod pèse déjà 37 Mo. Prévoir l'optimisation des PNG (`oxipng`) et suivre la taille à chaque version. | À chaque publication |
+| Poids du mod | Le jeu d'origine pèse 2,4 Go de graphismes ; à 19 % fait (11 octobre), le mod pèse 72 Mo. Prévoir l'optimisation des PNG (`oxipng`) et suivre la taille à chaque version. | À chaque publication |
 | Compatibilité | Autres mods qui réutilisent les fichiers de base (ils hériteront du style, c'est voulu) ; mods qui modifient les mêmes entités. | Avant la 0.1 |
 | Licence | Nos sprites sont des créations (rendus de nos modèles), pas des retouches des fichiers de Wube : à rappeler dans la description. Choisir une licence pour le code et les images. | Avant la 0.1 |
 | Mod pixel | Les deux mods partagent les outils (`tools/`). Toute évolution de l'outillage doit rester compatible avec le mod pixel. | En continu |
