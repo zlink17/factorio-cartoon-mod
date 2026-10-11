@@ -3,8 +3,7 @@
 Document de référence du mod cel-shading : **tout sprite du mod doit le respecter**. Les valeurs chiffrées vivront
 dans `celshading/blender/style.py` ; si on change une règle, on la change ici et dans `style.py`, dans le même commit.
 
-Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer, **[À DÉCIDER]** question ouverte
-(voir [docs/celshading/plan.md](../docs/celshading/plan.md), section 4).
+Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer.
 
 ## 1. Direction artistique
 
@@ -23,11 +22,13 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer, *
 
 ## 3. Contours
 
-- **[À DÉCIDER]** aucun, contour fin de silhouette teinté (recommandé), ou noir chaud.
+- Contour **fin**, sur la silhouette seulement (pas sur les arêtes intérieures), de la **teinte foncée de l'objet**,
+  jamais noir. **[VALIDÉ]** (épaisseur **[PROVISOIRE]**)
 
 ## 4. Palette
 
-- **[À DÉCIDER]** teintes de Factorio, palette Wind Waker, ou teintes de Factorio saturées et éclaircies (recommandé).
+- Teintes de Factorio (chaque objet garde sa couleur, pour être reconnu), **plus saturées et plus claires** ; ombres
+  bleu-violet. **[VALIDÉ]** (dosage **[PROVISOIRE]**)
 
 ## 5. Projection et format technique
 
@@ -37,8 +38,8 @@ en sprites séparés, même cadre et même emprise que l'original au pixel près
 
 ## 6. Ombres au sol
 
-- **[À DÉCIDER]** celles du jeu, ou silhouette à bord net moins opaque (recommandé). Le jeu les dessine en noir
-  semi-transparent : pas de teinte possible.
+- Silhouette à bord net, moins opaque que l'original. Le jeu les dessine en noir semi-transparent : pas de teinte
+  possible. **[VALIDÉ]** (opacité **[PROVISOIRE]**)
 
 ## 7. Effets
 

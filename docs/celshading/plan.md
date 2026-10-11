@@ -1,7 +1,7 @@
 # Mod Cel-shading : approche et plan
 
-Rédigé le 11 octobre 2026. **État : dossier créé (`celshading/`), mod vide qui se charge ; rien n'est dessiné.
-Prochaine action : trancher les questions de la section 4 avec Bastien, puis l'étape 0.**
+Rédigé le 11 octobre 2026. **État : dossier créé (`celshading/`), mod vide qui se charge ; questions de la section 4 tranchées (11 octobre :
+les quatre recommandations). Étape 0 en cours.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -85,7 +85,7 @@ au cartoon (à rendre paramétrable, étape 0).
 
 ---
 
-## 4. Questions de style à trancher (Bastien)
+## 4. Questions de style (tranchées le 11 octobre : les quatre recommandations, retenues par Bastien)
 
 1. **Contours** : (a) aucun, comme Wind Waker ; (b) **contour fin de silhouette, teinte foncée de l'objet**
    (recommandé : lisible sur une usine chargée, sans ressembler au mod cartoon) ; (c) contour noir chaud.
@@ -104,9 +104,14 @@ prototype, production, contrôle, vérification en jeu, commit.
 
 ### Étape 0 : fondations
 - [x] Dossier `celshading/`, mod vide (`celshading/mod/`) incompatible avec les mods cartoon et pixel.
-- [ ] `celshading/blender/style.py` et `lib.py` : lumière, seuil, teinte d'ombre, contour ; mêmes fonctions que la
-      bibliothèque cartoon.
-- [ ] Essai de faisabilité : un cylindre, une sphère et une boîte, rendus en cel-shading avec ombres portées.
+- [x] `celshading/blender/cel_style.py` et `lib.py` : lumière, paliers, teinte d'ombre, contour de silhouette teinté,
+      ombres au sol allégées ; mêmes fonctions que la bibliothèque cartoon (reprise telle quelle sauf `mat` et
+      `render_scene`). Rendu en deux passes Cycles (couleurs, puis lumière d'un soleil à ombres dures), assemblées
+      avec numpy : pas de compositeur Blender. Éclairement calibré (dessus plat = composante verticale de la lumière).
+- [x] Essai de faisabilité (`blender/essai.py`) : boîte, cylindre, sphère, tore : frontière d'ombre nette qui suit
+      la forme, croissant d'ombre, ombres portées sur l'objet.
+- [x] `blender/run_cartoon.py` : rend un générateur du mod cartoon en cel-shading sans le modifier (lot
+      « assembleurs » : les trois assembleurs, planches, ombres et icônes, en 1 min).
 - [ ] Galerie : rendre `tools/galerie.py` paramétrable (`--mod celshading`) et ajouter le mod en dépendance facultative.
 
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
