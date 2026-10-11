@@ -125,6 +125,11 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   seul maillage), plateau à ailes, carter sombre et engrenages de laiton, vrille hélicoïdale, foyer gris-bleu,
   goulotte cuivre vers la sortie. Courbe des pieds ajustée sur la silhouette de l'original (4 directions).
   Animation : engrenages, vrille, piston. **[VALIDÉ]**
+- **Foreuse électrique** (`blender/electric_drill.py`) : un seul modèle découpé en calques comme l'original
+  (cadre, tête animée qui glisse sur les rails, pièces avant, tambour de sortie). Rails sombres à crémaillère
+  (texture, sans relief), poutre jaune-orangé côté sortie avec moteur et trémie, tête gris-bleu debout à plaque
+  cuivre, foret à vis, tuyau rouge. Terre remuée en aplat semi-transparent. Voyants, poussières d'origine.
+  **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

@@ -606,6 +606,19 @@ local function detail_production()
     label(d, 2 + (k - 1) * 4.5, s.y + 12.3, 0.5)
   end
   animate("anim-foreuses-charbon", 0, s.y + 8, 18, 5, 16, 2)
+  -- foreuses électriques dans les 4 directions, sur du cuivre, alimentées
+  power(19, s.y, 32, s.y + 18)
+  for x = 22, 31 do
+    for y = 3, 14 do
+      create { name = "copper-ore", position = { x + 0.5, s.y + y + 0.5 }, amount = 5000 }
+    end
+  end
+  for k, d in ipairs({ "north", "east", "south", "west" }) do
+    local x, y = 24.5 + ((k - 1) % 2) * 5, s.y + 5.5 + math.floor((k - 1) / 2) * 6
+    create { name = "electric-mining-drill", position = { x, y }, direction = defines.direction[d] }
+    label(d, x, y + 2.1, 0.5)
+  end
+  animate("anim-foreuses-electriques", 21, s.y + 3, 11, 12, 16, 2)
 end
 
 -- Vue rapprochée : mélange d'entités (arbres, gros rochers) et de décorations tout autour (devant, derrière, côtés) :

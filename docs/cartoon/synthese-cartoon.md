@@ -117,6 +117,7 @@ touffes ton sur ton dans la texture.
 | Gros rochers et poissons | `big-rock` (20), `huge-rock` (16), `big-sand-rock` (16) : blocs prismatiques posés sur la silhouette de l'original (colonnes hexagonales ; grès en gros blocs olive), teintes sombres proches de l'original. Poissons : silhouette nette sous l'eau. | `terrain/rocks.py` |
 | Four en pierre | Pyramide tronquée de briques ocre, cheminée et bouche en pierre grise, ombre, icône ; flammes en aplats (48 images). | `blender/furnace.py` |
 | Foreuse à charbon | 4 directions × 32 images (engrenages, vrille, piston), ombres, icône ; pieds arqués ajustés sur l'original. | `blender/burner_drill.py` |
+| Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône. | `blender/electric_drill.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -206,6 +207,10 @@ touffes ton sur ton dans la texture.
   Les engrenages de `lib.gear` sont horizontaux : les créer à l'origine puis régler `location`/`rotation_euler`.
 - **Pièces fines (pieds, vrilles)** : un maillage continu (poutre balayée le long d'une courbe, ruban
   hélicoïdal) plutôt qu'une suite de cylindres, sinon chaque raccord reçoit un contour.
+- **Entités en calques (foreuse électrique)** : le nord et le sud partagent le même fichier de tête, l'est et
+  l'ouest aussi ; le jeu fait glisser la tête (`shift_animation_waypoints`), on la rend donc à l'origine. Les
+  fichiers « -front » redessinent par-dessus la tête les pièces du cadre qui sont devant elle : on les obtient en
+  ne gardant, après rotation, que les objets du cadre entièrement devant (y < -0,75).
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.

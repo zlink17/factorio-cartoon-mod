@@ -88,6 +88,9 @@ PALETTE_HEX = {
     # foreuse à charbon : fer sombre légèrement violacé des pieds (original)
     "drill_iron":         "#6e6a7c",
     "drill_auger":        "#4a4c58",
+    # foreuse électrique : poutre jaune-orangé, corps de la tête gris-bleu
+    "drill_yellow":       "#e3a32e",
+    "drill_body":         "#7f9298",
 }
 PALETTE = {k: _lin(v) for k, v in PALETTE_HEX.items()}
 
