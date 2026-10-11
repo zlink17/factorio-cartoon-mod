@@ -11,15 +11,14 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
    « Objets sur les convoyeurs », 2.7 « Nature » et 2.8 « Décorations » faits.**
 2. **Prochaine action : lot 2.2 « Production de base »** (four en pierre, foreuses), puis l'ordre du plan.
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
-   souche de Nauvis passent dans la couche « lower-object » (triée, sous les entités), et chaque image est recalée pour que le pied du dessin tombe
-   sur la position de la décoration (`tools/decorative_feet.py`, lancé par `build.py`, écrit `cartoon/mod/feet.lua` ;
-   appliqué dans `data-final-fixes.lua`). Règle voulue par Bastien : ce qui a le pied plus bas à l'écran passe
-   devant. Scènes de contrôle : `detail-superpositions`, `detail-melange` et `monde-rocher` du banc. Les gros
-   rochers ne reçoivent plus de décorations dans leur emprise (couche `doodad` dans leur masque de collision ;
-   migration pour les parties existantes). Limites connues : une image d'herbe à plusieurs
-   touffes est triée d'un bloc (sur sa touffe la plus basse), pieds à égalité = ordre arbitraire ; performance à
-   surveiller sur une grande partie (beaucoup de sprites dans la couche triée). Si une touffe passe encore devant un
-   caillou de façon gênante : régénérer les herbes avec une seule touffe par image.
+   souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
+   « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
+   Chaque image est recalée pour que le pied du dessin tombe sur la position de la décoration
+   (`tools/decorative_feet.py`, lancé par `build.py`, écrit `cartoon/mod/feet.lua` ; appliqué dans
+   `data-final-fixes.lua`). Règle voulue par Bastien : ce qui a le pied plus bas à l'écran passe devant. Scènes de
+   contrôle : `detail-superpositions`, `detail-melange` (arbres, rochers, convoyeur) et `monde-rocher` du banc.
+   Limites connues : une touffe devant un caillou ou un rocher passe dessous (peu visible) ; pieds à égalité =
+   ordre arbitraire ; performance à surveiller sur une grande partie.
 3. Cadrage d'un lot : `.venv/bin/python tools/inventory.py cartoon liste icons/` (fichiers, tailles, prototypes).
 4. Production : ajouter le générateur dans `cartoon/lots.py`, puis `.venv/bin/python tools/build.py cartoon <lot>`.
 5. Vérification : `.venv/bin/python tools/check_mod.py cartoon --jeu`, puis `.venv/bin/python tools/bench.py cartoon
@@ -171,9 +170,14 @@ pour l'ordre de chargement).
   est triée par **position** de la décoration, pas par le bas de l'image. D'où le recalage des images sur leur pied
   (`feet.lua`). **Mais dans « object », les décorations ne sont triées qu'entre elles** et dessinées après toutes
   les entités : touffes et cailloux par-dessus les feuillages et les gros rochers (vu dans la partie de Bastien).
-  D'où la couche « lower-object » : triée elle aussi, mais sous les entités et sous leurs ombres. Le générateur de
-  carte pose des décorations sous les gros rochers (rien ne l'en empêche) : couche `doodad` ajoutée à leur masque
-  de collision. Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
+  « lower-object » est triée et sous les entités, mais au-dessus des convoyeurs (touffes sur les convoyeurs).
+  **« remnants » et « floor » sont triées, sous les convoyeurs, les objets au sol, les entités et leurs ombres** :
+  c'est là qu'elles vont. Une image d'herbe à plusieurs touffes étant triée d'un bloc (sur sa touffe la plus
+  basse), ses autres touffes passaient sur les cailloux : les herbes vont dans « remnants », sous « floor » où sont
+  les éléments uniques. (Essayés et écartés : une touffe par image, ou touffes regroupées en bouquet : les herbes
+  « carpet » ont jusqu'à 15 touffes par image, la prairie se vide.) Curiosité : dans « object » et « lower-object »,
+  le générateur de carte ne pose pas de décorations sous les entités ; dans les autres couches, si (comme à
+  l'origine) ; elles y sont cachées. Ajouter `doodad` au masque de collision des rochers n'y change rien. Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
   pointent vers le mod et ne correspondent plus aux clés de `feet.lua`.
 - **Rochers : redessiner l'éclairage de l'original ne donne pas un rocher.** Facettes de Voronoï ou zones de
   lumière tirées en trois tons donnent des taches de camouflage ; il faut construire des volumes (blocs

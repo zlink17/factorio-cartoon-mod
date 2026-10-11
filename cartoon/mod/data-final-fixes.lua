@@ -35,37 +35,28 @@ end
 
 -- Superpositions : les herbes, buissons et cailloux de Nauvis sont presque tous dans la couche « decorative », que le
 -- jeu ne trie pas par profondeur ; avec des contours nets, une touffe posée derrière un caillou se voit par-dessus.
--- On les met dans la couche « lower-object », que le jeu trie par position ; et on décale chaque image pour poser le
--- pied du dessin (feet.lua) sur cette position : ce qui est plus bas à l'écran passe devant. Cette couche est sous
--- les entités (arbres, rochers, bâtiments) et sous leurs ombres. Pas « object » : les décorations y sont triées
--- entre elles seulement et dessinées après les entités, donc par-dessus les feuillages et les rochers. Les taches
--- au sol restent dans la couche « decorative », dessous.
+-- On les met dans des couches que le jeu trie par position (sorted_decoratives.lua : herbes dans « remnants », le
+-- reste dans « floor », au-dessus) ; et on décale chaque image pour poser le pied du dessin (feet.lua) sur cette
+-- position : ce qui est plus bas à l'écran passe devant. Ces couches sont sous les convoyeurs, les objets au sol et
+-- les entités (arbres, rochers, bâtiments), et sous leurs ombres. Pas « object » : les décorations y sont triées
+-- entre elles seulement et dessinées après les entités, par-dessus les feuillages et les rochers ; ni
+-- « lower-object » : au-dessus des convoyeurs. Le générateur de carte pose des décorations sous les gros rochers,
+-- comme à l'origine : elles y sont cachées par le rocher. Les taches au sol restent dans « decorative », dessous.
 local feet = require("feet")
 local sorted = require("sorted_decoratives")
-for _, name in pairs(sorted.decoratives) do
-  local decorative = data.raw["optimized-decorative"][name]
-  if decorative then
-    decorative.render_layer = "lower-object"
-    for _, picture in pairs(decorative.pictures or {}) do
-      local foot = feet[picture.filename]
-      if foot and not picture.x and not picture.y then     -- image entière (pas un morceau de planche)
-        local shift = picture.shift or { 0, 0 }
-        picture.shift = { shift[1] or shift.x, -foot * (picture.scale or 1) / 32 }
+for layer, names in pairs({ remnants = sorted.grasses, floor = sorted.singles }) do
+  for _, name in pairs(names) do
+    local decorative = data.raw["optimized-decorative"][name]
+    if decorative then
+      decorative.render_layer = layer
+      for _, picture in pairs(decorative.pictures or {}) do
+        local foot = feet[picture.filename]
+        if foot and not picture.x and not picture.y then     -- image entière (pas un morceau de planche)
+          local shift = picture.shift or { 0, 0 }
+          picture.shift = { shift[1] or shift.x, -foot * (picture.scale or 1) / 32 }
+        end
       end
     end
-  end
-end
-
--- Une décoration générée dans l'emprise d'un gros rocher sortirait de sous sa base. La couche « doodad » (celle des
--- décorations) ajoutée à son masque de collision empêche la génération de carte d'en poser là ; la migration
--- migrations/2026-10-11-decorations-sous-rochers.lua les retire des parties existantes.
-for _, name in pairs(sorted.rocks) do
-  local rock = data.raw["simple-entity"][name]
-  if rock then
-    local mask = rock.collision_mask or { layers = { item = true, meltable = true, object = true, player = true,
-      water_tile = true, is_object = true, is_lower_object = true } }   -- masque par défaut des simple-entity
-    mask.layers.doodad = true
-    rock.collision_mask = mask
   end
 end
 

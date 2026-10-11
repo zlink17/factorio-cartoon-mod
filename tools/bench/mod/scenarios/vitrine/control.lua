@@ -328,23 +328,14 @@ local function world()
   s.always_day = true
   s.request_to_generate_chunks({ 0, 0 }, 4)
   s.force_generate_chunk_requests()
-  -- décorations générées dans l'emprise d'un gros rocher : elles passeraient devant lui dans la couche « object »
-  -- (doit être 0 avec le mod cartoon, qui l'interdit par le masque de collision des rochers)
-  local rocks, under, best, best_n = 0, 0, nil, -1
+  local best, best_n = nil, -1      -- le gros rocher le plus entouré de décorations (vue « monde-rocher »)
   for _, e in pairs(s.find_entities_filtered { type = "simple-entity" }) do
-    rocks = rocks + 1
     local around = #s.find_decoratives_filtered { position = e.position, radius = 4 }
     if around > best_n then best, best_n = e, around end
-    for _, d in pairs(s.find_decoratives_filtered { area = e.bounding_box }) do
-      if not d.decorative.name:match("decal") then     -- les taches au sol restent dessous : sans importance
-        under = under + 1
-      end
-    end
   end
-  note(string.format("monde : %d rochers, %d décorations dans leur emprise", rocks, under))
   shots[#shots + 1] = { name = "monde-01", surface = s, position = { 0, 0 }, zoom = ZOOM, w = PAGE_W, h = PAGE_H }
   shots[#shots + 1] = { name = "monde-02", surface = s, position = { 40, 30 }, zoom = 2, w = PAGE_W / 2, h = PAGE_H / 2 }
-  if best then         -- le rocher le plus entouré de décorations, à la résolution du jeu
+  if best then
     shots[#shots + 1] = { name = "monde-rocher", surface = s, position = best.position, zoom = 2, w = 16, h = 9 }
   end
 end
@@ -605,6 +596,13 @@ local function detail_mix()
     end
     pcall(surface.create_decoratives, { check_collision = false, decoratives = list })
     label(name, x, y + 3.2, 0.4)
+  end
+  -- convoyeurs posés sur des décorations : elles doivent rester dessous
+  for i = 0, 29 do
+    local x, y = i + 1.5, s.y + 14.5
+    pcall(surface.create_decoratives, { check_collision = false, decoratives = {
+      { name = (i % 4 == 0) and "medium-rock" or "green-hairy-grass", position = { x, y - 0.6 + (i % 3) * 0.6 }, amount = 1 } } })
+    create { name = "transport-belt", position = { x, y }, direction = defines.direction.east, force = "player" }
   end
 end
 
