@@ -621,6 +621,24 @@ local function detail_production()
   animate("anim-foreuses-electriques", 21, s.y + 3, 11, 12, 16, 2)
 end
 
+-- Vue rapprochée : foreuses électriques « humides » (uranium, acide sulfurique) dans les 4 directions.
+local function detail_wet_drills()
+  local s = scene("detail-foreuses-humides", 1, GROUND, 2)
+  power(0, s.y, s.w, s.y + s.h)
+  for x = 2, 29 do
+    for y = 3, 14 do
+      create { name = "uranium-ore", position = { x + 0.5, s.y + y + 0.5 }, amount = 5000 }
+    end
+  end
+  for k, d in ipairs({ "north", "east", "south", "west" }) do
+    local x, y = 5.5 + (k - 1) * 7, s.y + 8.5
+    local e = create { name = "electric-mining-drill", position = { x, y }, direction = defines.direction[d] }
+    if e then pcall(function() e.insert_fluid { name = "sulfuric-acid", amount = 100 } end) end
+    label(d, x, y + 2.2, 0.5)
+  end
+  animate("anim-foreuses-humides", 2, s.y + 6, 28, 6, 16, 2)
+end
+
 -- Vue rapprochée : mélange d'entités (arbres, gros rochers) et de décorations tout autour (devant, derrière, côtés) :
 -- une décoration ne doit jamais passer sur un feuillage ou sur un rocher dont elle est derrière.
 local function detail_mix()
@@ -671,7 +689,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_production, detail_wet_drills, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_mix, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

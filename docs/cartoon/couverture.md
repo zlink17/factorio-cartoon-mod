@@ -8,20 +8,20 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1377 | 4143 | 33 % |
+| `base` | 1410 | 4143 | 34 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **1395** | **8246** | **17 %** |
+| **Total** | **1428** | **8246** | **17 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 1294 | 5483 |
+| sprite | 1323 | 5483 |
 | icone | 77 | 1525 |
-| ombre | 24 | 822 |
+| ombre | 28 | 822 |
 | lumiere | 0 | 135 |
 | masque | 0 | 281 |
 
@@ -81,7 +81,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ✅ white-desert-bush | 20 | 20 | 0 |
 | ✅ worms-decal | 16 | 16 | 0 |
 
-### entity : 560 / 2289
+### entity : 593 / 2289
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -131,7 +131,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | display-panel | 0 | 3 | 1 |
 | distractor-robot | 0 | 4 | 2 |
 | electric-furnace | 0 | 8 | 3 |
-| ◐ electric-mining-drill | 24 | 69 | 14 |
+| ◐ electric-mining-drill | 57 | 69 | 14 |
 | explosion | 0 | 2 | 0 |
 | explosion-gunshot | 0 | 1 | 0 |
 | explosion-hit | 0 | 1 | 0 |

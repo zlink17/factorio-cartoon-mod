@@ -129,6 +129,7 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   (cadre, tête animée qui glisse sur les rails, pièces avant, tambour de sortie). Rails sombres à crémaillère
   (texture, sans relief), poutre jaune-orangé côté sortie avec moteur et trémie, tête gris-bleu debout à plaque
   cuivre, foret à vis, tuyau rouge. Terre remuée en aplat semi-transparent. Voyants, poussières d'origine.
+  Variante humide : réservoirs à hublot et tuyaux gris autour du cadre ; fenêtres de fluide en aplats.
   **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 

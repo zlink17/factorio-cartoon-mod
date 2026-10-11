@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées, lots 2.1, 2.7 et 2.8 faits ; prochaine action : lot 2.2 (production de base).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
+Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées, lots 2.1, 2.2, 2.7 et 2.8 faits ; prochaine action : lot 2.3 (coffres).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -121,7 +121,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | Lot | Contenu | Tech. | Remarques |
 |---|---|---|---|
 | [x] 2.1 Objets sur les convoyeurs | Plaques, engrenage, câble, circuits, acier, briques, bois, plastique, soufre, batterie, packs de science... (30 icônes, `items.py`) | B | Vue à 45°, rotation libre ; vu en jeu (`detail-objets`) |
-| [ ] 2.2 Production de base | Four en pierre, foreuse à charbon, foreuse électrique (69 fichiers, animée, 4 directions) | B | **Four fait** (`furnace.py`, flammes en aplats ; halos d'origine). **Foreuse à charbon faite** (`burner_drill.py`). **Foreuse électrique sèche faite** (`electric_drill.py`) ; reste la variante humide. Décidé : foreuse à charbon puis électrique, variante « humide » comprise ; poussière et fumées au lot 3.9 ; épaves au lot 3.9 |
+| [x] 2.2 Production de base | Four en pierre, foreuse à charbon, foreuse électrique (69 fichiers, animée, 4 directions) | B | Four (`furnace.py`, flammes en aplats), foreuse à charbon (`burner_drill.py`), foreuse électrique sèche et humide (`electric_drill.py`, calques comme l'original, fenêtres de fluide à la forme de l'original) ; vus en jeu (`detail-production`, `detail-foreuses-humides`). Laissés : halos et voyants (d'origine), poussières et fumées, épaves (lot 3.9), motif de zone de minage (étape 5) |
 | [ ] 2.3 Stockage | Coffres bois, fer, acier | B | Rapide |
 | [ ] 2.4 Énergie vapeur | Pompe côtière, chaudière, machine à vapeur | B | Animations, flammes, vapeur |
 | [ ] 2.5 Tuyaux | Tuyau (28 variantes de raccord), tuyau souterrain, couvercles de tuyaux, tuyaux des assembleurs 2 et 3 | B | Vue de dessus (règle des objets au sol) |

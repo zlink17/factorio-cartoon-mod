@@ -1,7 +1,7 @@
 """Foreuse électrique (electric-mining-drill) : cadre, tête de forage, pièces avant, sorties, ombres, icône.
 
 Usage : python cartoon/blender/electric_drill.py <dossier_sortie> [partie[,partie...]|toutes] [--apercu]
-        partie = cadres, tetes, sorties, integrations, icone ; --apercu : une seule image par planche (réglages)
+        partie = cadres, tetes, sorties, integrations, humide, icone ; --apercu : une seule image par planche (réglages)
 
 Le jeu compose la foreuse de calques (voir le prototype) ; on les produit tous à partir d'un même modèle 3D, au
 cadre et au décalage (shift) de l'original :
@@ -14,6 +14,9 @@ cadre et au décalage (shift) de l'original :
   electric-mining-drill-horizontal-front.png        pièce de la tête horizontale devant le rail avant
   electric-mining-drill-<D>-output.png              tambour de sortie, 5 images
   electric-mining-drill-<D>-integration.png         terre remuée sous la foreuse, en aplat semi-transparent
+  electric-mining-drill-<D>-wet*.png                variante humide : cadre et ombre avec réservoirs à hublot et
+                                                    tuyaux, pièces avant, fenêtres de fluide (forme de l'original,
+                                                    en aplats ; le jeu teinte le fluide)
   electric-mining-drill.png (icône)                 64 px + mipmaps
 Le jeu fait glisser la tête le long des rails (shift_animation_waypoints) : elle est rendue à l'origine.
 Laissés d'origine : voyants (teintés par l'état), poussières et fumées (lot 3.9), restes (lot 3.9).
@@ -301,6 +304,159 @@ def build_integrations(out):
     print("OK intégrations", flush=True)
 
 
+# --- variante humide (fluide : acide sulfurique pour l'uranium) -------------------------------------------------
+# Cadres de l'original (taille, shift) : cadre, ombre, pièces avant ; fenêtres de fluide « arrière » (dessinées sous
+# la tête, E/S/W) et « avant » (après la tête). Les fenêtres reprennent la forme exacte de l'original, en aplats ;
+# nos réservoirs sont placés, direction par direction, pour que leur hublot tombe dessous.
+WET = {"N": ((190, 198), (0, -0.21875)), "E": ((194, 208), (-0.0625, -0.28125)),
+       "S": ((192, 210), (0.03125, -0.171875)), "W": ((194, 208), (0.03125, -0.28125))}
+WET_SHADOW = {"N": ((248, 222), (0.375, 0.03125)), "E": ((226, 202), (0.28125, 0.15625)),
+              "S": ((248, 192), (0.375, 0.15625)), "W": ((260, 202), (0.28125, 0.1875))}
+WET_FRONT = {"N": ((200, 130), (0, 0.5)), "E": ((208, 148), (0.09375, 0.34375)), "S": ((192, 140), (0, 0.5625)),
+             "W": ((208, 144), (-0.125, 0.375))}
+WINDOW_LAYERS = ("window-background", "fluid-background", "fluid-flow")
+WINDOW_COLORS = {"window-background": (40, 34, 30), "fluid-background": None, "fluid-flow": None}   # None : teinte
+                                                                     # moyenne de l'original (le jeu la teinte)
+
+
+def window_files(direction):
+    """Fichiers de fenêtres de la direction : (nom de fichier, groupe « arrière » ou « avant »)."""
+    out = []
+    for layer in WINDOW_LAYERS:
+        if direction != "N":
+            out.append((f"{NAME}-{direction}-wet-{layer}.png", "arrière"))
+        out.append((f"{NAME}-{direction}-wet-{layer}{'' if direction == 'N' else '-front'}.png", "avant"))
+    return out
+
+
+def original(file):
+    from lib import FACTORIO_DATA
+    return cv2.imread(os.path.join(FACTORIO_DATA, "base/graphics/entity", NAME, file), cv2.IMREAD_UNCHANGED)
+
+
+def proto_cells():
+    """Taille et shift de chaque calque humide, lus dans le dump des prototypes."""
+    import json
+    dump = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".cache", "data-raw-dump.json")
+    gs = json.load(open(dump))["mining-drill"][NAME]["wet_mining_graphics_set"]
+    cells = {}
+    for w in gs["working_visualisations"]:
+        for k, a in w.items():
+            if k.endswith("animation"):
+                for l in a.get("layers", [a]):
+                    cells[l["filename"].split("/")[-1]] = ((l["width"], l["height"]), tuple(l["shift"]))
+    return cells
+
+
+def windows(direction, cells):
+    """Hublots de la direction, d'après les fenêtres « window-background » de l'original : liste de
+    (x, y, z, largeur, hauteur) en unités du monde, hublot sur la face avant (vers -y) d'un réservoir."""
+    out = []
+    for file, _ in window_files(direction):
+        if "window-background" not in file:
+            continue
+        im = original(file)
+        (w, h), (sx, sy) = cells[file]
+        n, _, st, _ = cv2.connectedComponentsWithStats((im[:, :, 3] > 40).astype(np.uint8))
+        for x0, y0, ww, hh, area in st[1:]:
+            if area < 20:
+                continue
+            cx = x0 + ww / 2 - w / 2 + sx * PX_PER_TILE
+            cy = y0 + hh / 2 - h / 2 + sy * PX_PER_TILE
+            if abs(cx) > 40:
+                y = -0.2                                    # réservoir sur le côté
+            elif cy < -40:
+                y = 1.25                                    # au fond
+            else:
+                y = -1.35                                   # devant
+            z = (-cy - y * PX_PER_TILE * math.cos(math.radians(S.PITCH_BUILDING_DEG))) / (
+                PX_PER_TILE * math.sin(math.radians(S.PITCH_BUILDING_DEG)))
+            out.append((cx / PX_PER_TILE, y, z, ww / PX_PER_TILE, hh / (PX_PER_TILE * 0.5)))
+    return out
+
+
+def wet_parts(direction, m, cells):
+    """Réservoirs à hublot, piquages et tuyaux de la variante humide (déjà orientés pour la direction)."""
+    objs = []
+    tanks = windows(direction, cells)
+    r = 0.24
+    for x, y, z, ww, hh in tanks:
+        top = z + hh / 2 + 0.18
+        objs.append(cyl((x, y + r, top / 2), r, top, m["pipe"], verts=18))                  # réservoir
+        objs.append(cyl((x, y + r, top + 0.03), r * 0.8, 0.06, m["copper"], verts=18))      # couvercle
+        objs.append(box((x, y - 0.01, z), (ww + 0.08, 0.03, hh + 0.08), m["steel"], 0.005))  # cadre du hublot
+        objs.append(box((x, y - 0.03, z), (ww, 0.03, hh), m["glass"]))                     # verre
+        # piquage vers le bord de l'entité (raccord de tuyau)
+        if abs(x) > 0.6:
+            objs.append(cyl((math.copysign(1.4, x), y + r, 0.3), 0.12, 0.3, m["pipe"], verts=12, rot=(0, 90, 0)))
+        else:
+            objs.append(cyl((x, math.copysign(1.4, y + r), 0.3), 0.12, 0.3, m["pipe"], verts=12, rot=(90, 0, 0)))
+    sides = [t for t in tanks if abs(t[0]) > 0.6]
+    ends = [t for t in tanks if abs(t[0]) <= 0.6]
+    zp, xo = 0.42, 1.42                                      # tuyaux : par l'extérieur des rails, assez haut
+    for xs, ys, *_ in sides:                                 # chaque réservoir de côté vers chaque bout
+        out_x = math.copysign(xo, xs)
+        for xe, ye, *_ in ends:
+            yy = ye + r - math.copysign(0.05, ye)
+            objs.append(sweep([(xs, ys + r, zp), (out_x, ys + r, zp), (out_x, yy, zp), (xe, yy, zp)], 0.11, m["pipe"]))
+    return objs
+
+
+def wet_scene(what, direction, cells):
+    import bpy
+    reset()
+    m = mats()
+    m["pipe"], m["glass"] = mat("pipe", P["steel"]), mat("glass", P["dark"])
+    objs = frame_parts(m)
+    turn(objs, YAW[direction])
+    objs += wet_parts(direction, m, cells)
+    if what == "avant":
+        bpy.context.view_layer.update()
+        for o in list(objs):
+            ys = [(o.matrix_world @ v.co).y for v in o.data.vertices]
+            if max(ys) > -0.75:
+                bpy.data.objects.remove(o)
+
+
+def recolor(im, color):
+    """Fenêtre de l'original en aplat : forme nette (alpha seuillé), couleur unie (`color`, ou sa moyenne)."""
+    a = im[:, :, 3] > 40
+    out = np.zeros_like(im)
+    if a.any():
+        out[a, :3] = color if color is not None else im[a, :3].mean(0)
+        out[a, 3] = 255
+    return out
+
+
+def build_wet(out):
+    cells = proto_cells()
+    path = os.path.join(out, "_emd.png")
+    for d in YAW:
+        build = lambda: wet_scene("cadre", d, cells)
+        build()
+        render_scene(path, size=CANVAS, scale=CANVAS / PX_PER_TILE, outline_units=OUTLINE)
+        write(out, f"{NAME}-{d}-wet.png", crop_centered(load(path), WET[d][0], px(WET[d][1])))
+        sh = render_shadow(build, path, CANVAS, CANVAS / PX_PER_TILE, SUN_SHEAR)
+        write(out, f"{NAME}-{d}-wet-shadow.png", crop_centered(sh, WET_SHADOW[d][0], px(WET_SHADOW[d][1])))
+        wet_scene("avant", d, cells)
+        render_scene(path, size=CANVAS, scale=CANVAS / PX_PER_TILE, outline_units=OUTLINE)
+        (fw, fh), fshift = WET_FRONT[d]
+        front = crop_centered(load(path), (fw, fh), px(fshift))
+        for file, group in window_files(d):                 # fenêtres : aplats ; percées dans la pièce avant
+            im = original(file)
+            write(out, file, recolor(im, WINDOW_COLORS[next(k for k in WINDOW_LAYERS if k in file)]))
+            if group != "avant":
+                continue
+            (w, h), (sx, sy) = cells[file]
+            x0 = int(round(fw / 2 + (sx - fshift[0]) * PX_PER_TILE - w / 2))
+            y0 = int(round(fh / 2 + (sy - fshift[1]) * PX_PER_TILE - h / 2))
+            for yy, xx in zip(*np.nonzero(im[:, :, 3] > 40)):
+                if 0 <= y0 + yy < fh and 0 <= x0 + xx < fw:
+                    front[y0 + yy, x0 + xx, 3] = 0
+        write(out, f"{NAME}-{d}-wet-front.png", front)
+        print("OK humide", d, flush=True)
+
+
 def build_icon(out):
     def whole():
         import bpy
@@ -318,10 +474,11 @@ if __name__ == "__main__":
     args = [a for a in args if a != "--apercu"]
     out = args[0] if args else "electric_drill_out"
     which = (args[1] if len(args) > 1 else "toutes")
-    parts = ["cadres", "tetes", "sorties", "integrations", "icone"] if which == "toutes" else which.split(",")
+    parts = ["cadres", "tetes", "sorties", "integrations", "humide", "icone"] if which == "toutes" else which.split(",")
     os.makedirs(out, exist_ok=True)
     if "cadres" in parts: build_frames(out)
     if "tetes" in parts: build_heads(out, preview)
     if "sorties" in parts: build_outputs(out)
     if "integrations" in parts: build_integrations(out)
+    if "humide" in parts: build_wet(out)
     if "icone" in parts: build_icon(out)

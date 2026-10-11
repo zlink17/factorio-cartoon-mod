@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.2, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -8,8 +8,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
-   « Objets sur les convoyeurs », 2.7 « Nature » et 2.8 « Décorations » faits.**
-2. **Prochaine action : lot 2.2 « Production de base »** (four en pierre, foreuses), puis l'ordre du plan.
+   « Objets sur les convoyeurs », 2.2 « Production de base », 2.7 « Nature » et 2.8 « Décorations » faits.**
+2. **Prochaine action : lot 2.3 « Stockage »** (coffres en bois, fer, acier), puis l'ordre du plan.
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).
@@ -117,7 +117,7 @@ touffes ton sur ton dans la texture.
 | Gros rochers et poissons | `big-rock` (20), `huge-rock` (16), `big-sand-rock` (16) : blocs prismatiques posés sur la silhouette de l'original (colonnes hexagonales ; grès en gros blocs olive), teintes sombres proches de l'original. Poissons : silhouette nette sous l'eau. | `terrain/rocks.py` |
 | Four en pierre | Pyramide tronquée de briques ocre, cheminée et bouche en pierre grise, ombre, icône ; flammes en aplats (48 images). | `blender/furnace.py` |
 | Foreuse à charbon | 4 directions × 32 images (engrenages, vrille, piston), ombres, icône ; pieds arqués ajustés sur l'original. | `blender/burner_drill.py` |
-| Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône. | `blender/electric_drill.py` |
+| Foreuse électrique | Cadres des 4 directions, têtes verticale et horizontale (30 images, ombres 21), pièces avant, tambours de sortie, terre remuée, icône ; variante humide (réservoirs à hublot, tuyaux, fenêtres de fluide). | `blender/electric_drill.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -211,6 +211,11 @@ touffes ton sur ton dans la texture.
   l'ouest aussi ; le jeu fait glisser la tête (`shift_animation_waypoints`), on la rend donc à l'origine. Les
   fichiers « -front » redessinent par-dessus la tête les pièces du cadre qui sont devant elle : on les obtient en
   ne gardant, après rotation, que les objets du cadre entièrement devant (y < -0,75).
+- **Fenêtres de fluide (foreuse humide)** : leurs cadres sont serrés au pixel près autour des hublots de
+  l'original, et leurs positions ne suivent pas une rotation propre d'une direction à l'autre. On garde la forme
+  exacte de l'original en aplats (verre sombre, fond et reflets que le jeu teinte) et on place nos réservoirs
+  direction par direction sous ces hublots (position 3D déduite de la position à l'écran) ; la pièce avant est
+  percée aux hublots, car le jeu dessine les fenêtres avant elle.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
