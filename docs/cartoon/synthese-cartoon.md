@@ -317,5 +317,6 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
   (câbles). Par rôle : 1 394 sprites, 88 icônes, 48 ombres, 4 masques. Détail : [couverture.md](couverture.md).
 - ~9 100 lignes écrites à la main (générateurs, outils, banc d'essai, galerie, Lua du mod) ; 72 Mo d'images dans
   `cartoon/mod/graphics`.
-- Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 428 captures en ~40 s par passe.
+- Tout le mod se régénère en ~19 min (`tools/build.py cartoon tous --verifier`, 11 octobre : reproductible, 1 534
+  fichiers identiques) ; le banc d'essai fait ses 428 captures en ~40 s par passe.
 - Le mod n'a pas été publié ; il s'installe avec `tools/install_mod.sh cartoon` (la galerie : `tools/install_mod.sh cartoon-galerie`).
