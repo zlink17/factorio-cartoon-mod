@@ -8,18 +8,18 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 1285 | 4143 | 31 % |
+| `base` | 1339 | 4143 | 32 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 13 | 3414 | 0 % |
 | `core` | 5 | 456 | 1 % |
-| **Total** | **1303** | **8246** | **16 %** |
+| **Total** | **1357** | **8246** | **16 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 1216 | 5483 |
+| sprite | 1270 | 5483 |
 | icone | 74 | 1525 |
 | ombre | 13 | 822 |
 | lumiere | 0 | 135 |
@@ -35,11 +35,11 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 |---|---:|---:|---:|
 | achievement | 0 | 59 | 0 |
 
-### decorative : 669 / 759
+### decorative : 721 / 759
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
-| big-rock | 0 | 20 | 0 |
+| ✅ big-rock | 20 | 20 | 0 |
 | ✅ brown-asterisk | 20 | 20 | 0 |
 | ✅ brown-asterisk-mini | 12 | 12 | 0 |
 | ✅ brown-carpet-grass | 12 | 12 | 0 |
@@ -61,7 +61,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ✅ green-pita | 15 | 15 | 0 |
 | ✅ green-pita-mini | 15 | 15 | 0 |
 | ✅ green-small-grass | 12 | 12 | 0 |
-| huge-rock | 0 | 16 | 0 |
+| ✅ huge-rock | 16 | 16 | 0 |
 | ✅ lichen-decal | 16 | 16 | 0 |
 | ✅ light-mud-decal | 30 | 30 | 0 |
 | ✅ medium-rock | 12 | 12 | 0 |
@@ -74,14 +74,14 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ✅ red-pita | 15 | 15 | 0 |
 | ✅ sand-decal | 30 | 30 | 0 |
 | ✅ sand-dune-decal | 30 | 30 | 0 |
-| ◐ sand-rock | 16 | 48 | 0 |
+| ◐ sand-rock | 32 | 48 | 0 |
 | ✅ shroom-decal | 16 | 16 | 0 |
 | ✅ small-rock | 16 | 16 | 0 |
 | ✅ tiny-rock | 16 | 16 | 0 |
 | ✅ white-desert-bush | 20 | 20 | 0 |
 | ✅ worms-decal | 16 | 16 | 0 |
 
-### entity : 523 / 2289
+### entity : 525 / 2289
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -145,7 +145,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | ◐ fast-underground-belt | 3 | 4 | 0 |
 | fire-flame | 0 | 9 | 0 |
 | fire-smoke | 0 | 2 | 0 |
-| fish | 0 | 2 | 0 |
+| ✅ fish | 2 | 2 | 0 |
 | flamethrower-fire-stream | 0 | 2 | 0 |
 | flamethrower-turret | 0 | 26 | 13 |
 | fluid-wagon | 0 | 11 | 4 |

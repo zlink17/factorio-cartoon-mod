@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1 et 2.8 faits, arbres du lot 2.7 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 11 octobre 2026 (étape 2 commencée : lots 2.1, 2.7 et 2.8 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -8,9 +8,8 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
-   « Objets sur les convoyeurs » et 2.8 « Décorations » faits.**
-2. **Prochaine action : fin du lot 2.7** (gros rochers, poissons), puis lot 2.2 « Production de base » (four en
-   pierre, foreuses) et l'ordre du plan.
+   « Objets sur les convoyeurs », 2.7 « Nature » et 2.8 « Décorations » faits.**
+2. **Prochaine action : lot 2.2 « Production de base »** (four en pierre, foreuses), puis l'ordre du plan.
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans la couche « object », et chaque image est recalée pour que le pied du dessin tombe
    sur la position de la décoration (`tools/decorative_feet.py`, lancé par `build.py`, écrit `cartoon/mod/feet.lua` ;
@@ -56,7 +55,8 @@ cartoon/
   mod/        le mod installable (info.json, Lua, manifest.lua, graphics/overrides/)
   blender/    générateurs 3D : style.py (source de vérité), lib.py, assembler*.py, animate.py, belt.py, inserter.py,
               underground.py, splitter.py, pole.py, ore.py
-  terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets)
+  terrain/    ground.py (sols de Nauvis), masks.py (masques de transition nets), decoratives.py, trees.py,
+              rocks.py (gros rochers, poissons)
   lots.py     les lots et les commandes qui les produisent (lu par tools/build.py)
   ai/         ComfyUI (comfy_batch.py, workflow, post-traitement) : essai, non retenu
   STYLE.md    guide de style
@@ -89,7 +89,7 @@ pour l'ordre de chargement).
   teintes claires pour les pylônes (ils doivent ressortir sur le sol brun) ; une couleur par minerai.
 - **Format** : PNG RGBA, même dimension et même cadrage que l'original, au pixel près.
 
-## 5. Ce qui est fait (1 303 fichiers remplacés, tous vus en jeu)
+## 5. Ce qui est fait (1 357 fichiers remplacés, tous vus en jeu)
 
 | Famille | Contenu | Générateur |
 |---|---|---|
@@ -103,6 +103,7 @@ pour l'ordre de chargement).
 | Objets intermédiaires | 30 icônes (aussi les objets sur les convoyeurs) : plaques, poutre, engrenage, câble, tige, 3 circuits, brique, bois, plastique, soufre, batterie, moteurs, cadre de robot, structure légère, combustibles, explosifs, uranium 235 et 238, 7 packs de science. Vue à 45° et rotation libre (plaques de fer et de cuivre en miroir, comme l'original). | `items.py` |
 | Décorations de Nauvis | 669 fichiers, 37 familles : touffes et buissons (une touffe sur cinq, contour teinté), rameaux, agaves, crotons, buissons touffus en lobes (roux, rosé, blanc), touffes de paille, petits palmiers (garballo), cailloux en facettes, souches, taches au sol à 60 %. Procédural 2D, placé d'après le canal alpha de l'original. | `terrain/decoratives.py` |
 | Arbres de Nauvis | 9 espèces (troncs, feuillage en 3 états, normales, souches) et 5 arbres morts ou secs : 448 fichiers. Feuillage en gros lobes ronds (sapin : étages pointus) en tons neutres, teinté par le jeu ; troncs en aplat à trois tons tirés de l'original ; ombres d'origine. | `terrain/trees.py` |
+| Gros rochers et poissons | `big-rock` (20), `huge-rock` (16), `big-sand-rock` (16) : blocs prismatiques posés sur la silhouette de l'original (colonnes hexagonales ; grès en gros blocs olive), teintes sombres proches de l'original. Poissons : silhouette nette sous l'eau. | `terrain/rocks.py` |
 | Sols de Nauvis | 19 planches (herbe, terre, sable, désert rouge) en aplats avec petits détails ; masques de transition 1, 3 et 4 à bords nets (partagés avec des sols de Space Age). | `terrain/ground.py`, `terrain/masks.py` |
 
 ## 6. Ce qu'on a appris (à ne pas redécouvrir)
@@ -168,6 +169,10 @@ pour l'ordre de chargement).
   est triée par **position** de la décoration, pas par le bas de l'image. D'où le recalage des images sur leur pied
   (`feet.lua`). Le recalage doit se faire **avant** `walk(data.raw)` dans `data-final-fixes.lua` : après, les chemins
   pointent vers le mod et ne correspondent plus aux clés de `feet.lua`.
+- **Rochers : redessiner l'éclairage de l'original ne donne pas un rocher.** Facettes de Voronoï ou zones de
+  lumière tirées en trois tons donnent des taches de camouflage ; il faut construire des volumes (blocs
+  prismatiques à dessus clair et flanc droit sombre). Le corps d'un gros rocher se lit à **alpha > 200** (son ombre
+  intégrée est à ~140), pas au seuil de valeur des décorations (< 35), qui perd ses faces sombres.
 - **`tools/bench.py` n'a pas d'option `--help`** : tout argument inconnu lance le banc complet.
 - **Lua de Factorio = Lua 5.2** : pas de `//` (division entière) ; `tools/bench.py` compile les scripts avec `lupa`
   avant de lancer le jeu.
@@ -184,7 +189,7 @@ Tout est dans [`plan.md`](plan.md) : étapes 2 (début de partie sur Nauvis, ver
 
 ## 8. Chiffres
 
-- 1 303 fichiers remplacés sur 8 246 à couvrir (16 %) : 669 de décorations, 448 d'arbres, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
+- 1 357 fichiers remplacés sur 8 246 à couvrir (16 %) : 669 de décorations, 448 d'arbres, 54 de rochers et poissons, 75 d'entités, 71 d'icônes, 22 de terrain (19 planches, 3 masques),
   5 de câbles (jeu `core`), 13 pour Space Age.
 - ~3 500 lignes de code (générateurs, outils, banc d'essai) ; 37 Mo d'images dans `cartoon/mod/graphics`.
 - Tout le mod se régénère en 10 min (`tools/build.py cartoon tous`) ; le banc d'essai fait ses 264 captures en ~40 s par passe.

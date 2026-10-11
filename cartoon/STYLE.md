@@ -110,6 +110,13 @@ Pas d'autre ombrage : pas de dégradé, pas de reflets. **[VALIDÉ]**
   Seuls les lobes du bord bas-droit sont sombres. Troncs, souches et arbres morts en aplat brun, trois tons tirés de
   la luminosité de l'original (on garde les troncs multiples, les racines). Normales plates sous le feuillage. Ombres
   d'origine conservées (noires, unies, même silhouette). Contour teinté. **[VALIDÉ]**
+- **Gros rochers** (procédural 2D, `terrain/rocks.py`) : **blocs prismatiques** posés sur la silhouette de l'original,
+  de l'arrière vers l'avant : colonnes hexagonales hautes pour `big-rock` et `huge-rock` (comme les colonnes de
+  l'original), gros blocs bas à 8 pans pour le grès (`big-sand-rock`). Dessus clair, faces gauche et avant moyennes,
+  face droite sombre, trait fin entre blocs, contour noir chaud. Teintes sombres proches de l'original (brun-roux ;
+  grès olive, qui ressort sur le sable). Ombre de l'original en aplat. **[VALIDÉ]**
+- **Poissons** : silhouette nette (fuseau et queue en V) à la place de la tache floue, même teinte et même opacité,
+  sans contour (ils sont sous l'eau). **[VALIDÉ]**
 - **Poteaux et fins éléments** : assez épais pour rester lisibles à la taille du jeu. **[PROVISOIRE]**
 
 ## 8. Approche IA (si utilisée)

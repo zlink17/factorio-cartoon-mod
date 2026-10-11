@@ -546,6 +546,31 @@ local function detail_overlaps()
   end
 end
 
+-- Vue rapprochée : gros rochers (cinq par ligne, variantes tirées au hasard, touffes autour ; grès sur du sable)
+-- et un étang avec des poissons.
+local function detail_rocks()
+  local s = scene("detail-rochers", 1, GROUND, 2)
+  local sand = {}
+  for x = 0, 23 do for y = 12, 17 do sand[#sand + 1] = { name = "sand-1", position = { x, s.y + y } } end end
+  local water = {}
+  for x = 24, 31 do for y = 2, 15 do water[#water + 1] = { name = "water", position = { x, s.y + y } } end end
+  surface.set_tiles(sand, true, false, true)
+  surface.set_tiles(water, true, false, true)
+  for i, name in ipairs({ "big-rock", "huge-rock", "big-sand-rock" }) do
+    for j = 0, 4 do
+      local x, y = j * 4.6 + 2.4, s.y + (i - 1) * 5.6 + 3
+      create { name = name, position = { x, y }, force = "neutral" }
+      local grass = i == 3 and "white-desert-bush" or "green-hairy-grass"
+      pcall(surface.create_decoratives, { check_collision = false, decoratives = {
+        { name = grass, position = { x - 1.6, y + 1.2 }, amount = 1 }, { name = grass, position = { x + 1.7, y - 0.6 }, amount = 1 } } })
+    end
+    label(name, 11, s.y + (i - 1) * 5.6 + 5.2, 0.5)
+  end
+  for k = 0, 5 do
+    create { name = "fish", position = { 25.5 + (k % 2) * 3.5, s.y + 4 + math.floor(k / 2) * 3.5 } }
+  end
+end
+
 -- Vue rapprochée : les sols de Nauvis côte à côte (on y voit les transitions).
 local function detail_grounds()
   local names = { "grass-1", "grass-2", "grass-3", "grass-4", "dry-dirt", "dirt-1", "dirt-2", "dirt-3", "dirt-4",
@@ -569,7 +594,7 @@ local function build()
   game.forces.enemy.set_cease_fire("player", true)
   game.forces.player.set_cease_fire("enemy", true)
   for _, step in ipairs({ buildings, belts, factory, resources, nature, tiles, items, world,
-    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_grounds }) do
+    detail_inserters, detail_belts, detail_assemblers, detail_ores, detail_items, detail_decoratives, detail_trees, detail_overlaps, detail_rocks, detail_grounds }) do
     local ok, err = pcall(step)
     if not ok then note("ERREUR " .. tostring(err)) end
   end

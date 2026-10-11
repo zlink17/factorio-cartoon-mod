@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées, lots 2.1 et 2.8 faits, arbres du lot 2.7 faits ; prochaine action : fin du lot 2.7 (gros rochers, poissons), puis 2.2.** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
+Rédigé le 10 octobre 2026. **État : étapes 0 et 1 terminées, lots 2.1, 2.7 et 2.8 faits ; prochaine action : lot 2.2 (production de base).** Point de départ : [synthese-cartoon.md](synthese-cartoon.md) (état au 10 octobre).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -126,7 +126,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | [ ] 2.4 Énergie vapeur | Pompe côtière, chaudière, machine à vapeur | B | Animations, flammes, vapeur |
 | [ ] 2.5 Tuyaux | Tuyau (28 variantes de raccord), tuyau souterrain, couvercles de tuyaux, tuyaux des assembleurs 2 et 3 | B | Vue de dessus (règle des objets au sol) |
 | [ ] 2.6 Petits bâtiments | Laboratoire, radar, petite lampe | B | |
-| [ ] 2.7 Nature | Rochers, arbres (559 fichiers : ~15 espèces × variantes × feuillage), poissons | P | **Arbres faits** (448 fichiers, `terrain/trees.py`, gros lobes teintés par le jeu). Restent : gros rochers (`big-rock`, `huge-rock`, `big-sand-rock`), poissons, reflets dans l'eau |
+| [x] 2.7 Nature | Rochers, arbres (559 fichiers : ~15 espèces × variantes × feuillage), poissons | P | Arbres : 448 fichiers (`terrain/trees.py`, gros lobes teintés par le jeu). Gros rochers et poissons : 54 fichiers (`terrain/rocks.py`, blocs prismatiques) ; vus en jeu (`detail-arbres`, `detail-rochers`). Reflets dans l'eau : fichiers techniques, laissés d'origine |
 | [x] 2.8 Décorations | Touffes d'herbe, buissons, cailloux, taches (669 fichiers, `terrain/decoratives.py`) | P | Une touffe sur cinq, contour teinté, taches à 60 %. Laissés aux autres lots : gros rochers (2.7), traces d'ennemis (3.8), sol nucléaire (4.5) |
 | [ ] 2.9 Eau et falaises | Eau (profonde, peu profonde, verte, boue), falaises | P / B | Les falaises ont de nombreuses orientations |
 | [ ] 2.10 Personnage | Inactif, course, minage, mort, avec et sans arme, 3 niveaux d'armure | B | Modèle articulé : nouveau savoir-faire (rig + animation) |
