@@ -3,7 +3,7 @@
 Rédigé le 11 octobre 2026. **État : dossier créé (`celshading/`), mod vide qui se charge ; questions de la section 4 tranchées (11 octobre :
 les quatre recommandations). Étape 0 faite : moteur cel-shading, assembleurs du mod cartoon vus en jeu (essai).
 Décision du 11 octobre au soir : modèles refaits de zéro, d'après des images cibles (section 3.3). Étape 1 en cours :
-images cibles de l'assembleur 1.**
+assembleur 1 modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu le 12 octobre, avis de Bastien attendu.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -133,7 +133,7 @@ prototype, production, contrôle, vérification en jeu, commit.
       la forme, croissant d'ombre, ombres portées sur l'objet.
 - [x] `blender/run_cartoon.py` : rend un générateur du mod cartoon en cel-shading sans le modifier (lot
       « assembleurs » : les trois assembleurs, planches, ombres et icônes, en 1 min).
-- [ ] Galerie : rendre `tools/galerie.py` paramétrable (`--mod celshading`) et ajouter le mod en dépendance facultative.
+- [x] Galerie : le scénario détecte le mod (`factorio-celshading-mod`, variante « celshading », commit `1e27ad4`) ; `tools/galerie.py --mod celshading` et la dépendance facultative sont faits.
 
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
 Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode

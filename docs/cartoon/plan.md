@@ -1,6 +1,6 @@
 # Mod Cartoon : plan d'ensemble
 
-Rédigé le 10 octobre 2026. **État (11 octobre, soir) : étapes 0 et 1 terminées, lots 2.1 à 2.9 faits ; prochaine action : lot 2.10 Personnage. Galerie jouable en place (`cartoon-galerie/`).** Avancement détaillé : section 1 ci-dessous ; leçons et mode d'emploi : [synthese-cartoon.md](synthese-cartoon.md).
+Rédigé le 10 octobre 2026. **État (12 octobre, après minuit) : étapes 0 et 1 terminées, lots 2.1 à 2.9 faits ; lot 2.10 Personnage en cours (modèle `blender/character.py` d'après l'image cible b-24 commité, production complète des 62 planches en cours, zone « Lot 2.10 » dans la galerie). Galerie jouable en place (`cartoon-galerie/`).** Avancement détaillé : section 1 ci-dessous ; leçons et mode d'emploi : [synthese-cartoon.md](synthese-cartoon.md).
 Règles visuelles : [`cartoon/STYLE.md`](../../cartoon/STYLE.md).
 
 Ce document fixe **ce qu'il reste à faire pour obtenir un mod complet et publiable**, dans quel ordre, et **comment on
@@ -20,7 +20,7 @@ Inventaire des PNG du jeu (Factorio 2.0, dossier `data/`) :
 | `elevated-rails` | 186 | rails surélevés, trains vus en hauteur |
 | `quality` | 52 | icônes de qualité, modules |
 
-### Avancement (11 octobre 2026, soir)
+### Avancement (12 octobre 2026, après minuit)
 
 **1 582 fichiers remplacés sur 8 246 (19 %), dont 1 564 sur 4 143 dans `base` (38 %)** : l'objectif de la 0.1
 (~25 % de `base`) est dépassé, porté par les décorations (721 / 759) et les arbres. Détail par famille :
@@ -30,7 +30,7 @@ Inventaire des PNG du jeu (Factorio 2.0, dossier `data/`) :
 |---|---|
 | 0 Outillage | fait |
 | 1 Validation de l'existant | fait |
-| 2 Début de partie (0.1) | 9 lots sur 12 faits : 2.1 à 2.9. Restent 2.10 Personnage, 2.11 Chargeurs et lecteur de convoyeur, 2.12 Publication |
+| 2 Début de partie (0.1) | 9 lots sur 12 faits : 2.1 à 2.9. **2.10 Personnage en cours** (modèle fait, planches à produire et à voir en jeu) ; restent 2.11 Chargeurs et lecteur de convoyeur, 2.12 Publication |
 | 3 à 6 | pas commencées |
 
 Validation par Bastien (style, en jeu) : 2.1 à 2.5, 2.7, 2.8 et les falaises du 2.9 validés ; **2.6 Petits
@@ -156,7 +156,7 @@ Technique indiquée : **B** = Blender (modèle 3D toon), **P** = procédural 2D 
 | [x] 2.7 Nature | Rochers, arbres (559 fichiers : ~15 espèces × variantes × feuillage), poissons | P | Arbres : 448 fichiers (`terrain/trees.py`, gros lobes teintés par le jeu). Gros rochers et poissons : 54 fichiers (`terrain/rocks.py`, blocs prismatiques) ; vus en jeu (`detail-arbres`, `detail-rochers`). Reflets dans l'eau : fichiers techniques, laissés d'origine |
 | [x] 2.8 Décorations | Touffes d'herbe, buissons, cailloux, taches (669 fichiers, `terrain/decoratives.py`) | P | Une touffe sur cinq, contour teinté, taches à 60 %. Laissés aux autres lots : gros rochers (2.7), traces d'ennemis (3.8), sol nucléaire (4.5) |
 | [x] 2.9 Eau et falaises | Eau (profonde, peu profonde, verte, boue), rives, falaises | P | `terrain/water.py` : 36 fichiers (18 planches d'eau, 8 planches de rives à masque net et berge cernée, 10 bords d'eau peu profonde) et 7 fichiers techniques retouchés (bruit du shader lissé, 6 cartes d'effet en paliers). `blender/cliffs_3d.py` (et `terrain/cliffs.py`) : 12 fichiers (4 planches × haut, pied, ombre) : pans à facettes aux tons de l'original, ombres portées selon le relief (validées par Bastien après quatre pistes). Vus en jeu (`detail-eau`, `detail-falaises`, galerie). Laissés : `water-patch`, rives des sols construits (lot 4.5), transitions vers le vide, falaises et rives de Space Age (étape 6), `water-wube` |
-| [ ] 2.10 Personnage | Inactif, course, minage, mort, avec et sans arme, 3 niveaux d'armure | B | Modèle articulé : nouveau savoir-faire (rig + animation) |
+| [ ] 2.10 Personnage | Inactif, course, minage, mort, avec et sans arme, 3 niveaux d'armure | B | Modèle articulé : nouveau savoir-faire (rig + animation). **En cours** : image cible `personnage-b-24` retenue (visage visible, pièces à la couleur du joueur) ; `character.py` (corps, masques, armures 2 et 3, ombres : 6 animations, 62 planches, icône, ~30 min) ; zone « Lot 2.10 » de la galerie faite. Reste : production complète, contrôle, vue en jeu, avis de Bastien |
 | [ ] 2.11 Chargeurs et lecteur de convoyeur | Chargeurs 1 à 3 + turbo, lecteur de convoyeur, paratonnerre | B | Restes de la synthèse |
 | [ ] 2.12 Publication 0.1 | Vignette du mod, description, captures, `changelog.txt`, publication sur le portail des mods | — | Décider le nom public |
 

@@ -1,6 +1,6 @@
 # Mod Cartoon : synthèse du travail
 
-État au 11 octobre 2026 (étape 2 commencée : lots 2.1 à 2.9 faits). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
+État au 12 octobre 2026 (étape 2 commencée : lots 2.1 à 2.9 faits, lot 2.10 Personnage en cours). Ce document résume ce qui a été fait, comment, ce qu'on a appris en
 chemin et ce qui reste. Le guide de style de référence est [`cartoon/STYLE.md`](../../cartoon/STYLE.md) ; le mode d'emploi
 des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille de route est dans [`plan.md`](plan.md).
 
@@ -9,8 +9,10 @@ des outils est dans [`cartoon/README.md`](../../cartoon/README.md) ; la feuille 
 1. Lire [`plan.md`](plan.md) : méthode (un lot = cadrage, prototype, production, contrôle, vérification en jeu, commit),
    étapes et cases cochées. **Étapes 0 (outillage) et 1 (validation en jeu de l'existant) terminées ; lots 2.1
    « Objets sur les convoyeurs », 2.2 « Production de base », 2.3 « Stockage », 2.4 « Énergie vapeur », 2.5 « Tuyaux »,
-   2.6 « Petits bâtiments », 2.7 « Nature », 2.8 « Décorations » et 2.9 « Eau et falaises » faits.**
-2. **Prochaine action : lot 2.10 Personnage**, puis l'ordre du plan (2.11 Chargeurs, 2.12 Publication).
+   2.6 « Petits bâtiments », 2.7 « Nature », 2.8 « Décorations » et 2.9 « Eau et falaises » faits ; 2.10 « Personnage » commencé.**
+2. **Prochaine action : finir le lot 2.10 Personnage** (modèle commité ; reste la production complète
+   `tools/build.py cartoon personnage`, ~30 min, le contrôle, la vue en jeu dans la galerie, zone « Lot 2.10 »),
+   puis l'ordre du plan (2.11 Chargeurs, 2.12 Publication).
    **Fait le 11 octobre (hors lot) : tri des décorations par profondeur.** Herbes, buissons, rameaux, cailloux et
    souche de Nauvis passent dans deux couches triées, sous les convoyeurs et les entités : herbes dans
    « remnants », éléments uniques (cailloux, buissons...) dans « floor », au-dessus (`cartoon/mod/sorted_decoratives.lua`).

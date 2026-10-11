@@ -1,7 +1,7 @@
 # Mod Pixel : méthode et plan d'ensemble
 
 Rédigé le 11 octobre 2026. **État : méthode validée par Bastien le 11 octobre (section 8). Étape 0 presque finie (section 6) : reste l'essai B→px
-(images cibles de l'assembleur 1 en cours) et la galerie.**
+(images cibles de l'assembleur 1 en cours) ; la galerie est faite (12 octobre).**
 Situation et pièges connus : [synthese-pixel.md](synthese-pixel.md). Règles visuelles : [`pixel/STYLE.md`](../../pixel/STYLE.md).
 
 Ce document fixe **comment on produit l'intégralité du mod pixel**, sur le modèle du plan du mod cartoon
@@ -118,8 +118,8 @@ par Bastien ; générateur reproductible.
 - [x] **Contrôle pixel** `pixel/controle.py`, appelé par `check_mod.py` (donc par `build.py`) : pixels nets sur la
       grille du monde (d'après le `shift` du prototype), palette, alpha, ombres en aplat, icônes.
 - [x] **Couverture** [couverture.md](couverture.md) (`inventory.py pixel`).
-- [ ] **Galerie** : `tools/galerie.py --mod pixel` et dépendances facultatives faits ; la détection du mod dans le
-      scénario est faite par la session de la galerie, en attente de son commit.
+- [x] **Galerie** : `tools/galerie.py --mod pixel`, dépendances facultatives et détection du mod dans le scénario
+      (variante « pixel », commit `1e27ad4`).
 - [x] **Recette ComfyUI** [`pixel/concept/`](../../pixel/concept/README.md) (LoRA Pixel Art XL) et option
       `--pixel` de `planche.py` et `compare.py` (chaque variante aussi à 16 px d'art par case).
 - [x] **Allègement des décorations** : réglages de démarrage par famille dans le mod (10 % par défaut), commande
