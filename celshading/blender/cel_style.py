@@ -20,6 +20,11 @@ HIGHLIGHT_ABOVE = 0.66
 SHADOW_TINT = (0.56, 0.58, 0.80)
 HIGHLIGHT_TINT = (1.10, 1.08, 1.02)
 
+# --- Rendu -----------------------------------------------------------------------------------------------------
+# Échantillons Cycles par pixel (le mod cartoon en prend 4) : à 4, contours et frontières d'ombre granuleux, des
+# points parasites dans les aplats (12 octobre) ; à 16, nets, pour ~1 s de plus par image.
+RENDER_SAMPLES = 16
+
 # --- Palette --------------------------------------------------------------------------------------------------
 # Les modèles donnent les teintes de Factorio (palette cartoon) ; mat() les avive : saturation et valeur (HSV).
 SATURATION_GAIN = 1.30

@@ -128,7 +128,7 @@ def _render(path, size, view_transform, outline_px=None, depth="8"):
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.device = "CPU"
-    sc.cycles.samples = S.RENDER_SAMPLES
+    sc.cycles.samples = C.RENDER_SAMPLES
     sc.cycles.use_denoising = False
     sc.render.film_transparent = True
     sc.render.resolution_x, sc.render.resolution_y = size

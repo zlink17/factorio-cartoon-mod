@@ -50,6 +50,7 @@ NIVEAUX = {
 LAITON, CUIVRE, SOMBRE = "#e5aa44", "#8a5d31", "#3b3f3a"
 ROUGE, BLANC = "#b5503a", "#e4e2d4"
 ACIER = "#8a949b"                # genouillères et tiges des grands pistons (niveaux 2 et 3)
+FIXATION = "#5d666d"             # patins des pivots : acier sombre (le presque noir faisait un trou dans le plateau)
 
 
 def name(niveau):
@@ -93,12 +94,10 @@ def build(phase=0.0, niveau=1):
     lisse(cyl((-0.55, -0.38, zt + 0.12), 0.305, 0.16, laiton, verts=48))
     lisse(cyl((-0.55, -0.38, zt + 0.47), 0.305, 0.08, laiton, verts=48))
     # deux engrenages debout qui dépassent du bord arrière ; ils s'engrènent (tournent en sens inverse) ;
-    # 3 dents par boucle : assez vite pour se voir, boucle sans à-coup. Niveaux 2 et 3 : plus bas (cadre de
-    # l'assembleur 2 moins haut ; au 3, les grands pistons dépassent à leur place)
+    # 3 dents par boucle : assez vite pour se voir, boucle sans à-coup
     a = phase * 3 * 360 / 10
-    dz = 0.0 if niveau == 1 else -0.2
-    engrenage_debout((0.15, 1.0, zt + 0.5 + dz), 0.38, 10, a, laiton, cuivre)
-    engrenage_debout((-0.62, 1.02, zt + 0.42 + dz), 0.27, 7, -a * 10 / 7 + 12, cuivre, laiton)
+    engrenage_debout((0.15, 1.0, zt + 0.5), 0.38, 10, a, laiton, cuivre)
+    engrenage_debout((-0.62, 1.02, zt + 0.42), 0.27, 7, -a * 10 / 7 + 12, cuivre, laiton)
     if niveau == 1:
         mecanisme_1(phase, zt, a, laiton, cuivre, corps)
     else:
@@ -145,20 +144,20 @@ def mecanisme_bras(phase, zt, niveau, laiton, cuivre, sombre, blanc):
     à bouts arrondis, en acier) : chacune, menée par une manivelle de laiton qui fait un tour par boucle, plie et
     déplie son genou ; elles travaillent en opposition (demi-tour d'écart). Dans un plan penché vers l'arrière, face
     à la caméra. Niveau 3 : trois grands pistons verticaux à l'arrière."""
-    acier = couleur("acier", ACIER)
+    acier, fixation = couleur("acier", ACIER), couleur("fixation", FIXATION)
     y, z0 = -0.5, zt + 0.15                       # bas du plan penché : avant du plateau
     # Profondeurs (vers la caméra = négatif, avant de pencher le plan ; le plan penché, c'est aussi « plus haut ») :
     # par genouillère, de l'arrière vers l'avant : bielle du pivot, bielle de la manivelle, disque de la manivelle,
     # maneton (rond sombre à cœur de laiton) ; seul le maneton se voit tourner sur le disque. Celle de gauche est
     # posée au-dessus de celle de droite. Jamais deux faces dans le même plan.
-    for d, (cx, cz), (gx, gz), decalage in ((-0.25, (0.0, 0.7), (0.85, 0.1), 0.0),
+    for d, (cx, cz), (gx, gz), decalage in ((-0.25, (0.1, 0.7), (0.85, 0.1), 0.0),     # manivelle détachée du tambour
                                             (0.0, (0.95, 0.75), (0.12, 0.12), 180.0)):
         yy = y + d
         a = lambda p, dd: (p[0], yy + dd, p[2])
         avant = set(bpy.data.objects)
         maneton, coude = genou((cx, yy, z0 + cz), 0.18, phase * 360 + decalage, (gx, yy, z0 + gz), 0.75, 0.6)
-        barre(a(coude, 0.0), (gx, yy, z0 + gz), 0.17, 0.08, acier, laiton)
-        barre(a(maneton, -0.05), a(coude, -0.05), 0.17, 0.08, acier, laiton)
+        barre(a(coude, 0.0), (gx, yy, z0 + gz), 0.2, 0.08, acier, laiton)
+        barre(a(maneton, -0.05), a(coude, -0.05), 0.2, 0.08, acier, laiton)
         lisse(cyl((cx, yy - 0.12, z0 + cz), 0.22, 0.05, laiton, verts=48, rot=(90, 0, 0)))     # disque
         lisse(cyl(a(maneton, -0.17), 0.085, 0.03, sombre, verts=32, rot=(90, 0, 0)))          # maneton
         lisse(cyl(a(maneton, -0.19), 0.045, 0.03, laiton, verts=24, rot=(90, 0, 0)))
@@ -166,12 +165,12 @@ def mecanisme_bras(phase, zt, niveau, laiton, cuivre, sombre, blanc):
                               (gx, yy, z0 + gz))
         # fixation du pivot : patin rond posé à plat sur le plateau (socle bas pour la genouillère surélevée)
         h = max(0.06, pz - z0)
-        lisse(cyl((px, py, z0 + h / 2), 0.17, h, sombre, verts=40))
+        lisse(cyl((px, py, z0 + h / 2), 0.17, h, fixation, verts=40))
     if niveau == 3:
         # trois grands pistons verticaux à l'arrière, décalés d'un tiers de boucle : chemise de cuivre, tige d'acier,
-        # tête blanche
+        # tête blanche ; assez hauts pour dépasser des engrenages et de la machine, comme dans l'original
         for k, (x, yy) in enumerate(((0.05, 0.7), (0.47, 0.85), (0.95, 0.72))):
-            h = 0.62 if k != 1 else 0.75
+            h = 1.15 if k != 1 else 1.3
             lisse(cyl((x, yy, zt + 0.15 + h / 2), 0.15, h, cuivre, verts=40))
             lisse(cyl((x, yy, zt + 0.15 + h - 0.04), 0.17, 0.08, laiton, verts=40))
             piston(x, yy, zt + 0.15 + h, GRANDS_PISTONS * va_et_vient(phase, k / 3), acier, blanc,

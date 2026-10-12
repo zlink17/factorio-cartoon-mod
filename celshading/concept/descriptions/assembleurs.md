@@ -38,8 +38,7 @@ déplie son genou entre la manivelle et un pivot fixe ; les deux travaillent en 
 Bastien : la bielle passe derrière son disque, dont on ne voit tourner que le maneton (rond sombre à cœur de laiton) ;
 fixations des pivots en patins ronds posés à plat sur le plateau ; celle de gauche passe au-dessus de celle de droite
 (un peu surélevée, sur un socle rond). Mobiles :
-genouillères, manivelles, piston du tambour, engrenages du fond (plus bas qu'au 1 : le cadre de l'original est moins
-haut).
+genouillères, manivelles, piston du tambour, engrenages du fond (même hauteur qu'au 1 : le cadre a la place).
 
 ## 3 — Assembleur 3
 
@@ -47,5 +46,5 @@ haut).
 pistons verticaux (chemise, tige argentée, tête blanche) qui montent et descendent en décalé, au-dessus de la machine.
 
 **Cel-shading.** Corps vert sauge (l'ancien vert de l'assembleur 1), plateau bleu. Les genouillères de l'assembleur 2, plus **trois grands pistons** à l'arrière (chemise de
-cuivre, bague de laiton, tige d'acier, tête blanche), décalés d'un tiers de boucle, qui dépassent au-dessus de la
-machine (le cadre de l'original est plus haut, pour eux).
+cuivre, bague de laiton, tige d'acier, tête blanche), décalés d'un tiers de boucle, hauts : ils dépassent nettement au-dessus de la
+machine et de ses engrenages, comme dans l'original (son cadre est plus haut, pour eux).

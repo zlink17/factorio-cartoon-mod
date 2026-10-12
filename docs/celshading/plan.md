@@ -220,6 +220,8 @@ de la section 3.3 :
       (planche, ombre, icône) ; piston du tambour ajouté à la demande de Bastien (course 0,30) ; validé le 12 octobre.
       Leçon : la caméra regarde presque d'en haut, un mouvement vertical n'y paraît qu'à moitié ; mouvements dans un
       plan penché vers l'arrière (`kit.incliner`).
+      Revue du 12 octobre : rendu à 16 échantillons au lieu de 4 (aplats et contours granuleux, `cel_style.RENDER_SAMPLES`),
+      arbres et assembleurs relancés ; vérifier le haut des planches (place libre à prendre, pièces coupées).
 - [ ] **Arbres** (organique) : images cibles écartées, prototype Blender retenu (12 octobre), inspiré de l'image de
       Bastien (`concept/cibles/arbre-bastien.jpg`) : touffes en chou-fleur cernées, tronc visible, teinte grise du jeu
       remplacée par un orange d'automne (`mod/data-updates.lua`). Espèce 02 validée en jeu. Un dessin par espèce
