@@ -244,7 +244,7 @@ cartoon a faites avant son plan).
 | [ ] 1.3 Convoyeurs, souterrains, répartiteurs | 3 niveaux + turbo | B | — (vus partout : à soigner) |
 | [ ] 1.4 Bras | 5 bras | B (une cible pour la famille) | — |
 | [ ] 1.5 Poteaux et câbles | poteaux, câbles | B (poteaux), P (câbles) | — |
-| [ ] 1.6 Assembleurs 2 et 3 | | B (dérivés de l'assembleur 1 et du kit) | — |
+| [ ] 1.6 Assembleurs 2 et 3 | de plus en plus de pièces mobiles, comme le jeu (l'assembleur 1 reste le plus simple : piston, quelques engrenages ; le 3 : grands pistons verticaux) | B (dérivés de l'assembleur 1 et du kit) | — |
 | [ ] 2.1 Objets sur les convoyeurs | plaques, engrenages, circuits, packs... | B3 | — |
 | [ ] 2.2 Production de base | four en pierre (fait à l'étape 1), foreuses | B | — |
 | [ ] 2.3 Stockage | coffres bois, fer, acier | B (une cible) | — |
