@@ -1,7 +1,7 @@
 # Mod Cel-shading : approche et plan
 
 Rédigé le 11 octobre 2026. **État (12 octobre) : étape 0 presque finie (moteur, recette d'images cibles, galerie) ; étape 1 en cours : assembleur 1
-modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbres : 9 espèces
+validé (piston du tambour ajouté) ; assembleurs 2 et 3 avancés (lot 1.6), prototypes vus en jeu, avis de Bastien attendu ; arbres : 9 espèces
 produites (`79a159d`), espèce 02 validée, les autres à voir en jeu. Méthode révisée le 12 octobre : prototype Blender d'abord, l'IA si besoin. Plan d'implémentation par lots : sections 5 à 10.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
@@ -186,8 +186,9 @@ piège rencontré), `changelog.txt` à la première publication.
 - [x] `blender/run_cartoon.py` : rend un générateur du mod cartoon en cel-shading sans le modifier (essai du moteur).
 - [x] Galerie : le scénario détecte le mod (variante « celshading », commit `1e27ad4`), `tools/galerie.py --mod celshading`.
 - [x] Recette d'images cibles (`celshading/concept/`), sur les outils communs (`tools/concept/`).
-- [ ] **Boîte de pièces** (`blender/kit.py`) : tirée de l'assembleur 1 une fois validé (tôle rivetée, gros boulons,
-      tuyau à brides, engrenage rond, bloc moteur, pieds), aux proportions « Metal Slug » de la charte.
+- [ ] **Boîte de pièces** (`blender/kit.py`) : commencée le 12 octobre avec les assembleurs 2 et 3 (biseau, prisme,
+      engrenage debout, piston, poutre, articulation, bras articulé, `incliner` : plan penché face à la caméra) ; à
+      compléter au fil des machines (tôle rivetée, gros boulons, tuyau à brides, bloc moteur, pieds).
 - [ ] **Allègement par les prototypes** (à cadrer avec le lot 2.8) : réglages de démarrage du mod pour la quantité de
       décorations par famille (comme `cartoon-epure`), et, si besoin, moins de variantes listées dans les
       prototypes (décorations, peut-être rochers ; pas les arbres) plutôt que des fichiers dupliqués : mod plus léger. À vérifier : sans effet sur
@@ -214,8 +215,10 @@ eau, fumées), qui fixe la lumière et la palette, **puis les machines** du déb
 ### Étape 1 : charte visuelle, sur trois objets vus en jeu
 Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le banc d'essai, chacun par la méthode
 de la section 3.3 :
-- [ ] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; nouveau modèle
-      `blender/assembler.py` (planche, ombre, icône), vu en jeu le 12 octobre, avis de Bastien attendu.
+- [x] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; modèle `blender/assembler.py`
+      (planche, ombre, icône) ; piston du tambour ajouté à la demande de Bastien (course 0,30) ; validé le 12 octobre.
+      Leçon : la caméra regarde presque d'en haut, un mouvement vertical n'y paraît qu'à moitié ; mouvements dans un
+      plan penché vers l'arrière (`kit.incliner`).
 - [ ] **Arbres** (organique) : images cibles écartées, prototype Blender retenu (12 octobre), inspiré de l'image de
       Bastien (`concept/cibles/arbre-bastien.jpg`) : touffes en chou-fleur cernées, tronc visible, teinte grise du jeu
       remplacée par un orange d'automne (`mod/data-updates.lua`). Espèce 02 validée en jeu. Un dessin par espèce
@@ -244,7 +247,7 @@ cartoon a faites avant son plan).
 | [ ] 1.3 Convoyeurs, souterrains, répartiteurs | 3 niveaux + turbo | B | — (vus partout : à soigner) |
 | [ ] 1.4 Bras | 5 bras | B (une cible pour la famille) | — |
 | [ ] 1.5 Poteaux et câbles | poteaux, câbles | B (poteaux), P (câbles) | — |
-| [ ] 1.6 Assembleurs 2 et 3 | de plus en plus de pièces mobiles, comme le jeu (l'assembleur 1 reste le plus simple : piston, quelques engrenages ; le 3 : grands pistons verticaux) | B (dérivés de l'assembleur 1 et du kit) | — |
+| [ ] 1.6 Assembleurs 2 et 3 (**avancé au 12 octobre**, prototypes vus en jeu, avis attendu ; `concept/descriptions/assembleurs.md`) | de plus en plus de pièces mobiles, comme le jeu (l'assembleur 1 reste le plus simple : piston, quelques engrenages ; le 3 : grands pistons verticaux) | B (dérivés de l'assembleur 1 et du kit) | — |
 | [ ] 2.1 Objets sur les convoyeurs | plaques, engrenages, circuits, packs... | B3 | — |
 | [ ] 2.2 Production de base | four en pierre (fait à l'étape 1), foreuses | B | — |
 | [ ] 2.3 Stockage | coffres bois, fer, acier | B (une cible) | — |

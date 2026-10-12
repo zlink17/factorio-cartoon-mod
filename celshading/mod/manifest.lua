@@ -2,6 +2,10 @@
 return {
   ["__base__/graphics/entity/assembling-machine-1/assembling-machine-1-shadow.png"] = true,
   ["__base__/graphics/entity/assembling-machine-1/assembling-machine-1.png"] = true,
+  ["__base__/graphics/entity/assembling-machine-2/assembling-machine-2-shadow.png"] = true,
+  ["__base__/graphics/entity/assembling-machine-2/assembling-machine-2.png"] = true,
+  ["__base__/graphics/entity/assembling-machine-3/assembling-machine-3-shadow.png"] = true,
+  ["__base__/graphics/entity/assembling-machine-3/assembling-machine-3.png"] = true,
   ["__base__/graphics/entity/tree/01/tree-01-a-leaves.png"] = true,
   ["__base__/graphics/entity/tree/01/tree-01-a-normal.png"] = true,
   ["__base__/graphics/entity/tree/01/tree-01-a-shadow.png"] = true,
@@ -503,4 +507,6 @@ return {
   ["__base__/graphics/entity/tree/09/tree-09-h-stump.png"] = true,
   ["__base__/graphics/entity/tree/09/tree-09-h-trunk.png"] = true,
   ["__base__/graphics/icons/assembling-machine-1.png"] = true,
+  ["__base__/graphics/icons/assembling-machine-2.png"] = true,
+  ["__base__/graphics/icons/assembling-machine-3.png"] = true,
 }

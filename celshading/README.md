@@ -1,8 +1,7 @@
 # Mod Cel-shading
 
 Remplace les textures par une version en cel-shading, inspirée de Zelda Wind Waker : lumière et ombre à bord franc,
-ombres teintées, couleurs vives, fumées en volutes. **Premiers essais** : les trois assembleurs (modèles du mod
-cartoon rendus en cel-shading).
+ombres teintées, couleurs vives, fumées en volutes. En cours : assembleurs 1 à 3, arbres de Nauvis.
 
 - Approche, questions de style ouvertes et feuille de route : [docs/celshading/plan.md](../docs/celshading/plan.md).
 - Règles visuelles (brouillon) : [STYLE.md](STYLE.md).
@@ -13,7 +12,7 @@ cartoon rendus en cel-shading).
 |---|---|
 | `mod/` | Le mod Factorio (`factorio-celshading-mod`) : `info.json`, `data-final-fixes.lua`, `manifest.lua`, `graphics/overrides/`. Incompatible avec les mods cartoon et pixel. |
 | `lots.py` | Lots de production, lus par `tools/build.py`. |
-| `blender/` | Rendus 3D cel-shading. `cel_style.py` : valeurs du style ; `lib.py` : mêmes fonctions que `cartoon/blender/lib.py`, rendu cel-shading ; `run_cartoon.py` : rend un générateur du mod cartoon en cel-shading ; `essai.py` : formes simples. |
+| `blender/` | Rendus 3D cel-shading. `cel_style.py` : valeurs du style ; `lib.py` : mêmes fonctions que `cartoon/blender/lib.py`, rendu cel-shading ; `kit.py` : boîte de pièces communes aux machines ; `assembler.py`, `tree.py` : modèles ; `run_cartoon.py` : rend un générateur du mod cartoon en cel-shading ; `essai.py` : formes simples. |
 | `concept/` | Images cibles avec ComfyUI (outils communs `tools/concept/`) : recette du mod (`recette.json`, README) et images retenues (`cibles/`). |
 | `terrain/` | (à venir) sols, décorations et eau en procédural 2D. |
 
