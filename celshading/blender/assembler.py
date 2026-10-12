@@ -27,6 +27,7 @@ SHADOW_CELL, SHADOW_OFFSET = (190, 165), (17, 6)   # cadre de l'ombre originale 
 SUN_SHEAR = (0.5, 0.03)          # ombre au sol : décalage par unité de hauteur (droite, vers le bas) ;
                                  # calé pour que l'ombre aille aussi loin à droite que l'originale
 CANVAS = 400
+PISTON_COURSE = 0.14             # course du piston du tambour (unités : 1 case = 1)
 
 # couleurs mesurées sur les images cibles (ton « éclairé »)
 VERT, BLEU = "#9ab590", "#4b7a8e"
@@ -130,12 +131,22 @@ def build(phase=0.0):
     lisse(o)
     lisse(cyl((0.8, 0.45, zt + 0.55), 0.2, 0.42, laiton, verts=40, rot=(0, 90, 0)))
     arrondi(box((-0.07, 0.45, zt + 0.55), (0.3, 0.38, 0.38), vert), 0.08)     # raccord moteur-entonnoir
-    # deux engrenages debout qui dépassent du bord arrière ; ils s'engrènent (tournent en sens inverse)
-    a = phase * 2 * 360 / 10
+    # deux engrenages debout qui dépassent du bord arrière ; ils s'engrènent (tournent en sens inverse) ;
+    # 3 dents par boucle : assez vite pour se voir, boucle sans à-coup
+    a = phase * 3 * 360 / 10
     engrenage_debout((0.15, 1.0, zt + 0.5), 0.38, 10, a, laiton, cuivre)
     engrenage_debout((-0.62, 1.02, zt + 0.42), 0.27, 7, -a * 10 / 7 + 12, cuivre, laiton)
-    # petit engrenage couché sur le plateau, à droite
-    gear((0.8, -0.05, zt + 0.12), 0.17, 0.1, 6, phase * 2 * 360 / 6, laiton, cuivre)
+    # paire d'engrenages couchés sur le plateau, à droite (2 dents par boucle)
+    b = phase * 2 * 360 / 8
+    gear((0.5, -0.08, zt + 0.15), 0.21, 0.1, 8, b, laiton, cuivre)
+    gear((0.83, -0.1, zt + 0.15), 0.15, 0.1, 6, -b * 8 / 6 + 15, cuivre, laiton)
+    # piston qui sort du tambour : une course aller-retour par boucle (assembleurs 2 et 3 : davantage de pièces
+    # mobiles, l'assembleur 1 reste le plus simple)
+    course = PISTON_COURSE * (0.5 - 0.5 * math.cos(2 * math.pi * phase))
+    z0 = zt + 0.7                                                    # haut du tambour
+    lisse(cyl((-0.55, -0.38, z0 + 0.03), 0.12, 0.06, sombre, verts=32))   # presse-étoupe
+    lisse(cyl((-0.55, -0.38, z0 + 0.1 + course / 2), 0.065, 0.2 + course, sombre, verts=24))   # tige
+    lisse(cyl((-0.55, -0.38, z0 + 0.24 + course), 0.17, 0.09, laiton, verts=40))              # tête
     # cheminée de laiton à gauche, un peu penchée
     lisse(cyl((-1.0, 0.8, zt + 0.45), 0.11, 0.8, laiton, verts=32, rot=(0, -12, 0)))
 
@@ -151,9 +162,7 @@ def build(phase=0.0):
     bpy.ops.mesh.primitive_torus_add(location=(-1.27, 0.05, zt + 0.4), rotation=(0, math.radians(90 - 11), 0),
                                      major_radius=0.12, minor_radius=0.04, major_segments=32, minor_segments=12)
     lisse(bpy.context.object).data.materials.append(blanc)
-    # plaque de cuivre à fente sur le plateau, bande rouge au coin arrière gauche
-    arrondi(box((0.42, -0.05, zt + 0.17), (0.24, 0.24, 0.04), cuivre), 0.02, 2)
-    box((0.42, -0.05, zt + 0.195), (0.05, 0.13, 0.02), sombre)
+    # bande rouge au coin arrière gauche
     arrondi(box((-1.12, 0.62, zt + 0.08), (0.06, 0.5, 0.22), rouge), 0.02, 2)
 
 def measure(path):
