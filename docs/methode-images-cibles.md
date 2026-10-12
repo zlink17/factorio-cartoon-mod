@@ -8,6 +8,11 @@ propulseur (mod cartoon) et de l'assembleur 1 (mod cel-shading).
 Décision de Bastien, après l'arbre du mod cel-shading : un premier prototype Blender, fait vite, a donné la direction
 mieux que les images générées. L'image cible n'est donc **plus systématique** :
 
+0. **Description** (ajoutée le 12 octobre, deuxième décision de Bastien) : avant le premier rendu, on rédige une
+   description détaillée du sprite original (silhouette, volumes, matières, couleurs, détails qui le font reconnaître,
+   calques et états), puis sa **déclinaison dans le style du mod**, et ce qu'elle donne dans Blender. Rangement :
+   `<mod>/concept/descriptions/<famille>.md` (exemple : `celshading/concept/descriptions/arbres.md`). Le prototype suit
+   la déclinaison ; si on passe par l'IA, elle sert de texte (à traduire en anglais).
 1. **Prototype Blender** d'abord : quelques grosses formes, aux couleurs et aux règles du guide de style du mod, à
    l'emprise de l'original. Montré en grand et à la taille du jeu (puis en jeu), Bastien juge.
 2. S'il convient, on **itère dessus** ; Bastien peut donner une image de référence pour s'en inspirer (ex.

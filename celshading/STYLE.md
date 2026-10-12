@@ -16,7 +16,8 @@ Légende : **[VALIDÉ]** décidé avec Bastien, **[PROVISOIRE]** à confirmer.
   l'assembleur...), formes redessinées, arrondies, trapues, proportions un peu exagérées. **[VALIDÉ]**
 - **Peu de grosses formes** : quelques volumes ronds bien lisibles (le cel-shading se lit sur les courbes ; tout
   détail de moins de 6 px disparaît à la taille du jeu). **[VALIDÉ]**
-- **Méthode** (révisée le 12 octobre) : pour chaque objet, un prototype Blender d'abord ; s'il ne colle pas, des
+- **Méthode** (révisée le 12 octobre) : pour chaque objet, une description de l'original et sa déclinaison
+  cel-shading (`concept/descriptions/`), puis un prototype Blender qui la suit ; s'il ne colle pas, des
   images cibles (ComfyUI, guidées par la silhouette de l'original) ; Bastien
   choisit ou commente ; puis modèle Blender qui s'en approche. **[VALIDÉ]**
 - Pas de dégradé, de bruit ni de texture réaliste. Les motifs peints en aplats (planches, pierres, rivets) sont

@@ -45,7 +45,11 @@ FLAT_NORMAL = (255, 128, 128)  # BGR : normale (0, 0, 1), face à la caméra (co
 TRUNK_SHOW = 0.3               # bas du feuillage remonté (unités, à l'écran) : le tronc se voit comme sur l'original
 ROOT_BACK = 0.3                # pied reculé (unités au sol) : racines et pied restent dans le cadre du tronc d'origine
 # dessin propre à chaque espèce (12 octobre, validé par Bastien) ; les autres : touffes en chou-fleur
-DESIGNS = {"01": "sapin", "06": "saule", "09": "geant"}
+# (voir celshading/concept/descriptions/arbres.md)
+DESIGNS = {"01": "sapin", "03": "noueux", "04": "elance", "05": "dome", "06": "saule", "07": "masses",
+           "08": "parasol", "09": "geant"}
+BARK_BY = {"elance": "#b88d66", "parasol": "#c29c74"}          # écorce claire et chaude (04, 08 ; un gris vire au lilas)
+FIR_LAYERS = 3                 # étages du sapin (Bastien : trois, plus lisibles en cel-shading)
 R_CAP = {"geant": 0.5}         # taille maximale des touffes (unités), 0,42 par défaut
 FOOT_BACK = {"geant": 0.6}     # recul du pied (unités au sol) par dessin, ROOT_BACK par défaut
 FIR_TRUNK = 0.7                # hauteur de tronc dégagée sous le premier étage du sapin (unités)
@@ -166,7 +170,78 @@ def crown_balls(p):
         return fir_layers(p)
     if p["design"] == "saule":
         return willow_anchors(p)
-    return clumps(p)
+    if p["design"] == "elance":
+        return zigzag(p)
+    if p["design"] == "masses":
+        return masses(p)
+    if p["design"] == "parasol":
+        return parasol(p)
+    balls = clumps(p)
+    if p["design"] == "noueux":                                 # des trous dans la couronne
+        rng = random.Random(p["seed"] + 5)
+        balls = balls[:-1]
+        drop = set(rng.sample(range(len(balls)), round(len(balls) * 0.45)))
+        balls = [b for i, b in enumerate(balls) if i not in drop] + [clumps(p)[-1]]
+    return balls
+
+
+def zigzag(p):
+    """Arbre élancé : une touffe par étage, d'un côté puis de l'autre, une au sommet ; étages remontés."""
+    rng = random.Random(p["seed"])
+    r0, r1 = p["r"]
+    z0 = p["z0"] + 0.15
+    n = max(4, round((p["z1"] - z0) / (r1 * 1.25)) + 1)
+    out = []
+    side = rng.choice((-1, 1))
+    for i in range(n):
+        z = z0 + (p["z1"] - z0) * i / (n - 1)
+        span = row_span(p, z, r1) or (p["x"] - r1, p["x"] + r1)
+        half = max(0.0, (span[1] - span[0]) / 2 - r1)
+        out.append(((span[0] + span[1]) / 2 + side * half * rng.uniform(0.85, 1.0),
+                    p["base_y"] + rng.uniform(-0.1, 0.2), z, r1 * rng.uniform(0.85, 0.95)))
+        side = -side
+    out.append((p["x"], p["base_y"] + 0.1, p["z1"] + r0 * 0.5, r0))
+    return out
+
+
+def masses(p):
+    """Arbre en masses : trois amas de touffes à trois hauteurs, alternés gauche / droite."""
+    rng = random.Random(p["seed"])
+    r0, r1 = p["r"]
+    out = []
+    side = rng.choice((-1, 1))
+    rm = r1 * 0.72                                              # touffes plus petites : les masses se détachent
+    for zf in (0.0, 0.5, 1.0):
+        z = p["z0"] - 0.1 + (p["z1"] - p["z0"] + 0.1) * zf
+        span = row_span(p, z, rm) or (p["x"] - rm, p["x"] + rm)
+        cx = (span[0] + span[1]) / 2 + side * max(0.0, (span[1] - span[0]) / 2 - rm * 1.9) * 0.9
+        for dx, dz, dy in ((-0.85, 0, 0.1), (0.85, 0, 0.1), (0, 0.65, 0.0), (0, 0.1, -0.3)):
+            out.append((cx + dx * rm, p["base_y"] + dy, z + dz * rm, rm * rng.uniform(0.85, 1.0)))
+        side = -side
+    return out
+
+
+def parasol(p):
+    """Arbre en parasol : un anneau de touffes sur la plus grande largeur de la silhouette, une couche plus petite
+    au-dessus."""
+    rng = random.Random(p["seed"])
+    r0, r1 = p["r"]
+    zc = p["z0"] + (p["z1"] - p["z0"]) * 0.55
+    span = max((row_span(p, p["z0"] + (p["z1"] - p["z0"]) * f, r1) or (p["x"], p["x"]) for f in (0.3, 0.5, 0.7)),
+               key=lambda sp: sp[1] - sp[0])
+    left, right = span[0] + r1 * 1.15, span[1] - r1 * 1.15
+    n = max(3, round((right - left) / (r1 * 1.4)) + 1)
+    out = []
+    for k in range(n):                                          # anneau : derrière puis devant
+        x = left + (right - left) * k / (n - 1)
+        out.append((x, p["base_y"] + 0.3, zc + rng.uniform(-0.08, 0.08), r1 * rng.uniform(0.9, 1.0)))
+    for k in range(n - 1):
+        x = left + (right - left) * (k + 0.5) / (n - 1)
+        out.append((x, p["base_y"] - 0.3, zc - r1 * 0.3, r1 * rng.uniform(0.85, 1.0)))
+    for k in range(max(1, n - 2)):                             # couche du dessus
+        x = left + (right - left) * (k + 1) / (n - 1) if n > 2 else p["x"]
+        out.append((x, p["base_y"], zc + r1 * 1.1, r0 * rng.uniform(0.85, 1.0)))
+    return out
 
 
 def row_span(p, z, r):
@@ -183,32 +258,27 @@ def fir_layers(p):
     r0, r1 = p["r"]
     zb = p["z0"] + FIR_TRUNK                                    # étages remontés : le tronc se voit sous le sapin
     T = (p["top"] - 0.04 - p["screen0"]) / SIN                  # la pointe au haut du feuillage d'origine
-    n = max(5, round((T - zb) / 0.5))
+    n = FIR_LAYERS
     zt = (T + 0.8 * zb / n) / (1 + 0.8 / n)                     # bas du dernier étage (pointe = zt + 0,8 pas)
     step = (zt - zb) / n
-    p["layer_h"] = step * 1.8
+    p["layer_h"] = step * 1.7
     widest = max((row_span(p, zb + i * step, r1) or (p["x"], p["x"]) for i in range(n // 2)),
                  key=lambda sp: sp[1] - sp[0])
     R0 = max(0.2, (widest[1] - widest[0]) / 2 * 0.82)          # un peu moins large que l'original : sapin élancé
     cx = (widest[0] + widest[1]) / 2
     # chaque étage nettement plus étroit que celui du dessous : son bord sort de l'ombre portée de l'étage du dessus
-    return [(cx, p["base_y"], zb + i * step, R0 * (1 - 0.8 * i / n)) for i in range(n)]
+    return [(cx, p["base_y"], zb + i * step, R0 * (1 - 0.62 * i / n)) for i in range(n)]
 
 
 def willow_anchors(p):
-    """Saule : points d'où pendent les filaments (x, y, z, rayon de la petite touffe au départ), en deux rangées
-    dans le haut du feuillage d'origine."""
+    """Saule : bouts des branches arquées, d'où pendent les filaments (x, y, z, rayon de la petite touffe), répartis
+    sur la largeur du feuillage d'origine, aux deux tiers de la hauteur."""
     rng = random.Random(p["seed"])
-    anchors = []
-    for zf in (1.0, 0.75, 0.5):
-        z = p["z0"] + (p["z1"] - p["z0"]) * zf
-        span = row_span(p, z, 0.15) or (p["x"] - 0.2, p["x"] + 0.2)
-        n = max(2, round((span[1] - span[0]) / 0.3))
-        for k in range(n):
-            x = span[0] + 0.1 + (span[1] - span[0] - 0.2) * (k + 0.5) / n
-            anchors.append((x + rng.uniform(-0.04, 0.04), p["base_y"] + rng.uniform(-0.1, 0.15),
-                            z + rng.uniform(-0.1, 0.1), 0.12))
-    return anchors
+    z = p["z0"] + (p["z1"] - p["z0"]) * 0.85
+    span = (p["frame_x"][0] + 0.17, p["frame_x"][1] - 0.17)     # les filaments restent dans le cadre du feuillage
+    n = 5
+    return [(span[0] + 0.08 + (span[1] - span[0] - 0.16) * k / (n - 1) + rng.uniform(-0.04, 0.04),
+             p["base_y"] + rng.uniform(-0.15, 0.2), z + rng.uniform(-0.25, 0.25), 0.07) for k in range(n)]
 
 
 def clumps(p):
@@ -282,10 +352,10 @@ def aim(dx, dy, dz):
 
 def add_trunk(p, stump=False):
     """Tronc épais, un peu tordu, racines étalées au sol, branches qui montent vers les touffes."""
-    bark = couleur("ecorce", BARK)
+    bark = couleur("ecorce", BARK_BY.get(p["design"], BARK))
     x0, y0 = p["x"], p["base_y"]
     rng = random.Random(p["seed"])
-    tr = p.get("trunk_r", 0.21)
+    tr = p.get("trunk_r", 0.21) * (0.7 if p["design"] == "parasol" else 1.0)
     k = math.sqrt(tr / 0.21)                                    # racines et pied : grossissent moins vite que le tronc
     for deg in (165, 230, 310, 15, 90):                         # racines : grosses, courtes, qui plongent au sol ;
         a = math.radians(deg + rng.uniform(-12, 12))            # celles de devant plus courtes (bas du cadre)
@@ -306,6 +376,19 @@ def add_trunk(p, stump=False):
         o["touffe"] = 0
     h = 0.42 if stump else p["z1"] * 0.85            # le tronc monte dans le feuillage, de plus en plus fin
     lean = rng.uniform(-0.08, 0.08) if p["design"] != "saule" else 0.35 * h / 2   # le saule penche à droite
+    if p["design"] == "noueux" and not stump:                   # fourche en Y : deux grosses branches
+        fz = p["z0"] * 0.6
+        for side in (-1, 1):
+            tx, tz = x0 + side * p["width"] * 0.9, p["z1"] * 0.8
+            L = math.sqrt((tx - x0) ** 2 + (tz - fz) ** 2)
+            bpy.ops.mesh.primitive_cone_add(vertices=20, radius1=tr * 0.7, radius2=0.06, depth=L,
+                                            location=((x0 + tx) / 2, y0, (fz + tz) / 2))
+            o = bpy.context.object
+            o.rotation_euler = aim(tx - x0, 0, tz - fz)
+            o.data.materials.append(bark)
+            bpy.ops.object.shade_smooth()
+            o["touffe"] = 52 + (side > 0)
+        h = fz + 0.2
     if p["design"] == "geant" and not stump:                    # géant : trois troncs massifs qui s'écartent
         for j, (dx, dy) in enumerate(((-0.55, 0.1), (0.05, -0.2), (0.6, 0.15))):
             bx, by = x0 + dx * tr, y0 + dy * tr
@@ -340,6 +423,22 @@ def add_trunk(p, stump=False):
         o.data.materials.append(couleur("coupe", "#e0bc84"))
         o["touffe"] = 0
         return
+    if p["design"] == "saule":                                  # branches nues arquées : montée, puis retombée
+        for bx, by, bz, r in crown_balls(p):
+            sz = z * 0.75
+            sx = x0 + lean * sz / h
+            ax, az = (sx + bx) / 2, bz + 0.55
+            for (ux, uy, uz), (vx, vy, vz), r1 in (((sx, y0, sz), (ax, by, az), 0.06), ((ax, by, az), (bx, by, bz), 0.04)):
+                L = math.sqrt((vx - ux) ** 2 + (vy - uy) ** 2 + (vz - uz) ** 2)
+                bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=r1, radius2=r1 * 0.6, depth=L,
+                                                location=((ux + vx) / 2, (uy + vy) / 2, (uz + vz) / 2))
+                o = bpy.context.object
+                o.rotation_euler = aim(vx - ux, vy - uy, vz - uz)
+                o.data.materials.append(bark)
+                o["touffe"] = 0
+                o = sphere((vx, vy, vz), r1 * 0.6, bark)        # coude arrondi
+                o["touffe"] = 0
+        return
     for i, (bx, by, bz, r) in enumerate(crown_balls(p)):        # une branche vers chaque touffe
         sz = max(0.5, min(z, bz - r * 0.9 - 0.2))          # départ sur le tronc, un peu sous la touffe
         sx, sy = x0 + lean * sz / h, y0
@@ -367,6 +466,9 @@ def add_leaves(p, state):
             o["touffe"] = i + 1                                 # chacun clair à gauche, ombré à droite
         elif p["design"] == "saule":
             willow_strands((x, y, z), r, leaf, p, p["seed"] * 7 + i, i + 1)
+        elif p["design"] == "dome":                             # boules lisses (première variante)
+            o = sphere((x, y, z), r * 1.1, leaf, squash=0.88)
+            o["touffe"] = i + 1
         else:
             clump((x, y, z), r, leaf, p["seed"] * 7 + i, i + 1)
 
@@ -378,10 +480,10 @@ def willow_strands(loc, r, m, p, seed, tag):
     o = sphere((x, y, z), r, m, squash=0.8)
     o["touffe"] = tag
     span = p["z1"] - p["z0"]
-    for k in range(8):
-        dx, dy = rng.uniform(-0.18, 0.18), rng.uniform(-0.08, 0.1)
-        L = span * rng.uniform(0.45, 0.75)
-        bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=0.035, radius2=0.01, depth=L,
+    for k in range(12):
+        dx, dy = rng.uniform(-0.13, 0.13), rng.uniform(-0.08, 0.1)
+        L = span * rng.uniform(0.4, 0.8)
+        bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.025, radius2=0.008, depth=L,
                                         location=(x + dx + dx * 0.15, y + dy, z - L / 2))
         o = bpy.context.object
         o.rotation_euler = aim(dx * 0.3, 0, -1)

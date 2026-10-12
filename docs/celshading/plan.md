@@ -81,7 +81,8 @@ Méthode par objet (révisée le 12 octobre : **prototype Blender d'abord**, l'I
    besoin d'énormément de sprites ; le cel-shading, fait de grandes formes, risque d'être surchargé si on garde
    tout. Avant de redessiner une famille, on décide si on la garde entière, en quantité réduite (décorations :
    réglages de démarrage du mod, comme `cartoon-epure`), avec moins de variantes, ou pas du tout. Voir STYLE.md §8.
-1. **Prototype Blender** rapide, à l'emprise de l'original ; s'il convient, on itère dessus (Bastien peut donner une
+1. **Description** de l'original puis sa déclinaison cel-shading (`celshading/concept/descriptions/`), ensuite
+   **prototype Blender** rapide qui la suit, à l'emprise de l'original ; s'il convient, on itère dessus (Bastien peut donner une
    image de référence). Sinon : **guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
    ([docs/methode-images-cibles.md](../methode-images-cibles.md), `tools/concept/`), recette du mod dans
    [`celshading/concept/`](../../celshading/concept/README.md) (SDXL Turbo guidé par ControlNet et par nos propres
@@ -143,7 +144,8 @@ dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-s
    `shift`, images, directions, teinte par le jeu), technique (section 7). **D'abord : garder, alléger ou retirer ?**
    Pour chaque famille : quantité (décorations), nombre de modèles distincts (variantes), ou retrait. Le choix est
    proposé à Bastien avec une recommandation.
-2. **Prototype Blender** (12 octobre) : quelques grosses formes, à l'emprise de l'original, vues en grand et à la
+2. **Description, puis prototype Blender** (12 octobre) : description détaillée de l'original et sa déclinaison
+   cel-shading (`celshading/concept/descriptions/<famille>.md`) ; puis quelques grosses formes qui la suivent, à l'emprise de l'original, vues en grand et à la
    taille du jeu ; Bastien juge. S'il ne colle pas : **image cible** (recette `celshading/concept/recette.json`, deux
    séries de 4 graines, planche avec identifiants ; Bastien choisit ; l'image va dans `celshading/concept/cibles/`).
    Pas de prototype ni d'image cible pour le procédural 2D.
@@ -211,9 +213,11 @@ Trois objets qui couvrent les trois familles de rendu, posés ensemble dans le b
 de la section 3.3 :
 - [ ] **Assembleur 1** (machine, surfaces dures) : cibles e-11 et e-15 retenues ; nouveau modèle
       `blender/assembler.py` (planche, ombre, icône), vu en jeu le 12 octobre, avis de Bastien attendu.
-- [ ] **Arbre** (organique) : images cibles écartées, prototype Blender retenu (12 octobre), inspiré de l'image de
+- [ ] **Arbres** (organique) : images cibles écartées, prototype Blender retenu (12 octobre), inspiré de l'image de
       Bastien (`concept/cibles/arbre-bastien.jpg`) : touffes en chou-fleur cernées, tronc visible, teinte grise du jeu
-      remplacée par un orange d'automne (`mod/data-updates.lua`). `blender/tree.py`, espèce 02 : à voir en jeu.
+      remplacée par un orange d'automne (`mod/data-updates.lua`). Espèce 02 validée en jeu. Un dessin par espèce
+      (`concept/descriptions/arbres.md` : sapin à trois étages, noueux, élancé, dôme, saule, masses, parasol, géant),
+      même nombre de variantes que le jeu ; prototypes des 9 espèces faits, production à lancer ; arbres morts à faire.
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.
 - [ ] Vue de nuit des trois objets (ombres bleues de nuit acceptables ?).
