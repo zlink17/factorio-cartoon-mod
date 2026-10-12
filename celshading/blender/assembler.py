@@ -147,19 +147,26 @@ def mecanisme_bras(phase, zt, niveau, laiton, cuivre, sombre, blanc):
     à la caméra. Niveau 3 : trois grands pistons verticaux à l'arrière."""
     acier = couleur("acier", ACIER)
     y, z0 = -0.5, zt + 0.15                       # bas du plan penché : avant du plateau
-    avant = set(bpy.data.objects)
-    # la seconde genouillère, et la première barre de chacune, un peu vers la caméra (une fois le plan penché,
-    # « en retrait » passerait sous le plateau) : jamais deux faces dans le même plan
-    for dy, manivelle, pivot, decalage in ((0.0, (0.0, z0 + 0.7), (0.85, z0 + 0.1), 0.0),
-                                           (-0.24, (0.95, z0 + 0.75), (0.12, z0 + 0.12), 180.0)):
-        yy = y + dy
-        manivelle, pivot = (manivelle[0], yy - 0.11, manivelle[1]), (pivot[0], yy, pivot[1])
-        maneton, coude = genou(manivelle, 0.18, phase * 360 + decalage, pivot, 0.75, 0.6)
-        lisse(cyl((manivelle[0], yy, manivelle[2]), 0.22, 0.1, laiton, verts=40, rot=(90, 0, 0)))   # plateau
-        arrondi(box((pivot[0], yy + 0.06, pivot[2] - 0.04), (0.26, 0.12, 0.18), sombre), 0.04, 2)   # chape du pivot
-        barre(maneton, coude, 0.17, 0.1, acier, laiton)
-        barre((coude[0], yy, coude[2]), pivot, 0.17, 0.1, acier, laiton)
-    incliner([o for o in bpy.data.objects if o not in avant], (0, y, z0), BRAS_INCLINAISON)
+    # Profondeurs (vers la caméra = négatif, avant de pencher le plan ; le plan penché, c'est aussi « plus haut ») :
+    # par genouillère, de l'arrière vers l'avant : bielle du pivot, bielle de la manivelle, disque de la manivelle,
+    # maneton (rond sombre à cœur de laiton) ; seul le maneton se voit tourner sur le disque. Celle de gauche est
+    # posée au-dessus de celle de droite. Jamais deux faces dans le même plan.
+    for d, (cx, cz), (gx, gz), decalage in ((-0.25, (0.0, 0.7), (0.85, 0.1), 0.0),
+                                            (0.0, (0.95, 0.75), (0.12, 0.12), 180.0)):
+        yy = y + d
+        a = lambda p, dd: (p[0], yy + dd, p[2])
+        avant = set(bpy.data.objects)
+        maneton, coude = genou((cx, yy, z0 + cz), 0.18, phase * 360 + decalage, (gx, yy, z0 + gz), 0.75, 0.6)
+        barre(a(coude, 0.0), (gx, yy, z0 + gz), 0.17, 0.08, acier, laiton)
+        barre(a(maneton, -0.05), a(coude, -0.05), 0.17, 0.08, acier, laiton)
+        lisse(cyl((cx, yy - 0.12, z0 + cz), 0.22, 0.05, laiton, verts=48, rot=(90, 0, 0)))     # disque
+        lisse(cyl(a(maneton, -0.17), 0.085, 0.03, sombre, verts=32, rot=(90, 0, 0)))          # maneton
+        lisse(cyl(a(maneton, -0.19), 0.045, 0.03, laiton, verts=24, rot=(90, 0, 0)))
+        px, py, pz = incliner([o for o in bpy.data.objects if o not in avant], (0, y, z0), BRAS_INCLINAISON,
+                              (gx, yy, z0 + gz))
+        # fixation du pivot : patin rond posé à plat sur le plateau (socle bas pour la genouillère surélevée)
+        h = max(0.06, pz - z0)
+        lisse(cyl((px, py, z0 + h / 2), 0.17, h, sombre, verts=40))
     if niveau == 3:
         # trois grands pistons verticaux à l'arrière, décalés d'un tiers de boucle : chemise de cuivre, tige d'acier,
         # tête blanche

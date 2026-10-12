@@ -34,7 +34,10 @@ plateau ; engrenages au fond ; deux cylindres blancs.
 **Cel-shading.** Corps bleu clair, plateau brun cuivré (contraste chaud avec le bleu). À droite : **deux genouillères
 croisées**, comme les bras de l'original (pas de pince : essayée le 12 octobre, écartée par Bastien) : barres plates
 d'acier à bouts arrondis, axes de laiton ; chacune, menée par une manivelle de laiton (un tour par boucle), plie et
-déplie son genou entre la manivelle et un pivot fixe sur le plateau ; les deux travaillent en opposition. Mobiles :
+déplie son genou entre la manivelle et un pivot fixe ; les deux travaillent en opposition. Retouches de
+Bastien : la bielle passe derrière son disque, dont on ne voit tourner que le maneton (rond sombre à cœur de laiton) ;
+fixations des pivots en patins ronds posés à plat sur le plateau ; celle de gauche passe au-dessus de celle de droite
+(un peu surélevée, sur un socle rond). Mobiles :
 genouillères, manivelles, piston du tambour, engrenages du fond (plus bas qu'au 1 : le cadre de l'original est moins
 haut).
 
