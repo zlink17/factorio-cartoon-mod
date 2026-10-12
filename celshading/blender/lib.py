@@ -60,12 +60,18 @@ def line_color(rgb):
     return tuple(_to_linear(min(1.0, c)) for c in (r, g, min(1.0, b * C.OUTLINE_BLUE)))
 
 
-def mat(name, rgb, avive=True):
+def mat(name, rgb, avive=True, paliers=None):
     """Aplat de la couleur (RGB linéaire), en émission ; le ton (ombre, éclairé, clair) est posé par render_scene.
-    `avive` : couleur de la palette cartoon, avivée (modèles du mod cartoon) ; False : couleur prise telle quelle."""
+    `avive` : couleur de la palette cartoon, avivée (modèles du mod cartoon) ; False : couleur prise telle quelle.
+    `paliers` : réglages des tons propres à la matière : (ombre en dessous de, clair au-dessus de) à la place de
+    SHADOW_BELOW et HIGHLIGHT_ABOVE, éventuellement suivis des teintes d'ombre et de clair (3 + 3 nombres) à la place
+    de SHADOW_TINT et HIGHLIGHT_TINT (feuillage : dessous foncé et dessus clair plus larges et plus marqués)."""
     base = vivid(rgb) if avive else tuple(rgb)
     m = bpy.data.materials.new(name)
     m["cel"] = 1
+    if paliers:
+        p = list(paliers)
+        m["cel_paliers"] = p + list(C.SHADOW_TINT) * (len(p) < 5) + list(C.HIGHLIGHT_TINT) * (len(p) < 8)
     m.line_color = (*line_color(base), 1)
     m.use_nodes = True
     nt = m.node_tree
@@ -77,9 +83,9 @@ def mat(name, rgb, avive=True):
     return m
 
 
-def couleur(name, hex_):
+def couleur(name, hex_, paliers=None):
     """Matière d'une couleur #rrggbb (sRGB) prise telle quelle : ton « éclairé » de l'objet (modèles du mod)."""
-    return mat(name, S._lin(hex_), avive=False)
+    return mat(name, S._lin(hex_), avive=False, paliers=paliers)
 
 
 def _flat(name, shader, value):
@@ -187,14 +193,54 @@ def _light_pass(path, size):
     return im[:, :, 2], im[:, :, 3]
 
 
-def tones(light, alpha):
+def _palier_pass(path, size):
+    """Réglages des tons de chaque pixel (tableaux pour les arguments de tones()), si une matière a les siens
+    (mat(paliers=...)) ; sinon None. Rendu « identifiant » : chaque jeu de réglages en aplat d'une valeur propre."""
+    import cv2, numpy as np
+    sc = bpy.context.scene
+    sets = [(C.SHADOW_BELOW, C.HIGHLIGHT_ABOVE, *C.SHADOW_TINT, *C.HIGHLIGHT_TINT)]
+    for o in sc.objects:
+        for m in (o.data.materials if o.type == "MESH" else []):
+            if m is not None and m.get("cel_paliers") and tuple(m["cel_paliers"]) not in sets:
+                sets.append(tuple(m["cel_paliers"]))
+    if len(sets) == 1:
+        return None
+    flats = [_flat(f"cel-palier-{i}", "ShaderNodeEmission", (i + 1) / 64) for i in range(len(sets))]
+    saved = {}
+    for o in sc.objects:
+        if o.type == "MESH" and o.data.name not in saved:
+            mats = list(o.data.materials)
+            saved[o.data.name] = (o.data, mats)
+            for i, m in enumerate(mats):
+                k = sets.index(tuple(m["cel_paliers"])) if m is not None and m.get("cel_paliers") else 0
+                o.data.materials[i] = flats[k]
+    filt = sc.render.filter_size
+    sc.render.filter_size = 0.01                 # pas d'anticrénelage : une seule valeur par pixel
+    _render(path, size, "Raw", depth="16")
+    sc.render.filter_size = filt
+    for me, mats in saved.values():
+        for i, m in enumerate(mats):
+            me.materials[i] = m
+    im = cv2.imread(path, cv2.IMREAD_UNCHANGED).astype(np.float32)
+    os.remove(path)
+    idx = np.clip(np.round(im[:, :, 2] / 65535 * 64).astype(int) - 1, 0, len(sets) - 1)
+    table = np.array(sets, np.float32)
+    return table[idx, 0], table[idx, 1], table[idx, 2:5], table[idx, 5:8]
+
+
+def tones(light, alpha, shadow_below=C.SHADOW_BELOW, highlight_above=C.HIGHLIGHT_ABOVE, shadow_tint=C.SHADOW_TINT,
+          highlight_tint=C.HIGHLIGHT_TINT):
     """Multiplicateur RGB (en sRGB, ordre BGR d'OpenCV) de chaque pixel selon son éclairement ; 1 hors de l'objet
-    (le contour qui déborde de la silhouette garde sa couleur)."""
+    (le contour qui déborde de la silhouette garde sa couleur). Réglages : nombres (et triplets RGB), ou tableaux
+    par pixel (voir _palier_pass)."""
     import numpy as np
     out = np.ones(light.shape + (3,), np.float32)
     inside = alpha > 0.5
-    out[inside & (light < C.SHADOW_BELOW)] = C.SHADOW_TINT[::-1]
-    out[inside & (light > C.HIGHLIGHT_ABOVE)] = C.HIGHLIGHT_TINT[::-1]
+    st = np.broadcast_to(np.asarray(shadow_tint, np.float32)[..., ::-1], out.shape)
+    ht = np.broadcast_to(np.asarray(highlight_tint, np.float32)[..., ::-1], out.shape)
+    dark, bright = inside & (light < shadow_below), inside & (light > highlight_above)
+    out[dark] = st[dark]
+    out[bright] = ht[bright]
     return out
 
 
@@ -221,7 +267,8 @@ def render_scene(path, size=256, scale=4.4, pitch_deg=S.PITCH_BUILDING_DEG, cy=0
               for m in o.data.materials)
     if cel:
         light, alpha = _light_pass(path + ".lumiere.png", big)
-        im[:, :, :3] = np.clip(im[:, :, :3] * tones(light, alpha), 0, 255)
+        paliers = _palier_pass(path + ".paliers.png", big) or ()
+        im[:, :, :3] = np.clip(im[:, :, :3] * tones(light, alpha, *paliers), 0, 255)
     a = im[:, :, 3:4] / 255.0
     pre = np.dstack([im[:, :, :3] * a, im[:, :, 3:4]])
     small = cv2.resize(pre, size_final, interpolation=cv2.INTER_AREA) if ss > 1 else pre

@@ -6,4 +6,5 @@ arguments ; build.py ajoute le dossier de sortie en premier argument.
 
 LOTS = {
     "assembleurs": [("blender/assembler.py", ["tout"])],   # assembleur 1 : planche animée, ombre, icône
+    "arbres": [("blender/tree.py", ["02"])],               # étape 1 : espèce 02 (tronc, feuillage, normales, ombres, souche)
 }
