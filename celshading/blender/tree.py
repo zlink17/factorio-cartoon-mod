@@ -24,15 +24,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
 import cv2
 import numpy as np
-from lib import reset, couleur, render_scene, render_shadow, crop_centered, line_color, S
+from lib import reset, couleur, render_scene, render_shadow, line_color, S
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 DATA = os.environ.get("FACTORIO_DIR", "/mnt/c/Program Files (x86)/Steam/steamapps/common/Factorio") + "/data/"
 DUMP = os.path.join(ROOT, ".cache", "data-raw-dump.json")
 TILE_PX = 64                   # px du fichier par case du jeu (sprites à scale 0,5) : place les cadres (`shift`)
 PX = 128                       # px du fichier par unité du modèle (1 unité = 2 cases ; échelle de rendu)
-CANVAS = 1100                  # canevas carré centré sur l'entité, en px du fichier
-SHADOW_CANVAS = 1500           # celui des ombres, qui partent loin à droite
+CANVAS = 1100                  # canevas virtuel centré sur l'entité (px du fichier) : on n'en rend que des fenêtres
 COS = math.cos(math.radians(S.PITCH_BUILDING_DEG))     # une case au sol se voit COS case à l'écran
 SIN = math.sin(math.radians(S.PITCH_BUILDING_DEG))     # une hauteur z se voit z x SIN à l'écran
 LEAF = "#c2cab2"               # feuillage neutre (ton moyen ; le jeu le teinte)
@@ -156,7 +155,7 @@ def fit(v, seed, design="chou-fleur"):
 # --- modèle -----------------------------------------------------------------------------------------------------
 
 def sphere(loc, r, m, squash=1.0):
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc, segments=40, ring_count=20)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc, segments=32, ring_count=16)
     o = bpy.context.object
     o.scale = (1, 1, squash)
     o.data.materials.append(m)
@@ -542,21 +541,47 @@ def outline_ids(im, ids, hex_, px):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def canvas(tmp, build, line=None):
-    """Rend la scène (`build()`) sur le canevas centré sur l'entité, avec un trait autour de chaque touffe (et de
-    l'objet) à la teinte de la matière `line` (#rrggbb)."""
+def frame_box(pic):
+    """Cadre d'un fichier dans le canevas virtuel centré sur l'entité : (x, y, largeur, hauteur) en px entiers."""
+    w, h = pic["width"], pic["height"]
+    return (round(CANVAS / 2 + pic["shift"][0] * TILE_PX - w / 2), round(CANVAS / 2 + pic["shift"][1] * TILE_PX - h / 2),
+            w, h)
+
+
+def window(pics, margin=6):
+    """Fenêtre de rendu : la réunion des cadres `pics`, plus une marge (le trait déborde d'un ou deux px). On ne rend
+    que cette fenêtre du canevas virtuel (un grand canevas jetait plus de 95 % des pixels)."""
+    boxes = [frame_box(q) for q in pics]
+    x0, y0 = min(b[0] for b in boxes) - margin, min(b[1] for b in boxes) - margin
+    x1, y1 = max(b[0] + b[2] for b in boxes) + margin, max(b[1] + b[3] for b in boxes) + margin
+    return x0, y0, x1 - x0, y1 - y0
+
+
+def camera_of(win):
+    """(échelle, décalage x, décalage y) de la caméra qui voit exactement la fenêtre `win` du canevas virtuel."""
+    x0, y0, w, h = win
+    big = max(w, h)
+    return big / PX, (x0 + w / 2 - CANVAS / 2) / big, -(y0 + h / 2 - CANVAS / 2) / big
+
+
+def canvas(tmp, build, line, win):
+    """Rend la scène (`build()`) dans la fenêtre `win`, avec un trait autour de chaque touffe (et de l'objet) à la
+    teinte de la matière `line` (#rrggbb)."""
     reset()
     build()
-    render_scene(tmp, size=CANVAS, scale=CANVAS / PX, pitch_deg=S.PITCH_BUILDING_DEG, outline=False)
+    scale, sx, sy = camera_of(win)
+    render_scene(tmp, size=(win[2], win[3]), scale=scale, pitch_deg=S.PITCH_BUILDING_DEG, outline=False,
+                 shift_x=sx, shift_y=sy)
     im = cv2.imread(tmp, cv2.IMREAD_UNCHANGED)
     ss = S.SUPERSAMPLE
-    ids = touffe_ids(tmp + ".id.png", (CANVAS * ss, CANVAS * ss))
+    ids = touffe_ids(tmp + ".id.png", (win[2] * ss, win[3] * ss))
     return outline_ids(im, ids, line, LINE_PX)
 
 
-def cut(im, pic):
-    """Cadre d'un fichier (taille et shift du prototype) dans le canevas."""
-    return crop_centered(im, (pic["width"], pic["height"]), (pic["shift"][0] * TILE_PX, pic["shift"][1] * TILE_PX))
+def cut(im, pic, win):
+    """Cadre d'un fichier, découpé dans le rendu de la fenêtre `win`."""
+    x, y, w, h = frame_box(pic)
+    return im[y - win[1]:y - win[1] + h, x - win[0]:x - win[0] + w].copy()
 
 
 def write(out, pic, im):
@@ -569,44 +594,52 @@ def write(out, pic, im):
 def render_variation(out, v, stump, p):
     """Tous les fichiers d'une variante. Renvoie (feuillages des 3 états, tronc), découpés à leur cadre."""
     tmp = os.path.join(out, "_calque.png")
-    trunk = cut(canvas(tmp, lambda: add_trunk(p), BARK), v["trunk"])
+    win = window([v["trunk"]])
+    trunk = cut(canvas(tmp, lambda: add_trunk(p), BARK, win), v["trunk"], win)
     write(out, v["trunk"], trunk)
     leaves, normals = [], []
+    win = window([v["leaves"]] + ([v["normal"]] if "normal" in v else []))
     for s in range(3):
-        im = canvas(tmp, lambda: add_leaves(p, s), LEAF)
-        leaves.append(cut(im, v["leaves"]))
+        im = canvas(tmp, lambda: add_leaves(p, s), LEAF, win)
+        leaves.append(cut(im, v["leaves"], win))
         if "normal" in v:                                       # le saule (06) n'en a pas
-            n = cut(im, v["normal"])
+            n = cut(im, v["normal"], win)
             n[:, :, :3] = FLAT_NORMAL
             normals.append(n)
     write(out, v["leaves"], np.hstack(leaves))
     if normals:
         write(out, v["normal"], np.hstack(normals))
     shadows = []
+    win = window([v["shadow"]])
+    scale, sx, sy = camera_of(win)
     for s in range(4):
         def build(s=s):
             reset()
             add_trunk(p)
             if s < 3:
                 add_leaves(p, s)
-        big = render_shadow(build, tmp, (SHADOW_CANVAS, SHADOW_CANVAS), SHADOW_CANVAS / PX, p["shear"])
-        shadows.append(cut(big, v["shadow"]))
+        im = render_shadow(build, tmp, (win[2], win[3]), scale, p["shear"], sx, sy)
+        shadows.append(cut(im, v["shadow"], win))
     write(out, v["shadow"], np.hstack(shadows))
     if stump:
-        write(out, stump, cut(canvas(tmp, lambda: add_trunk(p, stump=True), BARK), stump))
+        win = window([stump])
+        write(out, stump, cut(canvas(tmp, lambda: add_trunk(p, stump=True), BARK, win), stump, win))
     if os.path.exists(tmp):
         os.remove(tmp)
     return leaves, trunk
 
 
-def produce(out, species):
-    vs, stumps = variations(species)
-    stump_of = {re.search(r"-([a-z])-stump", s["filename"]).group(1): s for s in stumps}
-    for i, v in enumerate(vs):
-        letter = re.search(r"-([a-z])-trunk", v["trunk"]["filename"]).group(1)
-        p = fit(v, seed=int(species) * 100 + i, design=DESIGNS.get(species, "chou-fleur"))
-        render_variation(out, v, stump_of.get(letter), p)
-        print("OK", species, letter, {k: round(x, 2) for k, x in p.items() if isinstance(x, float)})
+def produce(out, species_list):
+    """Toutes les variantes des espèces. (Un seul processus : Cycles occupe déjà tous les cœurs ; plusieurs
+    processus en parallèle se gênent et vont beaucoup plus lentement.)"""
+    for sp in species_list:
+        vs, stumps = variations(sp)
+        stump_of = {re.search(r"-([a-z])-stump", s["filename"]).group(1): s for s in stumps}
+        for i, v in enumerate(vs):
+            letter = re.search(r"-([a-z])-trunk", v["trunk"]["filename"]).group(1)
+            p = fit(v, seed=int(sp) * 100 + i, design=DESIGNS.get(sp, "chou-fleur"))
+            render_variation(out, v, stump_of.get(letter), p)
+            print("OK", sp, letter, flush=True)
 
 
 # --- aperçu ---------------------------------------------------------------------------------------------------------
@@ -710,5 +743,4 @@ if __name__ == "__main__":
     elif cmd == "especes":
         apercu_especes(out, sys.argv[3].split(",") if len(sys.argv) > 3 else SPECIES)
     else:
-        for sp in cmd.split(","):
-            produce(out, sp)
+        produce(out, cmd.split(","))

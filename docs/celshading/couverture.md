@@ -8,20 +8,20 @@ sont exclus du décompte (174 fichiers).
 
 | Jeu | Remplacés | Total | Couverture |
 |---|---:|---:|---:|
-| `base` | 63 | 4143 | 2 % |
+| `base` | 503 | 4143 | 12 % |
 | `elevated-rails` | 0 | 181 | 0 % |
 | `quality` | 0 | 52 | 0 % |
 | `space-age` | 0 | 3414 | 0 % |
 | `core` | 0 | 456 | 0 % |
-| **Total** | **63** | **8246** | **1 %** |
+| **Total** | **503** | **8246** | **6 %** |
 
 ## Par rôle
 
 | Rôle | Remplacés | Total |
 |---|---:|---:|
-| sprite | 49 | 5483 |
+| sprite | 399 | 5483 |
 | icone | 1 | 1525 |
-| ombre | 13 | 822 |
+| ombre | 103 | 822 |
 | lumiere | 0 | 135 |
 | masque | 0 | 281 |
 
@@ -81,7 +81,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | white-desert-bush | 0 | 20 | 0 |
 | worms-decal | 0 | 16 | 0 |
 
-### entity : 62 / 2289
+### entity : 502 / 2289
 
 | Famille | Faits | Fichiers | Dont ombres, masques, lumières |
 |---|---:|---:|---:|
@@ -228,7 +228,7 @@ Famille = dossier sous la catégorie (pour les icônes : nom de l'objet).
 | train-stop | 0 | 24 | 19 |
 | train-wheel | 0 | 8 | 0 |
 | transport-belt | 0 | 17 | 2 |
-| ◐ tree | 60 | 550 | 102 |
+| ◐ tree | 500 | 550 | 102 |
 | underground-belt | 0 | 4 | 0 |
 | uranium-ore | 0 | 2 | 0 |
 | wall | 0 | 24 | 10 |
