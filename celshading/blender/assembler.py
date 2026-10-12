@@ -27,7 +27,7 @@ SHADOW_CELL, SHADOW_OFFSET = (190, 165), (17, 6)   # cadre de l'ombre originale 
 SUN_SHEAR = (0.5, 0.03)          # ombre au sol : décalage par unité de hauteur (droite, vers le bas) ;
                                  # calé pour que l'ombre aille aussi loin à droite que l'originale
 CANVAS = 400
-PISTON_COURSE = 0.14             # course du piston du tambour (unités : 1 case = 1)
+PISTON_COURSE = 0.30             # course du piston du tambour (unités : 1 case = 1)
 
 # couleurs mesurées sur les images cibles (ton « éclairé »)
 VERT, BLEU = "#9ab590", "#4b7a8e"
@@ -117,10 +117,10 @@ def build(phase=0.0):
     arrondi(box((-0.55, 0.3, zt + 0.45), (0.78, 0.85, 0.85), vert), 0.14)
     lisse(cyl((-0.55, 0.3, zt + 0.89), 0.22, 0.05, laiton, verts=40))
     cyl((-0.55, 0.3, zt + 0.92), 0.09, 0.03, sombre, verts=24)
-    # tambour cuivré devant le moteur, bague de laiton
-    lisse(cyl((-0.55, -0.38, zt + 0.38), 0.29, 0.7, cuivre, verts=48))
+    # tambour cuivré devant le moteur, bague de laiton ; assez bas pour que le piston qui en sort ne cache pas l'œil
+    lisse(cyl((-0.55, -0.38, zt + 0.27), 0.29, 0.48, cuivre, verts=48))
     lisse(cyl((-0.55, -0.38, zt + 0.12), 0.305, 0.16, laiton, verts=48))
-    lisse(cyl((-0.55, -0.38, zt + 0.66), 0.305, 0.08, laiton, verts=48))
+    lisse(cyl((-0.55, -0.38, zt + 0.47), 0.305, 0.08, laiton, verts=48))
     # long arbre de laiton vers la droite
     lisse(cyl((0.4, -0.45, zt + 0.3), 0.12, 1.25, laiton, verts=32, rot=(0, 90, 0)))
     # entonnoir de laiton couché, pointé vers la droite, et son embout
@@ -143,7 +143,7 @@ def build(phase=0.0):
     # piston qui sort du tambour : une course aller-retour par boucle (assembleurs 2 et 3 : davantage de pièces
     # mobiles, l'assembleur 1 reste le plus simple)
     course = PISTON_COURSE * (0.5 - 0.5 * math.cos(2 * math.pi * phase))
-    z0 = zt + 0.7                                                    # haut du tambour
+    z0 = zt + 0.51                                                   # haut du tambour
     lisse(cyl((-0.55, -0.38, z0 + 0.03), 0.12, 0.06, sombre, verts=32))   # presse-étoupe
     lisse(cyl((-0.55, -0.38, z0 + 0.1 + course / 2), 0.065, 0.2 + course, sombre, verts=24))   # tige
     lisse(cyl((-0.55, -0.38, z0 + 0.24 + course), 0.17, 0.09, laiton, verts=40))              # tête
