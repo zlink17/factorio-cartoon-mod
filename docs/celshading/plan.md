@@ -1,8 +1,8 @@
 # Mod Cel-shading : approche et plan
 
 Rédigé le 11 octobre 2026. **État (12 octobre) : étape 0 presque finie (moteur, recette d'images cibles, galerie) ; étape 1 en cours : assembleur 1
-modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbre : prototype
-Blender (espèce 02) en cours. Méthode révisée le 12 octobre : prototype Blender d'abord, l'IA si besoin. Plan d'implémentation par lots : sections 5 à 10.**
+modélisé d'après les cibles e-11/e-15 (commits `8e1e15f`, `cd26eeb`), vu en jeu, avis de Bastien attendu ; arbres : 9 espèces
+produites (`79a159d`), espèce 02 validée, les autres à voir en jeu. Méthode révisée le 12 octobre : prototype Blender d'abord, l'IA si besoin. Plan d'implémentation par lots : sections 5 à 10.**
 Règles visuelles : [`celshading/STYLE.md`](../../celshading/STYLE.md) (brouillon).
 
 Objectif : un troisième mod de textures, au style « Wind Waker » : cel-shading (lumière et ombre à bord franc),
@@ -77,10 +77,11 @@ exagérées, rivets, boulons, tuyaux). Machines réinterprétées mais reconnais
 
 Méthode par objet (révisée le 12 octobre : **prototype Blender d'abord**, l'IA seulement s'il ne colle pas, voir
 [methode-images-cibles.md](../methode-images-cibles.md)) :
-0. **Garder, alléger ou retirer ?** (12 octobre, demande de Bastien) : le Factorio d'origine, très détaillé, a
-   besoin d'énormément de sprites ; le cel-shading, fait de grandes formes, risque d'être surchargé si on garde
-   tout. Avant de redessiner une famille, on décide si on la garde entière, en quantité réduite (décorations :
-   réglages de démarrage du mod, comme `cartoon-epure`), avec moins de variantes, ou pas du tout. Voir STYLE.md §8.
+0. **Garder, alléger ou retirer ?** (12 octobre, précisé le même jour) : seulement pour les familles où l'original
+   surcharge l'image (décorations, taches au sol, particules, petits effets) : on y décide la **densité** (combien
+   d'éléments le jeu pose : réglages de démarrage du mod, comme `cartoon-epure`) et le nombre de **variantes**
+   (dessins distincts), ou le retrait. Tout le reste est **gardé par défaut** (densité et variantes d'origine),
+   allégé seulement si le jeu montre une surcharge. Voir STYLE.md §8.
 1. **Description** de l'original puis sa déclinaison cel-shading (`celshading/concept/descriptions/`), ensuite
    **prototype Blender** rapide qui la suit, à l'emprise de l'original ; s'il convient, on itère dessus (Bastien peut donner une
    image de référence). Sinon : **guides** tirés du sprite original, puis **images cibles** avec ComfyUI : méthode et outils communs aux mods
@@ -133,7 +134,9 @@ dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-s
   qu'au cartoon. Deux leviers pour tenir le coût : une **direction par famille** plutôt que par objet (les trois
   coffres, le trio de la vapeur), et une **boîte de pièces communes** (`blender/kit.py`, étape 0) pour que chaque machine coûte un assemblage,
   pas un modèle entier.
-- **Moins de sprites que l'original** (STYLE.md §8) : chaque lot commence par « garder, alléger ou retirer ? ».
+- **Moins de sprites que l'original, là où il surcharge** (STYLE.md §8) : les lots de décorations, taches,
+  particules et petits effets commencent par « garder, alléger ou retirer ? » ; les autres gardent tout par défaut
+  (leçon des arbres : les réduire aurait appauvri le monde).
 - **Le jeu teinte certains sprites** (feuillage, masques d'équipe, décorations, fluides) : ils sont rendus en tons
   neutres et doivent rester lisibles une fois teints (ombre bleue x teinte du jeu).
 - **Ombres au sol noires** quelle que soit leur couleur : seule leur forme et leur opacité sont à nous.
@@ -141,9 +144,9 @@ dans un autre ordre (section 8). Ce qui change, ce sont les contraintes du cel-s
 ### 5.1 Le cycle d'un lot
 
 1. **Cadrage** : liste des fichiers (`tools/inventory.py celshading liste <motif>`), lecture des prototypes (tailles,
-   `shift`, images, directions, teinte par le jeu), technique (section 7). **D'abord : garder, alléger ou retirer ?**
-   Pour chaque famille : quantité (décorations), nombre de modèles distincts (variantes), ou retrait. Le choix est
-   proposé à Bastien avec une recommandation.
+   `shift`, images, directions, teinte par le jeu), technique (section 7). **Pour les décorations, taches, particules et petits effets : garder,
+   alléger ou retirer ?** Densité (quantité posée par le jeu), nombre de variantes, ou retrait ; le choix est
+   proposé à Bastien avec une recommandation. Les autres familles gardent densité et variantes d'origine.
 2. **Description, puis prototype Blender** (12 octobre) : description détaillée de l'original et sa déclinaison
    cel-shading (`celshading/concept/descriptions/<famille>.md`) ; puis quelques grosses formes qui la suivent, à l'emprise de l'original, vues en grand et à la
    taille du jeu ; Bastien juge. S'il ne colle pas : **image cible** (recette `celshading/concept/recette.json`, deux
@@ -187,7 +190,7 @@ piège rencontré), `changelog.txt` à la première publication.
       tuyau à brides, engrenage rond, bloc moteur, pieds), aux proportions « Metal Slug » de la charte.
 - [ ] **Allègement par les prototypes** (à cadrer avec le lot 2.8) : réglages de démarrage du mod pour la quantité de
       décorations par famille (comme `cartoon-epure`), et, si besoin, moins de variantes listées dans les
-      prototypes (arbres, rochers) plutôt que des fichiers dupliqués : mod plus léger. À vérifier : sans effet sur
+      prototypes (décorations, peut-être rochers ; pas les arbres) plutôt que des fichiers dupliqués : mod plus léger. À vérifier : sans effet sur
       les autres mods, ni sur les sauvegardes existantes.
 - [ ] **Icônes** : `lib.save_icon` (repris du cartoon) rendu en cel-shading ; angle et contour à valider sur
       l'icône de l'assembleur 1.
@@ -217,7 +220,8 @@ de la section 3.3 :
       Bastien (`concept/cibles/arbre-bastien.jpg`) : touffes en chou-fleur cernées, tronc visible, teinte grise du jeu
       remplacée par un orange d'automne (`mod/data-updates.lua`). Espèce 02 validée en jeu. Un dessin par espèce
       (`concept/descriptions/arbres.md` : sapin à trois étages, noueux, élancé, dôme, saule, masses, parasol, géant),
-      même nombre de variantes que le jeu ; prototypes des 9 espèces faits, production à lancer ; arbres morts à faire.
+      même nombre de variantes que le jeu : 9 espèces produites (102 variantes, commit `79a159d`), à voir en jeu par
+      Bastien (seule la 02 validée) ; arbres morts à faire.
 - [ ] **Four en pierre avec sa fumée** (effets) : la volute de fumée.
 - [ ] Plus **l'herbe** comme fond.
 - [ ] Vue de nuit des trois objets (ombres bleues de nuit acceptables ?).
@@ -231,12 +235,12 @@ cartoon a faites avant son plan).
 
 | Lot | Contenu | Tech. | Allègement (piste) |
 |---|---|---|---|
-| [ ] 1.1 Sols de Nauvis et transitions | herbes, sables, terres, masques de transition | P | moins de variantes de motif par sol ; transitions nettes |
+| [ ] 1.1 Sols de Nauvis et transitions | herbes, sables, terres, masques de transition | P | gardé par défaut, à revoir en jeu si surchargé ; transitions nettes |
 | [ ] 2.8 Décorations | touffes, buissons, cailloux, taches | P / B3 | **le lot le plus allégé** : familles retirées ou à quelques % (réglage de démarrage), seules les plus lisibles redessinées |
-| [ ] 2.7 Nature | arbres (559 fichiers), rochers, poissons | B3 | 2 ou 3 modèles par espèce répartis sur les 12 variantes, peut-être moins d'espèces ; rochers : quelques modèles |
+| [ ] 2.7 Nature | arbres (559 fichiers), rochers, poissons | B3 | arbres : **tout gardé** (9 espèces, toutes leurs variantes, 12 octobre) ; rochers : quelques modèles, à juger en jeu |
 | [ ] 2.9 Eau et falaises | eau, rives, falaises | P (eau), B3 (falaises) | eau : écume en lignes blanches, limitée par le shader du jeu |
 | [ ] 3.9a Fumées, vapeur, feu | fumées des fours et chaudières, vapeur, flammes | B3 + P | **avancé** (signature du style) ; particules et petits effets : A |
-| [ ] 1.2 Minerais | fer, cuivre, charbon, pierre, uranium | B3 / P | moins de variantes par stade |
+| [ ] 1.2 Minerais | fer, cuivre, charbon, pierre, uranium | B3 / P | gardé par défaut, à revoir en jeu si surchargé |
 | [ ] 1.3 Convoyeurs, souterrains, répartiteurs | 3 niveaux + turbo | B | — (vus partout : à soigner) |
 | [ ] 1.4 Bras | 5 bras | B (une cible pour la famille) | — |
 | [ ] 1.5 Poteaux et câbles | poteaux, câbles | B (poteaux), P (câbles) | — |
@@ -266,8 +270,8 @@ Mêmes lots que le mod cartoon (section 5 du plan cartoon), détaillés au momen
 
 | Sujet | Question | Quand |
 |---|---|---|
-| Coût par modèle | Un modèle refait de zéro par objet est long ; tient-on le rythme ? | Mesuré sur l'étape 1 ; kit et cibles par famille (étape 0) |
-| Allègement | Jusqu'où réduire décorations et variantes sans appauvrir le monde ? Par fichiers ou par prototypes ? | Cadrage des lots 2.8 et 2.7 |
+| Coût par modèle | Un modèle refait de zéro par objet est long ; tient-on le rythme ? | Mesuré sur l'étape 1 ; kit et cibles par famille (étape 0). 12 octobre : le rendu n'est pas en cause (assembleur complet en 15 s), le temps part dans la conception de chaque objet ; on observe le rythme sur les prochains objets (four) avant de changer de méthode |
+| Allègement | Jusqu'où réduire les décorations (densité, variantes) sans appauvrir le monde ? Par fichiers ou par prototypes ? | Cadrage du lot 2.8 (arbres : tout gardé) |
 | Nuit | Les ombres bleues rendent-elles la nuit trop bleue ? | Fin de l'étape 1 |
 | Sprites teints par le jeu | Le cel-shading reste-t-il lisible après teinte (feuillage, masques d'équipe) ? | Lots 2.7 et 1.6 |
 | Fumées animées | Une volute en boules cel-shadées, animée sur les planches du jeu, est-elle lisible et fluide ? | Étape 1 (four) |

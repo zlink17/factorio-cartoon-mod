@@ -60,7 +60,10 @@ en sprites séparés, même cadre et même emprise que l'original au pixel près
 
 - Factorio a été pensé pour des sprites très détaillés, et il lui en faut énormément (décorations, taches, petites
   plantes, variantes). Le cel-shading vit de **grandes formes lisibles** : tout reprendre surchargerait l'image.
-  Pour chaque famille, on se demande d'abord **garder, alléger ou retirer ?** Les décorations ne seront
-  probablement pas toutes gardées, ou en quantité réduite (réglages de démarrage du mod, comme le sous-mod
-  `cartoon-epure`) ; même question pour le nombre de variantes (espèces d'arbres, variantes par espèce, rochers).
-  **[VALIDÉ]** (12 octobre ; les quantités se jugent en jeu, famille par famille : **[PROVISOIRE]**)
+  Pour les familles où l'original surcharge l'image (**décorations, taches au sol, particules, petits effets**), on
+  se demande d'abord **garder, alléger ou retirer ?** Deux leviers distincts : la **densité** (combien d'éléments le
+  jeu pose : réglages de démarrage du mod, comme le sous-mod `cartoon-epure`) et le nombre de **variantes** (dessins
+  distincts). **[VALIDÉ]** (12 octobre ; les quantités se jugent en jeu, famille par famille : **[PROVISOIRE]**)
+- **Tout le reste est gardé par défaut** (densité et variantes d'origine) : on n'allège que si le jeu montre une
+  surcharge. Les arbres gardent leurs 9 espèces et toutes leurs variantes : les réduire aurait appauvri le monde.
+  **[VALIDÉ]** (12 octobre)
