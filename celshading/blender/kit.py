@@ -115,3 +115,30 @@ def incliner(objets, pivot, angle, point=None):
     for o in objets:
         o.matrix_world = rot @ o.matrix_world
     return tuple(rot @ Vector(point)) if point is not None else None
+
+
+def barre(p0, p1, largeur, epaisseur, m, axe=None, r_axe=None):
+    """Barre plate à bouts arrondis entre deux points du plan x-z (même y), comme les bielles de Factorio :
+    `largeur` dans le plan, `epaisseur` selon y ; axes de laiton aux deux bouts si `axe`."""
+    poutre(p0, p1, epaisseur, largeur, m, biseau=min(largeur, epaisseur) * 0.3)
+    for p in (p0, p1):
+        lisse(cyl(p, largeur / 2, epaisseur, m, verts=32, rot=(90, 0, 0)))
+        if axe:
+            lisse(cyl((p[0], p[1] - epaisseur * 0.3, p[2]), r_axe or largeur * 0.28, epaisseur, axe, verts=24,
+                      rot=(90, 0, 0)))
+
+
+def genou(manivelle, r_manivelle, angle, pivot, l1, l2):
+    """Genouillère (quadrilatère articulé) dans le plan x-z : une manivelle de centre `manivelle` et de rayon
+    `r_manivelle`, tournée de `angle` degrés, pousse une bielle (`l1`) jusqu'au genou, relié par une seconde
+    bielle (`l2`) à un `pivot` fixe. Renvoie (maneton, genou) ; le genou est la solution la plus haute."""
+    cx, y, cz = manivelle
+    gx, _, gz = pivot
+    px, pz = cx + r_manivelle * math.cos(math.radians(angle)), cz + r_manivelle * math.sin(math.radians(angle))
+    dx, dz = gx - px, gz - pz
+    d = math.hypot(dx, dz)
+    a = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
+    h = math.sqrt(max(0.0, l1 * l1 - a * a))
+    mx, mz = px + a * dx / d, pz + a * dz / d
+    k = max(((mx - h * dz / d, mz + h * dx / d), (mx + h * dz / d, mz - h * dx / d)), key=lambda q: q[1])
+    return (px, y, pz), (k[0], y, k[1])

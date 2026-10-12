@@ -187,7 +187,8 @@ piège rencontré), `changelog.txt` à la première publication.
 - [x] Galerie : le scénario détecte le mod (variante « celshading », commit `1e27ad4`), `tools/galerie.py --mod celshading`.
 - [x] Recette d'images cibles (`celshading/concept/`), sur les outils communs (`tools/concept/`).
 - [ ] **Boîte de pièces** (`blender/kit.py`) : commencée le 12 octobre avec les assembleurs 2 et 3 (biseau, prisme,
-      engrenage debout, piston, poutre, articulation, bras articulé, `incliner` : plan penché face à la caméra) ; à
+      engrenage debout, piston, poutre, barre à bouts ronds, genouillère à manivelle, articulation, bras articulé (pour les
+      bras du lot 1.4 ?), `incliner` : plan penché face à la caméra) ; à
       compléter au fil des machines (tôle rivetée, gros boulons, tuyau à brides, bloc moteur, pieds).
 - [ ] **Allègement par les prototypes** (à cadrer avec le lot 2.8) : réglages de démarrage du mod pour la quantité de
       décorations par famille (comme `cartoon-epure`), et, si besoin, moins de variantes listées dans les

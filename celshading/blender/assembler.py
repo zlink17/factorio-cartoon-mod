@@ -12,8 +12,8 @@ Famille commune : corps trapu sur un socle sombre, grand tablier avant incliné 
 d'un rebord ; à gauche, moteur à « œil » jaune, tambour cuivré d'où sort un piston, cheminée de laiton ; engrenages
 debout à l'arrière. Pièces mobiles de plus en plus nombreuses d'un niveau à l'autre, comme dans le jeu :
 1 : piston, engrenages ; à droite, entonnoir, long arbre et paire d'engrenages couchés (corps rouille pâle) ;
-2 : à droite, un grand bras articulé qui travaille une pièce sur le plateau (corps bleu) ;
-3 : le bras, et trois grands pistons verticaux qui dépassent au-dessus de la machine (corps vert sauge).
+2 : à droite, deux genouillères croisées menées par des manivelles, comme les bras de l'original (corps bleu) ;
+3 : les genouillères, et trois grands pistons verticaux qui dépassent au-dessus de la machine (corps vert sauge).
 `build(phase, niveau)` est paramétré pour l'animation, boucle complète sur phase 0 -> 1.
 """
 import math, os, sys
@@ -22,8 +22,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
 from lib import (S, reset, couleur, box, cyl, gear, rod, render_scene, render_shadow, crop_centered, entity_path,
                  save_icon, sheet)
-from kit import (lisse, arrondi, prisme, coins_coupes, engrenage_debout, va_et_vient, piston, bras_articule,
-                 articulation, incliner)
+from kit import (lisse, arrondi, prisme, coins_coupes, engrenage_debout, va_et_vient, piston, barre, genou,
+                 incliner)
 
 N_FRAMES = 32
 COLUMNS = 8
@@ -32,7 +32,7 @@ SUN_SHEAR = (0.5, 0.03)          # ombre au sol : décalage par unité de hauteu
 CANVAS = 400
 PISTON_COURSE = 0.30             # course du piston du tambour (unités : 1 case = 1)
 GRANDS_PISTONS = 0.4             # course des grands pistons de l'assembleur 3 (vue d'en haut : paraît moitié moins)
-BRAS_INCLINAISON = 60           # plan du bras articulé penché vers l'arrière (degrés) : face à la caméra
+BRAS_INCLINAISON = 60           # plan des genouillères penché vers l'arrière (degrés) : face à la caméra
 
 # Par niveau : cadre de l'original (px), pixels opaques de son image 0 (largeur et bas servent au calage), cadre de
 # l'ombre et position de son centre par rapport au centre du sprite (px : écart des `shift` du prototype x 64),
@@ -49,7 +49,7 @@ NIVEAUX = {
 # couleurs mesurées sur les images cibles de l'assembleur 1 (ton « éclairé »)
 LAITON, CUIVRE, SOMBRE = "#e5aa44", "#8a5d31", "#3b3f3a"
 ROUGE, BLANC = "#b5503a", "#e4e2d4"
-ACIER = "#8a949b"                # bras articulé et tiges des grands pistons (niveaux 2 et 3)
+ACIER = "#8a949b"                # genouillères et tiges des grands pistons (niveaux 2 et 3)
 
 
 def name(niveau):
@@ -141,26 +141,25 @@ def mecanisme_1(phase, zt, a, laiton, cuivre, corps):
 
 
 def mecanisme_bras(phase, zt, niveau, laiton, cuivre, sombre, blanc):
-    """Niveaux 2 et 3, côté droit : grand bras articulé sur un pied, qui descend vers une pièce posée sur le
-    plateau et remonte (une fois par boucle) ; niveau 3 : trois grands pistons verticaux à l'arrière."""
+    """Niveaux 2 et 3, côté droit : deux genouillères croisées, comme les bras articulés de l'original (barres plates
+    à bouts arrondis, en acier) : chacune, menée par une manivelle de laiton qui fait un tour par boucle, plie et
+    déplie son genou ; elles travaillent en opposition (demi-tour d'écart). Dans un plan penché vers l'arrière, face
+    à la caméra. Niveau 3 : trois grands pistons verticaux à l'arrière."""
     acier = couleur("acier", ACIER)
-    y = -0.15
-    # pied du bras, à droite, et pièce de cuivre sur le plateau, sous la pince en bas de course
-    arrondi(box((0.8, y, zt + 0.4), (0.34, 0.38, 0.5), sombre), 0.08)
-    arrondi(box((0.14, -0.4, zt + 0.25), (0.36, 0.32, 0.2), cuivre), 0.05)
-    t = va_et_vient(phase)
-    a1 = 105 + 30 * t                     # bras : dressé, puis penché vers la gauche
-    a2 = 230 + 25 * t                     # avant-bras : vers la gauche, puis vers le bas, jusqu'à la pièce
-    epaule = (0.8, y, zt + 0.65)
+    y, z0 = -0.5, zt + 0.15                       # bas du plan penché : avant du plateau
     avant = set(bpy.data.objects)
-    poignet = bras_articule(epaule, 0.7, 0.65, a1, a2, acier, laiton, largeur=0.26, epaisseur=0.2)
-    articulation(poignet, 0.1, laiton, 0.3)
-    poignet = incliner([o for o in bpy.data.objects if o not in avant], epaule, BRAS_INCLINAISON, poignet)
-    # pince : deux mâchoires droites sous le poignet, qui se serrent en bas de course, sur la pièce
-    px, py, pz = poignet
-    for s in (-1, 1):
-        ecart = 0.15 - 0.06 * t
-        arrondi(box((px + s * ecart, py, pz - 0.12), (0.08, 0.24, 0.22), sombre), 0.03, 2)
+    # la seconde genouillère, et la première barre de chacune, un peu vers la caméra (une fois le plan penché,
+    # « en retrait » passerait sous le plateau) : jamais deux faces dans le même plan
+    for dy, manivelle, pivot, decalage in ((0.0, (0.0, z0 + 0.7), (0.85, z0 + 0.1), 0.0),
+                                           (-0.24, (0.95, z0 + 0.75), (0.12, z0 + 0.12), 180.0)):
+        yy = y + dy
+        manivelle, pivot = (manivelle[0], yy - 0.11, manivelle[1]), (pivot[0], yy, pivot[1])
+        maneton, coude = genou(manivelle, 0.18, phase * 360 + decalage, pivot, 0.75, 0.6)
+        lisse(cyl((manivelle[0], yy, manivelle[2]), 0.22, 0.1, laiton, verts=40, rot=(90, 0, 0)))   # plateau
+        arrondi(box((pivot[0], yy + 0.06, pivot[2] - 0.04), (0.26, 0.12, 0.18), sombre), 0.04, 2)   # chape du pivot
+        barre(maneton, coude, 0.17, 0.1, acier, laiton)
+        barre((coude[0], yy, coude[2]), pivot, 0.17, 0.1, acier, laiton)
+    incliner([o for o in bpy.data.objects if o not in avant], (0, y, z0), BRAS_INCLINAISON)
     if niveau == 3:
         # trois grands pistons verticaux à l'arrière, décalés d'un tiers de boucle : chemise de cuivre, tige d'acier,
         # tête blanche

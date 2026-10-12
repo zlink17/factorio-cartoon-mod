@@ -31,16 +31,18 @@ d'engrenages couchés. Mobiles : piston du tambour (une course par boucle), engr
 **Original.** Corps et panneaux bleus. Deux bras articulés en acier sombre, à plusieurs segments, balaient le
 plateau ; engrenages au fond ; deux cylindres blancs.
 
-**Cel-shading.** Corps bleu clair, plateau brun cuivré (contraste chaud avec le bleu). À droite : **un seul grand bras
-articulé** (épaule sur un pied sombre, bras et avant-bras d'acier, articulations de laiton, pince à deux mâchoires)
-qui descend prendre une pièce de cuivre posée sur le plateau, et remonte. Mobiles : bras, pince, piston du tambour,
-engrenages du fond (plus bas qu'au 1 : le cadre de l'original est moins haut).
+**Cel-shading.** Corps bleu clair, plateau brun cuivré (contraste chaud avec le bleu). À droite : **deux genouillères
+croisées**, comme les bras de l'original (pas de pince : essayée le 12 octobre, écartée par Bastien) : barres plates
+d'acier à bouts arrondis, axes de laiton ; chacune, menée par une manivelle de laiton (un tour par boucle), plie et
+déplie son genou entre la manivelle et un pivot fixe sur le plateau ; les deux travaillent en opposition. Mobiles :
+genouillères, manivelles, piston du tambour, engrenages du fond (plus bas qu'au 1 : le cadre de l'original est moins
+haut).
 
 ## 3 — Assembleur 3
 
 **Original.** Corps vert olive, tablier vert. Les bras articulés de l'assembleur 2, et trois ou quatre grands
 pistons verticaux (chemise, tige argentée, tête blanche) qui montent et descendent en décalé, au-dessus de la machine.
 
-**Cel-shading.** Corps vert sauge (l'ancien vert de l'assembleur 1), plateau bleu. Le bras de l'assembleur 2, plus **trois grands pistons** à l'arrière (chemise de
+**Cel-shading.** Corps vert sauge (l'ancien vert de l'assembleur 1), plateau bleu. Les genouillères de l'assembleur 2, plus **trois grands pistons** à l'arrière (chemise de
 cuivre, bague de laiton, tige d'acier, tête blanche), décalés d'un tiers de boucle, qui dépassent au-dessus de la
 machine (le cadre de l'original est plus haut, pour eux).
